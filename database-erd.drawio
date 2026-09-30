@@ -1,0 +1,94 @@
+<mxfile host="app.diagrams.net" modified="2026-09-24T00:00:00.000Z" agent="Codex" version="24.7.17" type="device">
+  <diagram id="DB_BanGiayTheThao_ERD" name="DB_BanGiayTheThao ERD">
+    <mxGraphModel dx="1800" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1400" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="DB_BanGiayTheThao - ERD" style="text;html=1;strokeColor=none;fillColor=none;fontSize=28;fontStyle=1;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="TaiKhoan" value="&lt;b&gt;TaiKhoan&lt;/b&gt;&lt;hr&gt;&lt;b&gt;PK&lt;/b&gt; MaTaiKhoan INT&lt;br&gt;TenDangNhap VARCHAR(50) UNIQUE&lt;br&gt;MatKhau VARCHAR(255)&lt;br&gt;Email VARCHAR(100) UNIQUE&lt;br&gt;SoDienThoai VARCHAR(15)&lt;br&gt;VaiTro NVARCHAR(20)&lt;br&gt;TrangThai BIT&lt;br&gt;NgayTao DATETIME" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="270" height="210" as="geometry"/>
+        </mxCell>
+        <mxCell id="KhachHang" value="&lt;b&gt;KhachHang&lt;/b&gt;&lt;hr&gt;&lt;b&gt;PK&lt;/b&gt; MaKhachHang INT&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; MaTaiKhoan INT UNIQUE&lt;br&gt;HoTen NVARCHAR(100)&lt;br&gt;GioiTinh NVARCHAR(10)&lt;br&gt;NgaySinh DATE&lt;br&gt;DiaChi NVARCHAR(255)&lt;br&gt;AnhDaiDien NVARCHAR(255)&lt;br&gt;DiemTichLuy INT&lt;br&gt;NgayDangKy DATETIME" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="390" y="90" width="290" height="240" as="geometry"/>
+        </mxCell>
+        <mxCell id="NhanVien" value="&lt;b&gt;NhanVien&lt;/b&gt;&lt;hr&gt;&lt;b&gt;PK&lt;/b&gt; MaNhanVien INT&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; MaTaiKhoan INT UNIQUE&lt;br&gt;HoTen NVARCHAR(100)&lt;br&gt;GioiTinh NVARCHAR(10)&lt;br&gt;NgaySinh DATE&lt;br&gt;DiaChi NVARCHAR(255)&lt;br&gt;ChucVu NVARCHAR(100)&lt;br&gt;Luong DECIMAL(18,2)&lt;br&gt;NgayVaoLam DATE&lt;br&gt;TrangThai BIT" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="390" y="370" width="290" height="250" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="SanPham" value="&lt;b&gt;SanPham&lt;/b&gt;&lt;hr&gt;&lt;b&gt;PK&lt;/b&gt; MaSanPham INT&lt;br&gt;TenSanPham NVARCHAR(150)&lt;br&gt;DanhMuc NVARCHAR(100)&lt;br&gt;ThuongHieu NVARCHAR(100)&lt;br&gt;GioiTinh NVARCHAR(20)&lt;br&gt;XuatXu NVARCHAR(100)&lt;br&gt;KieuDang NVARCHAR(100)&lt;br&gt;MoTa NVARCHAR(MAX)&lt;br&gt;GiaNhap DECIMAL(18,2)&lt;br&gt;GiaBan DECIMAL(18,2)&lt;br&gt;PhanTramGiam DECIMAL(5,2)&lt;br&gt;TrangThai BIT&lt;br&gt;NgayTao DATETIME&lt;br&gt;NgayCapNhat DATETIME" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="760" y="90" width="320" height="330" as="geometry"/>
+        </mxCell>
+        <mxCell id="BienTheSanPham" value="&lt;b&gt;BienTheSanPham&lt;/b&gt;&lt;hr&gt;&lt;b&gt;PK&lt;/b&gt; MaBienThe INT&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; MaSanPham INT&lt;br&gt;SizeGiay VARCHAR(10)&lt;br&gt;MauSac NVARCHAR(50)&lt;br&gt;ChatLieu NVARCHAR(100)&lt;br&gt;SoLuongTon INT&lt;br&gt;TrangThai BIT&lt;br&gt;&lt;b&gt;UQ&lt;/b&gt; MaSanPham + SizeGiay + MauSac + ChatLieu" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="100" width="350" height="220" as="geometry"/>
+        </mxCell>
+        <mxCell id="HinhAnhSanPham" value="&lt;b&gt;HinhAnhSanPham&lt;/b&gt;&lt;hr&gt;&lt;b&gt;PK&lt;/b&gt; MaHinhAnh INT&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; MaSanPham INT&lt;br&gt;DuongDanAnh NVARCHAR(500)&lt;br&gt;TenAnh NVARCHAR(255)&lt;br&gt;AnhChinh BIT&lt;br&gt;ThuTuHienThi INT" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="360" width="350" height="170" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="GioHang" value="&lt;b&gt;GioHang&lt;/b&gt;&lt;hr&gt;&lt;b&gt;PK&lt;/b&gt; MaGioHang INT&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; MaKhachHang INT UNIQUE&lt;br&gt;NgayTao DATETIME&lt;br&gt;NgayCapNhat DATETIME&lt;br&gt;TrangThai BIT" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="760" y="510" width="300" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="ChiTietGioHang" value="&lt;b&gt;ChiTietGioHang&lt;/b&gt;&lt;hr&gt;&lt;b&gt;PK&lt;/b&gt; MaChiTietGioHang INT&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; MaGioHang INT&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; MaBienThe INT&lt;br&gt;SoLuong INT&lt;br&gt;DonGia DECIMAL(18,2)&lt;br&gt;NgayThem DATETIME&lt;br&gt;&lt;b&gt;UQ&lt;/b&gt; MaGioHang + MaBienThe" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="590" width="350" height="200" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="Voucher" value="&lt;b&gt;Voucher&lt;/b&gt;&lt;hr&gt;&lt;b&gt;PK&lt;/b&gt; MaVoucher INT&lt;br&gt;MaCode VARCHAR(50) UNIQUE&lt;br&gt;TenVoucher NVARCHAR(150)&lt;br&gt;LoaiGiam NVARCHAR(20)&lt;br&gt;GiaTriGiam DECIMAL(18,2)&lt;br&gt;DonHangToiThieu DECIMAL(18,2)&lt;br&gt;GiamToiDa DECIMAL(18,2)&lt;br&gt;SoLuong INT&lt;br&gt;NgayBatDau DATETIME&lt;br&gt;NgayKetThuc DATETIME&lt;br&gt;TrangThai BIT" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="760" width="300" height="270" as="geometry"/>
+        </mxCell>
+        <mxCell id="DonHang" value="&lt;b&gt;DonHang&lt;/b&gt;&lt;hr&gt;&lt;b&gt;PK&lt;/b&gt; MaDonHang INT&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; MaKhachHang INT&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; MaVoucher INT NULL&lt;br&gt;HoTenNguoiNhan NVARCHAR(100)&lt;br&gt;SoDienThoaiNhan VARCHAR(15)&lt;br&gt;EmailNguoiNhan VARCHAR(100)&lt;br&gt;DiaChiGiaoHang NVARCHAR(255)&lt;br&gt;NgayDat DATETIME&lt;br&gt;TongTienHang DECIMAL(18,2)&lt;br&gt;TienGiam DECIMAL(18,2)&lt;br&gt;PhiVanChuyen DECIMAL(18,2)&lt;br&gt;TongThanhToan DECIMAL(18,2)&lt;br&gt;PhuongThucThanhToan NVARCHAR(50)&lt;br&gt;TrangThaiThanhToan NVARCHAR(50)&lt;br&gt;TrangThaiDonHang NVARCHAR(50)&lt;br&gt;MaGiaoDich VARCHAR(100)&lt;br&gt;NgayThanhToan DATETIME&lt;br&gt;NgayGiaoHang DATETIME&lt;br&gt;GhiChu NVARCHAR(500)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="420" y="720" width="350" height="430" as="geometry"/>
+        </mxCell>
+        <mxCell id="ChiTietDonHang" value="&lt;b&gt;ChiTietDonHang&lt;/b&gt;&lt;hr&gt;&lt;b&gt;PK&lt;/b&gt; MaChiTietDonHang INT&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; MaDonHang INT&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; MaBienThe INT&lt;br&gt;TenSanPham NVARCHAR(150)&lt;br&gt;SizeGiay VARCHAR(10)&lt;br&gt;MauSac NVARCHAR(50)&lt;br&gt;SoLuong INT&lt;br&gt;DonGia DECIMAL(18,2)&lt;br&gt;PhanTramGiam DECIMAL(5,2)&lt;br&gt;ThanhTien DECIMAL(18,2)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="840" y="820" width="330" height="260" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="DanhGia" value="&lt;b&gt;DanhGia&lt;/b&gt;&lt;hr&gt;&lt;b&gt;PK&lt;/b&gt; MaDanhGia INT&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; MaKhachHang INT&lt;br&gt;&lt;b&gt;FK&lt;/b&gt; MaSanPham INT&lt;br&gt;SoSao INT&lt;br&gt;TieuDe NVARCHAR(150)&lt;br&gt;BinhLuan NVARCHAR(1000)&lt;br&gt;HinhAnhDanhGia NVARCHAR(500)&lt;br&gt;NgayDanhGia DATETIME&lt;br&gt;PhanHoiAdmin NVARCHAR(1000)&lt;br&gt;NgayPhanHoi DATETIME&lt;br&gt;TrangThai BIT&lt;br&gt;&lt;b&gt;UQ&lt;/b&gt; MaKhachHang + MaSanPham" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=8;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1560" y="140" width="340" height="300" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="rel_tk_kh" value="1 : 0..1" style="endArrow=ERoneToOne;startArrow=ERone;html=1;rounded=0;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;fontSize=12;" edge="1" parent="1" source="TaiKhoan" target="KhachHang">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_tk_nv" value="1 : 0..1" style="endArrow=ERoneToOne;startArrow=ERone;html=1;rounded=0;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;fontSize=12;" edge="1" parent="1" source="TaiKhoan" target="NhanVien">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_sp_bt" value="1 : N" style="endArrow=ERmany;startArrow=ERone;html=1;rounded=0;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;fontSize=12;" edge="1" parent="1" source="SanPham" target="BienTheSanPham">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_sp_ha" value="1 : N" style="endArrow=ERmany;startArrow=ERone;html=1;rounded=0;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;fontSize=12;" edge="1" parent="1" source="SanPham" target="HinhAnhSanPham">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_kh_gh" value="1 : 0..1" style="endArrow=ERoneToOne;startArrow=ERone;html=1;rounded=0;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;fontSize=12;" edge="1" parent="1" source="KhachHang" target="GioHang">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_gh_ctgh" value="1 : N" style="endArrow=ERmany;startArrow=ERone;html=1;rounded=0;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;fontSize=12;" edge="1" parent="1" source="GioHang" target="ChiTietGioHang">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_bt_ctgh" value="1 : N" style="endArrow=ERmany;startArrow=ERone;html=1;rounded=0;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;fontSize=12;" edge="1" parent="1" source="BienTheSanPham" target="ChiTietGioHang">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_kh_dh" value="1 : N" style="endArrow=ERmany;startArrow=ERone;html=1;rounded=0;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;fontSize=12;" edge="1" parent="1" source="KhachHang" target="DonHang">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_v_dh" value="0..1 : N" style="endArrow=ERmany;startArrow=ERzeroToOne;html=1;rounded=0;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;fontSize=12;" edge="1" parent="1" source="Voucher" target="DonHang">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_dh_ctdh" value="1 : N" style="endArrow=ERmany;startArrow=ERone;html=1;rounded=0;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;fontSize=12;" edge="1" parent="1" source="DonHang" target="ChiTietDonHang">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_bt_ctdh" value="1 : N" style="endArrow=ERmany;startArrow=ERone;html=1;rounded=0;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;fontSize=12;" edge="1" parent="1" source="BienTheSanPham" target="ChiTietDonHang">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_kh_dg" value="1 : N" style="endArrow=ERmany;startArrow=ERone;html=1;rounded=0;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;fontSize=12;" edge="1" parent="1" source="KhachHang" target="DanhGia">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_sp_dg" value="1 : N" style="endArrow=ERmany;startArrow=ERone;html=1;rounded=0;strokeWidth=2;edgeStyle=orthogonalEdgeStyle;fontSize=12;" edge="1" parent="1" source="SanPham" target="DanhGia">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
