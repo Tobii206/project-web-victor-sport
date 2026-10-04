@@ -76,9 +76,9 @@ INSERT INTO nhan_vien (
     id_quyen_han, ten_nhan_vien, ten_tai_khoan, mat_khau, email, so_dien_thoai,
     ngay_sinh, thanh_pho, quan, phuong, dia_chi_cu_the
 ) VALUES
-(1, N'Nguyễn Minh Quân', 'admin', '123456', 'admin@sevenstrike.vn', '0900000001', '1998-02-12', N'Hà Nội', N'Cầu Giấy', N'Dịch Vọng', N'12 Xuân Thủy'),
-(2, N'Lê Thanh Huyền', 'banhang01', '123456', 'huyen.lt@sevenstrike.vn', '0900000002', '2000-07-21', N'Hà Nội', N'Nam Từ Liêm', N'Mỹ Đình 1', N'25 Lê Đức Thọ'),
-(3, N'Trần Đức Anh', 'kho01', '123456', 'anh.td@sevenstrike.vn', '0900000003', '1999-11-04', N'Hà Nội', N'Thanh Xuân', N'Nhân Chính', N'88 Nguyễn Trãi');
+(1, N'Nguyễn Minh Quân', 'admin', '123456', 'admin.victorsport@gmail.com', '0900000001', '1998-02-12', N'Hà Nội', N'Cầu Giấy', N'Dịch Vọng', N'12 Xuân Thủy'),
+(2, N'Lê Thanh Huyền', 'banhang01', '123456', 'huyen.victorsport@gmail.com', '0900000002', '2000-07-21', N'Hà Nội', N'Nam Từ Liêm', N'Mỹ Đình 1', N'25 Lê Đức Thọ'),
+(3, N'Trần Đức Anh', 'kho01', '123456', 'anh.victorsport@gmail.com', '0900000003', '1999-11-04', N'Hà Nội', N'Thanh Xuân', N'Nhân Chính', N'88 Nguyễn Trãi');
 
 INSERT INTO khach_hang (
     ten_khach_hang, ten_tai_khoan, mat_khau, email, so_dien_thoai,
@@ -160,7 +160,7 @@ INSERT INTO chi_tiet_gio_hang (id_gio_hang, id_chi_tiet_san_pham, so_luong, don_
 INSERT INTO dot_giam_gia (
     ten_dot_giam_gia, loai_giam_gia, gia_tri_giam_gia, ngay_bat_dau, ngay_ket_thuc, muc_uu_tien
 ) VALUES
-(N'Sale khai trương SevenStrike', 0, 10, '2026-01-01', '2026-12-31', 1),
+(N'Sale khai trương Victor Sport', 0, 10, '2026-01-01', '2026-12-31', 1),
 (N'Sale giày chạy bộ cuối tuần', 0, 8, '2026-09-01', '2026-10-31', 2);
 
 INSERT INTO chi_tiet_dot_giam_gia (
