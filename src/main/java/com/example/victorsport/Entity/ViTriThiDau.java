@@ -21,3 +21,4 @@ public class ViTriThiDau {
     @Column(name = "xoa_mem")
     private Boolean xoaMem;
 }
+

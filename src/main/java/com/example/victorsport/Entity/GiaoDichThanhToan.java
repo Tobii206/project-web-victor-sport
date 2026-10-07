@@ -65,3 +65,4 @@ public class GiaoDichThanhToan {
     @Column(name = "ghi_chu")
     private String ghiChu;
 }
+

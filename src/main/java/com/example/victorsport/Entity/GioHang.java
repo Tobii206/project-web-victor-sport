@@ -26,3 +26,4 @@ public class GioHang {
     @Column(name = "xoa_mem")
     private Boolean xoaMem;
 }
+

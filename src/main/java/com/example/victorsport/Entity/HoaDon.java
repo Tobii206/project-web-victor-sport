@@ -80,3 +80,4 @@ public class HoaDon {
     @Column(name = "da_hoan_phi")
     private Boolean daHoanPhi;
 }
+

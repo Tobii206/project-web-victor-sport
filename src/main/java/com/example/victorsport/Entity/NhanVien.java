@@ -21,9 +21,6 @@ public class NhanVien {
     @Column(name = "ten_nhan_vien", nullable = false)
     private String tenNhanVien;
 
-    @Column(name = "ten_tai_khoan", nullable = false)
-    private String tenTaiKhoan;
-
     @Column(name = "mat_khau", nullable = false)
     private String matKhau;
 
@@ -68,3 +65,4 @@ public class NhanVien {
     @Column(name = "nguoi_cap_nhat")
     private Integer nguoiCapNhat;
 }
+

@@ -60,3 +60,4 @@ public class ChiTietSanPham {
     @Column(name = "nguoi_cap_nhat")
     private Integer nguoiCapNhat;
 }
+

@@ -73,12 +73,13 @@ INSERT INTO quyen_han (ten_quyen_han) VALUES
 (N'Nhân viên kho');
 
 INSERT INTO nhan_vien (
-    id_quyen_han, ten_nhan_vien, ten_tai_khoan, mat_khau, email, so_dien_thoai,
+    id_quyen_han, ten_nhan_vien, mat_khau, email, so_dien_thoai,
     ngay_sinh, thanh_pho, quan, phuong, dia_chi_cu_the
 ) VALUES
-(1, N'Nguyễn Minh Quân', 'admin', '123456', 'admin.victorsport@gmail.com', '0900000001', '1998-02-12', N'Hà Nội', N'Cầu Giấy', N'Dịch Vọng', N'12 Xuân Thủy'),
-(2, N'Lê Thanh Huyền', 'banhang01', '123456', 'huyen.victorsport@gmail.com', '0900000002', '2000-07-21', N'Hà Nội', N'Nam Từ Liêm', N'Mỹ Đình 1', N'25 Lê Đức Thọ'),
-(3, N'Trần Đức Anh', 'kho01', '123456', 'anh.victorsport@gmail.com', '0900000003', '1999-11-04', N'Hà Nội', N'Thanh Xuân', N'Nhân Chính', N'88 Nguyễn Trãi');
+(1, N'Nguyễn Minh Quân', '123456', 'admin.victorsport@gmail.com', '0900000001', '1998-02-12', N'Hà Nội', N'Cầu Giấy', N'Dịch Vọng', N'12 Xuân Thủy'),
+(1, N'Nguyễn Thành Long', '123456', 'thlong080306@gmail.com', '0900000806', '2006-03-08', N'Hà Nội', N'Cầu Giấy', N'Dịch Vọng', N'Victor Sport'),
+(2, N'Lê Thanh Huyền', '123456', 'huyen.victorsport@gmail.com', '0900000002', '2000-07-21', N'Hà Nội', N'Nam Từ Liêm', N'Mỹ Đình 1', N'25 Lê Đức Thọ'),
+(3, N'Trần Đức Anh', '123456', 'anh.victorsport@gmail.com', '0900000003', '1999-11-04', N'Hà Nội', N'Thanh Xuân', N'Nhân Chính', N'88 Nguyễn Trãi');
 
 INSERT INTO khach_hang (
     ten_khach_hang, ten_tai_khoan, mat_khau, email, so_dien_thoai,

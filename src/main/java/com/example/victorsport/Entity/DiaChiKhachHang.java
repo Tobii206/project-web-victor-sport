@@ -34,3 +34,4 @@ public class DiaChiKhachHang {
     @Column(name = "xoa_mem")
     private Boolean xoaMem;
 }
+

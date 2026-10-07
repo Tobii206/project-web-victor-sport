@@ -24,3 +24,4 @@ public class PhuongThucThanhToan {
     @Column(name = "xoa_mem")
     private Boolean xoaMem;
 }
+

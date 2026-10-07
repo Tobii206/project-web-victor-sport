@@ -21,3 +21,4 @@ public class XuatXu {
     @Column(name = "xoa_mem")
     private Boolean xoaMem;
 }
+

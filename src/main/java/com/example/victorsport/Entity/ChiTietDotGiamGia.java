@@ -49,3 +49,4 @@ public class ChiTietDotGiamGia {
     @Column(name = "nguoi_cap_nhat")
     private Integer nguoiCapNhat;
 }
+

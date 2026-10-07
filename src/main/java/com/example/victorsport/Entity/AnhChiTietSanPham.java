@@ -25,3 +25,4 @@ public class AnhChiTietSanPham {
     @Column(name = "xoa_mem")
     private Boolean xoaMem;
 }
+

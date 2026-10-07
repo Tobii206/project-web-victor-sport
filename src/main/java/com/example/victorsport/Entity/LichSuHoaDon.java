@@ -36,3 +36,4 @@ public class LichSuHoaDon {
     @Column(name = "loai_nguoi_thuc_hien")
     private String loaiNguoiThucHien;
 }
+

@@ -91,7 +91,6 @@ CREATE TABLE nhan_vien (
     id_quyen_han INT NOT NULL,
     ma_nhan_vien AS 'NV' + RIGHT('00000' + CAST(id AS VARCHAR(5)), 5) PERSISTED,
     ten_nhan_vien NVARCHAR(100) NOT NULL,
-    ten_tai_khoan VARCHAR(50) NOT NULL,
     mat_khau VARCHAR(255) NOT NULL,
     email VARCHAR(100),
     so_dien_thoai VARCHAR(10),

@@ -21,3 +21,4 @@ public class CoGiay {
     @Column(name = "xoa_mem")
     private Boolean xoaMem;
 }
+

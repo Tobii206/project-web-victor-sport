@@ -24,3 +24,4 @@ public class MauSac {
     @Column(name = "xoa_mem")
     private Boolean xoaMem;
 }
+

@@ -64,3 +64,4 @@ public class SanPham {
     @Column(name = "nguoi_cap_nhat")
     private Integer nguoiCapNhat;
 }
+

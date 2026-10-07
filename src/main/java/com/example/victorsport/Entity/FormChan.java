@@ -21,3 +21,4 @@ public class FormChan {
     @Column(name = "xoa_mem")
     private Boolean xoaMem;
 }
+

@@ -27,3 +27,4 @@ public class ChiTietGioHang {
     @Column(name = "xoa_mem")
     private Boolean xoaMem;
 }
+

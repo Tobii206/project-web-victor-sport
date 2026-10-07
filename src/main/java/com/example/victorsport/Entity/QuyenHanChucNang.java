@@ -20,3 +20,4 @@ public class QuyenHanChucNang {
     @Column(name = "xoa_mem")
     private Boolean xoaMem;
 }
+

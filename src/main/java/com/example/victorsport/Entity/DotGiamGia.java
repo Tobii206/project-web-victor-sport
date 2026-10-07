@@ -38,3 +38,4 @@ public class DotGiamGia {
     @Column(name = "xoa_mem")
     private Boolean xoaMem;
 }
+

@@ -21,3 +21,4 @@ public class PhongCachChoi {
     @Column(name = "xoa_mem")
     private Boolean xoaMem;
 }
+

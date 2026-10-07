@@ -25,3 +25,4 @@ public class KichThuoc {
     @Column(name = "xoa_mem")
     private Boolean xoaMem;
 }
+
