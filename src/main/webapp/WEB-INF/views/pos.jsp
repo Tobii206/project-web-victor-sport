@@ -171,11 +171,11 @@
                     </div>
                     <div class="field">
                         <label for="customerPhone">Số điện thoại</label>
-                        <input class="input" id="customerPhone" name="customerPhone" placeholder="0000000000">
+                        <input class="input" id="customerPhone" name="customerPhone" placeholder="Có thể để trống">
                     </div>
                     <div class="field">
                         <label for="customerEmail">Email</label>
-                        <input class="input" id="customerEmail" name="customerEmail" placeholder="khachvanglai@gmail.com">
+                        <input class="input" id="customerEmail" name="customerEmail" placeholder="Có thể để trống">
                     </div>
                     <div class="field">
                         <label for="paymentMethodId">Phương thức thanh toán</label>

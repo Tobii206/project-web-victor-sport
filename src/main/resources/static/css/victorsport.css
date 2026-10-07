@@ -215,6 +215,18 @@ a {
     padding: 18px 22px;
 }
 
+.invoice-table {
+    overflow-x: auto;
+    margin-top: 16px;
+}
+
+.invoice-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    overflow-wrap: anywhere;
+}
+
 .panel {
     border: 1px solid #e2e8f0;
     border-radius: 8px;
@@ -305,6 +317,8 @@ a {
 .summary {
     display: grid;
     gap: 8px;
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    line-height: 1.5;
     margin-top: 16px;
     padding-top: 14px;
     border-top: 1px solid #e2e8f0;
@@ -318,7 +332,7 @@ a {
 
 .summary-row.total {
     font-size: 18px;
-    font-weight: 800;
+    font-weight: 700;
 }
 
 .checkout-grid {

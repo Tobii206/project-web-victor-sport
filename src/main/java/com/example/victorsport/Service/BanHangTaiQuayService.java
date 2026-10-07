@@ -374,8 +374,8 @@ public class BanHangTaiQuayService {
                     """;
             List<ThongTinKhachHang> danhSach = jdbcTemplate.query(cauLenhSql, (ketQua, soDong) -> new ThongTinKhachHang(
                     ketQua.getString("ten_khach_hang"),
-                    layGiaTriMacDinh(ketQua.getString("so_dien_thoai"), "0000000000"),
-                    layGiaTriMacDinh(ketQua.getString("email"), "khachvanglai@gmail.com"),
+                    layGiaTriMacDinh(ketQua.getString("so_dien_thoai"), ""),
+                    layGiaTriMacDinh(ketQua.getString("email"), ""),
                     "Mua trực tiếp tại cửa hàng Victor Sport"
             ), idKhachHang);
             if (!danhSach.isEmpty()) {
@@ -385,8 +385,8 @@ public class BanHangTaiQuayService {
 
         return new ThongTinKhachHang(
                 layGiaTriMacDinh(yeuCau.getTenKhachHang(), "Khách vãng lai"),
-                layGiaTriMacDinh(yeuCau.getSoDienThoai(), "0000000000"),
-                layGiaTriMacDinh(yeuCau.getEmail(), "khachvanglai@gmail.com"),
+                layGiaTriMacDinh(yeuCau.getSoDienThoai(), ""),
+                layGiaTriMacDinh(yeuCau.getEmail(), ""),
                 layGiaTriMacDinh(yeuCau.getDiaChi(), "Mua trực tiếp tại cửa hàng Victor Sport")
         );
     }
