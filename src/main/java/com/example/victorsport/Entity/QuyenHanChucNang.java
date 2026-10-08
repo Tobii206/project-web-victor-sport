@@ -1,7 +1,9 @@
 package com.example.victorsport.Entity;
 
 import jakarta.persistence.*;
-
+import lombok.Getter;
+import lombok.Setter;
+@Getter @Setter
 @Entity
 @Table(name = "quyen_han_chuc_nang")
 public class QuyenHanChucNang {

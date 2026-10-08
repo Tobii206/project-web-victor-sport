@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh Toán & Đặt Hàng - Victor Sport</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top py-3">
+        <div class="container">
+            <a class="navbar-brand text-danger" href="/index.html">
+                <i class="fa-solid fa-bolt text-danger"></i> VICTOR<span class="text-dark">SPORT</span>
+                <span class="brand-badge">PRO</span>
+            </a>
+            <div class="ms-auto">
+                <a href="/cart.html" class="text-decoration-none text-muted small">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Quay lại giỏ hàng
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Checkout Main -->
+    <div class="container my-5">
+        <h2 class="fw-bold mb-4"><i class="fa-solid fa-credit-card text-danger me-2"></i> TIẾN HÀNH ĐẶT HÀNG</h2>
+
+        <div class="row g-4" id="checkoutRow">
+            <!-- Cột trái: Thông tin nhận hàng & Thanh toán -->
+            <div class="col-lg-7">
+                <div class="cart-card p-4 shadow-sm mb-4">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">1. THÔNG TIN NGƯỜI NHẬN</h5>
+
+                    <form id="checkoutForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Họ và tên <span class="text-danger">*</span></label>
+                                <input type="text" id="custName" class="form-control" placeholder="Nguyễn Văn A" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Số điện thoại <span class="text-danger">*</span></label>
+                                <input type="tel" id="custPhone" class="form-control" placeholder="0901234567" required pattern="^(0|\+84)[0-9]{9}$">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Email nhận thông báo đơn hàng</label>
+                                <input type="email" id="custEmail" class="form-control" placeholder="email@example.com">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Địa chỉ giao hàng chi tiết <span class="text-danger">*</span></label>
+                                <textarea id="custAddress" class="form-control" rows="2" placeholder="Số nhà, ngõ/ngách, tên đường, Phường/Xã, Quận/Huyện, Tỉnh/TP" required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Ghi chú cho shipper / cửa hàng</label>
+                                <input type="text" id="custNote" class="form-control" placeholder="Giao giờ hành chính, gọi trước khi giao...">
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold mt-4 mb-3 border-bottom pb-2">2. PHƯƠNG THỨC THANH TOÁN</h5>
+                        <div class="d-flex flex-column gap-2 mb-3">
+                            <label class="border rounded-3 p-3 d-flex align-items-center gap-3 cursor-pointer" style="cursor: pointer;">
+                                <input type="radio" name="paymentMethod" value="4" checked class="form-check-input mt-0">
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold"><i class="fa-solid fa-money-bill-wave text-success me-2"></i> Thanh toán khi nhận hàng (COD)</div>
+                                    <small class="text-muted">Kiểm tra giày đúng size và thanh toán tiền mặt cho nhân viên giao hàng.</small>
+                                </div>
+                            </label>
+
+                            <label class="border rounded-3 p-3 d-flex align-items-center gap-3 cursor-pointer" style="cursor: pointer;">
+                                <input type="radio" name="paymentMethod" value="2" class="form-check-input mt-0">
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold"><i class="fa-solid fa-qrcode text-primary me-2"></i> Chuyển khoản VietQR (Ngân hàng 24/7)</div>
+                                    <small class="text-muted">Tự động tạo mã QR chính xác số tiền và mã đơn. Quét QR trên mọi App ngân hàng.</small>
+                                </div>
+                            </label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Cột phải: Tóm tắt đơn hàng & Áp mã giảm giá -->
+            <div class="col-lg-5">
+                <div class="cart-card p-4 shadow-sm mb-4">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">3. ĐƠN HÀNG CỦA BẠN</h5>
+
+                    <div id="checkoutItemsList" class="mb-3" style="max-height: 280px; overflow-y: auto;">
+                        <!-- Danh sách món -->
+                    </div>
+
+                    <!-- Nhập mã giảm giá -->
+                    <div class="border-top pt-3 mb-3">
+                        <label class="form-label small fw-bold">Mã giảm giá (Voucher)</label>
+                        <div class="input-group mb-1">
+                            <input type="text" id="voucherCodeInput" class="form-control text-uppercase" placeholder="Nhập mã (VD: PGG00002)">
+                            <button class="btn btn-outline-danger fw-bold" type="button" id="btnApplyVoucher">Áp dụng</button>
+                        </div>
+                        <div id="voucherMessage" class="small"></div>
+                    </div>
+
+                    <!-- Tóm tắt chi phí -->
+                    <div class="border-top pt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Tạm tính tiền hàng:</span>
+                            <span class="fw-bold" id="txtSubTotal">0 ₫</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2" id="rowDiscount" style="display: none !important;">
+                            <span class="text-success fw-semibold">Giảm giá voucher:</span>
+                            <span class="text-success fw-bold" id="txtDiscount">-0 ₫</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Phí vận chuyển:</span>
+                            <span class="fw-bold" id="txtShipFee">30.000 ₫</span>
+                        </div>
+
+                        <div class="border-top pt-3 mb-4 d-flex justify-content-between align-items-baseline">
+                            <span class="fs-5 fw-bold">Tổng thanh toán:</span>
+                            <span class="fs-3 fw-extrabold text-danger" id="txtFinalTotal">0 ₫</span>
+                        </div>
+
+                        <button type="button" class="btn btn-primary-sport w-100 py-3 fs-5" id="btnSubmitOrder">
+                            <i class="fa-solid fa-lock me-2"></i> XÁC NHẬN ĐẶT HÀNG
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white pt-5 pb-4 border-top mt-5">
+        <div class="container text-center small text-secondary">
+            © 2026 DATN Victor Sport. Tất cả quyền được bảo lưu.
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS & App JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        let appliedVoucher = null;
+        let discountAmount = 0;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const items = CartManager.getItems();
+            if (items.length === 0) {
+                alert('Giỏ hàng của bạn đang trống! Vui lòng chọn sản phẩm trước khi thanh toán.');
+                window.location.href = '/index.html#shop-section';
+                return;
+            }
+
+            renderOrderSummary();
+
+            document.getElementById('btnApplyVoucher').addEventListener('click', handleApplyVoucher);
+            document.getElementById('btnSubmitOrder').addEventListener('click', handleSubmitOrder);
+        });
+
+        function renderOrderSummary() {
+            const items = CartManager.getItems();
+            const listEl = document.getElementById('checkoutItemsList');
+            const subTotal = CartManager.getTotalPrice();
+            const shipFee = subTotal >= 1000000 ? 0 : 30000;
+            const finalTotal = Math.max(0, subTotal - discountAmount) + shipFee;
+
+            listEl.innerHTML = items.map(item => `
+                <div class="d-flex align-items-center gap-3 mb-2 pb-2 border-bottom">
+                    <img src="${item.hinhAnh}" class="rounded border" style="width: 50px; height: 50px; object-fit: cover;">
+                    <div class="flex-grow-1">
+                        <div class="small fw-bold text-truncate" style="max-width: 220px;">${item.tenSanPham}</div>
+                        <div class="small text-muted">${item.mauSac} | Size ${item.kichThuoc} x <strong>${item.soLuong}</strong></div>
+                    </div>
+                    <div class="small fw-bold text-danger">${formatVND(item.gia * item.soLuong)}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('txtSubTotal').textContent = formatVND(subTotal);
+            document.getElementById('txtShipFee').textContent = shipFee === 0 ? 'Miễn phí' : formatVND(shipFee);
+            document.getElementById('txtFinalTotal').textContent = formatVND(finalTotal);
+
+            const rowDiscount = document.getElementById('rowDiscount');
+            if (discountAmount > 0) {
+                rowDiscount.style.setProperty('display', 'flex', 'important');
+                document.getElementById('txtDiscount').textContent = `-${formatVND(discountAmount)}`;
+            } else {
+                rowDiscount.style.setProperty('display', 'none', 'important');
+            }
+        }
+
+        async function handleApplyVoucher() {
+            const code = document.getElementById('voucherCodeInput').value.trim();
+            const msgEl = document.getElementById('voucherMessage');
+            if (!code) {
+                msgEl.innerHTML = '<span class="text-danger">Vui lòng nhập mã voucher!</span>';
+                return;
+            }
+
+            const subTotal = CartManager.getTotalPrice();
+            try {
+                const res = await fetch(`/api/don-hang/kiem-tra-voucher?maVoucher=${encodeURIComponent(code)}&tongTien=${subTotal}`);
+                const resp = await res.json();
+
+                if (resp.status === 200 && resp.data && resp.data.hopLe) {
+                    appliedVoucher = resp.data.maVoucher;
+                    discountAmount = resp.data.soTienGiam || 0;
+                    msgEl.innerHTML = `<span class="text-success"><i class="fa-solid fa-check-circle me-1"></i> ${resp.data.thongBao}</span>`;
+                    renderOrderSummary();
+                } else {
+                    appliedVoucher = null;
+                    discountAmount = 0;
+                    msgEl.innerHTML = `<span class="text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i> ${resp.data?.thongBao || 'Mã không hợp lệ!'}</span>`;
+                    renderOrderSummary();
+                }
+            } catch (err) {
+                console.error(err);
+                msgEl.innerHTML = '<span class="text-danger">Không thể kiểm tra mã giảm giá!</span>';
+            }
+        }
+
+        async function handleSubmitOrder() {
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const email = document.getElementById('custEmail').value.trim();
+            const address = document.getElementById('custAddress').value.trim();
+            const note = document.getElementById('custNote').value.trim();
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+            if (!name || !phone || !address) {
+                showToast('Thiếu thông tin', 'Vui lòng điền đầy đủ Họ tên, Số điện thoại và Địa chỉ nhận hàng!', 'warning');
+                return;
+            }
+
+            const phoneRegex = /^(0|\+84)[0-9]{9}$/;
+            if (!phoneRegex.test(phone)) {
+                showToast('Lỗi', 'Số điện thoại không hợp lệ (cần 10 chữ số)!', 'warning');
+                return;
+            }
+
+            const items = CartManager.getItems();
+            const payload = {
+                tenKhachHang: name,
+                soDienThoai: phone,
+                email: email || null,
+                diaChi: address,
+                ghiChu: note || null,
+                idPhuongThucThanhToan: parseInt(paymentMethod),
+                maPhieuGiamGia: appliedVoucher,
+                danhSachSanPham: items.map(i => ({
+                    idChiTietSanPham: i.idChiTiet,
+                    soLuong: i.soLuong
+                }))
+            };
+
+            const btn = document.getElementById('btnSubmitOrder');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý đặt hàng...';
+
+            try {
+                const res = await fetch('/api/don-hang/dat-hang', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const resp = await res.json();
+
+                if (resp.status === 201 || resp.status === 200) {
+                    CartManager.clearCart();
+                    const orderData = resp.data;
+                    // Chuyển hướng tới trang thông báo thành công
+                    window.location.href = `/order-success.html?orderId=${encodeURIComponent(orderData.maHoaDon)}`;
+                } else {
+                    throw new Error(resp.message || 'Đặt hàng không thành công');
+                }
+            } catch (err) {
+                alert('Đặt hàng thất bại: ' + err.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-lock me-2"></i> XÁC NHẬN ĐẶT HÀNG';
+            }
+        }
+    </script>
+</body>
+</html>

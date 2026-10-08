@@ -1,9 +1,13 @@
 package com.example.victorsport.Entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "phong_cach_choi")
+@Getter
+@Setter
 public class PhongCachChoi {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,4 +24,44 @@ public class PhongCachChoi {
 
     @Column(name = "xoa_mem")
     private Boolean xoaMem;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getMaPhongCach() {
+        return maPhongCach;
+    }
+
+    public void setMaPhongCach(String maPhongCach) {
+        this.maPhongCach = maPhongCach;
+    }
+
+    public String getTenPhongCach() {
+        return tenPhongCach;
+    }
+
+    public void setTenPhongCach(String tenPhongCach) {
+        this.tenPhongCach = tenPhongCach;
+    }
+
+    public Boolean getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(Boolean trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    public Boolean getXoaMem() {
+        return xoaMem;
+    }
+
+    public void setXoaMem(Boolean xoaMem) {
+        this.xoaMem = xoaMem;
+    }
 }

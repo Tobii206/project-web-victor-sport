@@ -1,9 +1,13 @@
 package com.example.victorsport.Entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "anh_chi_tiet_san_pham")
+@Getter
+@Setter
 public class AnhChiTietSanPham {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Sản Phẩm - Victor Sport</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top py-3">
+        <div class="container">
+            <a class="navbar-brand text-danger" href="/index.html">
+                <i class="fa-solid fa-bolt text-danger"></i> VICTOR<span class="text-dark">SPORT</span>
+                <span class="brand-badge">PRO</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html"><i class="fa-solid fa-house me-1"></i> Trang chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html#shop-section"><i class="fa-solid fa-store me-1"></i> Cửa hàng</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/order-success.html"><i class="fa-solid fa-clock-rotate-left me-1"></i> Tra cứu đơn hàng</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="/cart.html" class="cart-btn">
+                        <i class="fa-solid fa-bag-shopping text-danger"></i>
+                        <span>Giỏ hàng</span>
+                        <span class="cart-badge" style="display: none;">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <div class="bg-white border-bottom py-2">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 small">
+                    <li class="breadcrumb-item"><a href="/index.html" class="text-decoration-none text-muted">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a href="/index.html#shop-section" class="text-decoration-none text-muted" id="bcBrand">Sản phẩm</a></li>
+                    <li class="breadcrumb-item active" aria-current="page" id="bcName">Chi tiết</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Product Detail Container -->
+    <div class="container my-5">
+        <div class="row g-5" id="productContainer">
+            <!-- Loading Spinner -->
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-danger" role="status"></div>
+                <p class="mt-2 text-muted">Đang tải thông tin sản phẩm...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white pt-5 pb-4 border-top mt-5">
+        <div class="container text-center small text-secondary">
+            © 2026 DATN Victor Sport. Tất cả quyền được bảo lưu.
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS & App JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        let currentProduct = null;
+        let variants = [];
+        let selectedVariant = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = urlParams.get('id');
+
+            if (!productId) {
+                document.getElementById('productContainer').innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <h4>Không tìm thấy mã sản phẩm!</h4>
+                        <a href="/index.html" class="btn btn-danger mt-3">Quay lại cửa hàng</a>
+                    </div>
+                `;
+                return;
+            }
+
+            loadProductData(productId);
+        });
+
+        async function loadProductData(id) {
+            try {
+                const [spRes, ctRes] = await Promise.all([
+                    fetch(`/api/san-pham/${id}`),
+                    fetch(`/api/chi-tiet-san-pham/by-san-pham/${id}`)
+                ]);
+
+                const spJson = await spRes.json();
+                const ctJson = await ctRes.json();
+
+                if (spJson.status !== 200 || !spJson.data) {
+                    throw new Error(spJson.message || 'Không tìm thấy sản phẩm');
+                }
+
+                currentProduct = spJson.data;
+                variants = ctJson.status === 200 ? ctJson.data : [];
+
+                document.getElementById('bcBrand').textContent = currentProduct.tenThuongHieu || 'Sản phẩm';
+                document.getElementById('bcName').textContent = currentProduct.tenSanPham;
+                document.title = `${currentProduct.tenSanPham} - Victor Sport`;
+
+                renderProductDetail();
+            } catch (err) {
+                console.error(err);
+                document.getElementById('productContainer').innerHTML = `
+                    <div class="col-12 text-center py-5 text-danger">
+                        <h4>${err.message || 'Có lỗi xảy ra khi tải sản phẩm!'}</h4>
+                        <a href="/index.html" class="btn btn-outline-dark mt-3">Quay lại trang chủ</a>
+                    </div>
+                `;
+            }
+        }
+
+        function renderProductDetail() {
+            // Chọn biến thể đầu tiên làm mặc định nếu có
+            selectedVariant = variants.length > 0 ? variants[0] : null;
+
+            // Danh sách màu duy nhất
+            const colors = [];
+            const colorMap = new Map();
+            variants.forEach(v => {
+                if (!colorMap.has(v.idMauSac)) {
+                    colorMap.set(v.idMauSac, true);
+                    colors.push({ id: v.idMauSac, ten: v.tenMauSac, hex: v.maMauHex });
+                }
+            });
+
+            // Danh sách kích thước duy nhất
+            const sizes = [];
+            const sizeMap = new Map();
+            variants.forEach(v => {
+                if (!sizeMap.has(v.idKichThuoc)) {
+                    sizeMap.set(v.idKichThuoc, true);
+                    sizes.push({ id: v.idKichThuoc, ten: v.tenKichThuoc });
+                }
+            });
+
+            // Danh sách Form chân duy nhất
+            const forms = [];
+            const formMap = new Map();
+            variants.forEach(v => {
+                if (!formMap.has(v.idFormChan)) {
+                    formMap.set(v.idFormChan, true);
+                    forms.push({ id: v.idFormChan, ten: v.tenFormChan });
+                }
+            });
+
+            const mainImg = (selectedVariant && selectedVariant.danhSachAnh && selectedVariant.danhSachAnh.length > 0)
+                ? selectedVariant.danhSachAnh[0].duongDanAnh
+                : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop&q=80';
+
+            const html = `
+                <!-- Cột trái: Ảnh sản phẩm -->
+                <div class="col-lg-6">
+                    <div class="border rounded-4 p-3 bg-white shadow-sm mb-3 text-center">
+                        <img id="mainProductImg" src="${mainImg}" alt="${currentProduct.tenSanPham}" class="img-fluid rounded-3" style="max-height: 480px; object-fit: contain;" onerror="this.src='https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop&q=80'">
+                    </div>
+                    <div class="d-flex gap-2 justify-content-center flex-wrap" id="thumbnailList">
+                        <!-- Thumbnails -->
+                    </div>
+                </div>
+
+                <!-- Cột phải: Thông tin & Đặt mua -->
+                <div class="col-lg-6">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-danger text-uppercase fw-bold">${currentProduct.tenThuongHieu || 'VICTOR SPORT'}</span>
+                        <span class="badge bg-secondary">Mã: ${currentProduct.maSanPham || 'SP' + currentProduct.id}</span>
+                        <span class="badge bg-success"><i class="fa-solid fa-check me-1"></i>Chính Hãng 100%</span>
+                    </div>
+
+                    <h1 class="h2 fw-bold text-dark mb-3">${currentProduct.tenSanPham}</h1>
+
+                    <!-- Giá tiền -->
+                    <div class="p-3 bg-light rounded-3 mb-4 d-flex align-items-baseline gap-3">
+                        <span class="h2 fw-extrabold text-danger mb-0" id="displayPrice">...</span>
+                        <span class="text-muted text-decoration-line-through fs-5" id="displayOldPrice" style="display: none;">...</span>
+                        <span class="badge bg-danger ms-auto" id="discountBadge" style="display: none;">GIẢM GIÁ</span>
+                    </div>
+
+                    ${currentProduct.moTaNgan ? `<p class="text-secondary mb-4">${currentProduct.moTaNgan}</p>` : ''}
+
+                    <!-- Bộ chọn Màu Sắc -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-uppercase">1. Chọn Màu Sắc: <span id="selectedColorText" class="text-danger fw-normal"></span></label>
+                        <div class="d-flex gap-2 flex-wrap" id="colorOptions">
+                            ${colors.map((c, idx) => `
+                                <button type="button" class="swatch-btn ${idx === 0 ? 'active' : ''}" data-color-id="${c.id}" onclick="selectColor(${c.id}, '${c.ten}')">
+                                    <span class="color-dot" style="background-color: ${c.hex || '#ccc'}"></span>
+                                    ${c.ten}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Bộ chọn Size -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-uppercase">2. Chọn Kích Thước (Size): <span id="selectedSizeText" class="text-danger fw-normal"></span></label>
+                        <div class="d-flex gap-2 flex-wrap" id="sizeOptions">
+                            ${sizes.map((s, idx) => `
+                                <button type="button" class="swatch-btn ${idx === 0 ? 'active' : ''}" data-size-id="${s.id}" onclick="selectSize(${s.id}, '${s.ten}')">
+                                    ${s.ten}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Bộ chọn Form chân -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-uppercase">3. Chọn Form Chân: <span id="selectedFormText" class="text-danger fw-normal"></span></label>
+                        <div class="d-flex gap-2 flex-wrap" id="formOptions">
+                            ${forms.map((f, idx) => `
+                                <button type="button" class="swatch-btn ${idx === 0 ? 'active' : ''}" data-form-id="${f.id}" onclick="selectForm(${f.id}, '${f.ten}')">
+                                    ${f.ten}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Trạng thái tồn kho -->
+                    <div class="mb-4">
+                        <div class="small fw-semibold" id="stockStatus">Đang kiểm tra tồn kho...</div>
+                    </div>
+
+                    <!-- Bộ chọn Số Lượng & Nút Mua -->
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="qty-control">
+                            <button class="qty-btn" type="button" onclick="adjustQty(-1)">-</button>
+                            <input type="number" id="buyQty" class="qty-input" value="1" min="1" max="99" readonly>
+                            <button class="qty-btn" type="button" onclick="adjustQty(1)">+</button>
+                        </div>
+
+                        <button class="btn btn-primary-sport flex-grow-1 py-3" id="btnAddToCart" onclick="handleAddToCart()">
+                            <i class="fa-solid fa-cart-plus me-2"></i> THÊM VÀO GIỎ HÀNG
+                        </button>
+                        <button class="btn btn-dark py-3 px-4 fw-bold rounded-3" id="btnBuyNow" onclick="handleBuyNow()">
+                            MUA NGAY
+                        </button>
+                    </div>
+
+                    <!-- Cam kết dịch vụ -->
+                    <div class="border rounded-3 p-3 bg-white small">
+                        <div class="row g-2">
+                            <div class="col-6"><i class="fa-solid fa-truck-fast text-danger me-2"></i> Freeship đơn từ 1.000.000 ₫</div>
+                            <div class="col-6"><i class="fa-solid fa-rotate-left text-danger me-2"></i> Đổi size trong 7 ngày</div>
+                            <div class="col-6"><i class="fa-solid fa-shield-halved text-danger me-2"></i> Cam kết 100% chính hãng</div>
+                            <div class="col-6"><i class="fa-solid fa-box-check text-danger me-2"></i> Kiểm tra hàng trước khi nhận</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thông số kỹ thuật & Mô tả chi tiết -->
+                <div class="col-12 mt-5">
+                    <ul class="nav nav-tabs fw-bold" id="productTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc-pane" type="button"><i class="fa-solid fa-file-lines me-1"></i> Mô Tả Chi Tiết</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="spec-tab" data-bs-toggle="tab" data-bs-target="#spec-pane" type="button"><i class="fa-solid fa-list-check me-1"></i> Thông Số Kỹ Thuật</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content bg-white p-4 border border-top-0 rounded-bottom-4 shadow-sm" id="productTabContent">
+                        <div class="tab-pane fade show active" id="desc-pane">
+                            <div class="lh-lg text-secondary">
+                                ${currentProduct.moTaChiTiet ? currentProduct.moTaChiTiet.replace(/\n/g, '<br>') : 'Chưa có thông tin mô tả chi tiết cho sản phẩm này.'}
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="spec-pane">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered align-middle mb-0">
+                                    <tbody>
+                                        <tr><th style="width: 250px;">Thương hiệu</th><td>${currentProduct.tenThuongHieu || 'Chưa cập nhật'}</td></tr>
+                                        <tr><th>Xuất xứ</th><td>${currentProduct.tenXuatXu || 'Chưa cập nhật'}</td></tr>
+                                        <tr><th>Chất liệu</th><td>${currentProduct.tenChatLieu || 'Chưa cập nhật'}</td></tr>
+                                        <tr><th>Loại cổ giày</th><td>${currentProduct.tenCoGiay || 'Chưa cập nhật'}</td></tr>
+                                        <tr><th>Phong cách chơi</th><td>${currentProduct.tenPhongCachChoi || 'Chưa cập nhật'}</td></tr>
+                                        <tr><th>Vị trí thi đấu thích hợp</th><td>${currentProduct.tenViTriThiDau || 'Chưa cập nhật'}</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('productContainer').innerHTML = html;
+
+            // Kích hoạt màu và size mặc định
+            if (colors.length > 0) selectColor(colors[0].id, colors[0].ten);
+            if (sizes.length > 0) selectSize(sizes[0].id, sizes[0].ten);
+            if (forms.length > 0) selectForm(forms[0].id, forms[0].ten);
+            updateVariantMatch();
+        }
+
+        let curColorId = null;
+        let curSizeId = null;
+        let curFormId = null;
+
+        function selectColor(colorId, colorName) {
+            curColorId = colorId;
+            document.getElementById('selectedColorText').textContent = colorName;
+            document.querySelectorAll('#colorOptions .swatch-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-color-id') == colorId);
+            });
+            updateVariantMatch();
+        }
+
+        function selectSize(sizeId, sizeName) {
+            curSizeId = sizeId;
+            document.getElementById('selectedSizeText').textContent = sizeName;
+            document.querySelectorAll('#sizeOptions .swatch-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-size-id') == sizeId);
+            });
+            updateVariantMatch();
+        }
+
+        function selectForm(formId, formName) {
+            curFormId = formId;
+            document.getElementById('selectedFormText').textContent = formName;
+            document.querySelectorAll('#formOptions .swatch-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-form-id') == formId);
+            });
+            updateVariantMatch();
+        }
+
+        function updateVariantMatch() {
+            // Tìm biến thể khớp với Color + Size + Form
+            selectedVariant = variants.find(v =>
+                (!curColorId || v.idMauSac === curColorId) &&
+                (!curSizeId || v.idKichThuoc === curSizeId) &&
+                (!curFormId || v.idFormChan === curFormId)
+            );
+
+            const priceEl = document.getElementById('displayPrice');
+            const oldPriceEl = document.getElementById('displayOldPrice');
+            const badgeEl = document.getElementById('discountBadge');
+            const stockEl = document.getElementById('stockStatus');
+            const btnAdd = document.getElementById('btnAddToCart');
+            const btnBuy = document.getElementById('btnBuyNow');
+
+            if (selectedVariant) {
+                const giaBan = selectedVariant.giaBan || selectedVariant.giaNiemYet;
+                const giaNiemYet = selectedVariant.giaNiemYet;
+
+                priceEl.textContent = formatVND(giaBan);
+                if (giaNiemYet && giaBan && giaNiemYet > giaBan) {
+                    oldPriceEl.textContent = formatVND(giaNiemYet);
+                    oldPriceEl.style.display = 'inline';
+                    badgeEl.style.display = 'inline';
+                } else {
+                    oldPriceEl.style.display = 'none';
+                    badgeEl.style.display = 'none';
+                }
+
+                // Cập nhật ảnh nếu biến thể có ảnh
+                if (selectedVariant.danhSachAnh && selectedVariant.danhSachAnh.length > 0) {
+                    document.getElementById('mainProductImg').src = selectedVariant.danhSachAnh[0].duongDanAnh;
+                }
+
+                // Tồn kho
+                const stock = selectedVariant.soLuong || 0;
+                if (stock > 0) {
+                    stockEl.innerHTML = `<span class="text-success"><i class="fa-solid fa-circle-check me-1"></i> Còn hàng (Hiện có <strong>${stock}</strong> đôi trong kho)</span>`;
+                    btnAdd.disabled = false;
+                    btnBuy.disabled = false;
+                } else {
+                    stockEl.innerHTML = `<span class="text-danger"><i class="fa-solid fa-circle-xmark me-1"></i> Tạm hết hàng phiên bản này</span>`;
+                    btnAdd.disabled = true;
+                    btnBuy.disabled = true;
+                }
+            } else {
+                priceEl.textContent = 'Liên hệ';
+                oldPriceEl.style.display = 'none';
+                badgeEl.style.display = 'none';
+                stockEl.innerHTML = `<span class="text-muted"><i class="fa-solid fa-circle-info me-1"></i> Vui lòng chọn phiên bản khác (Chưa có hàng phối màu/size này)</span>`;
+                btnAdd.disabled = true;
+                btnBuy.disabled = true;
+            }
+        }
+
+        function adjustQty(delta) {
+            const input = document.getElementById('buyQty');
+            let val = parseInt(input.value) || 1;
+            val += delta;
+            if (val < 1) val = 1;
+            if (selectedVariant && selectedVariant.soLuong && val > selectedVariant.soLuong) {
+                val = selectedVariant.soLuong;
+                showToast('Thông báo', `Số lượng trong kho chỉ còn ${val} đôi`, 'warning');
+            }
+            input.value = val;
+        }
+
+        function handleAddToCart() {
+            if (!selectedVariant) {
+                showToast('Lỗi', 'Vui lòng chọn đầy đủ màu sắc, kích thước và form chân!', 'warning');
+                return;
+            }
+            const qty = parseInt(document.getElementById('buyQty').value) || 1;
+            const img = (selectedVariant.danhSachAnh && selectedVariant.danhSachAnh.length > 0)
+                ? selectedVariant.danhSachAnh[0].duongDanAnh
+                : document.getElementById('mainProductImg').src;
+
+            CartManager.addItem({
+                idChiTiet: selectedVariant.id,
+                idSanPham: currentProduct.id,
+                tenSanPham: currentProduct.tenSanPham,
+                mauSac: selectedVariant.tenMauSac,
+                kichThuoc: selectedVariant.tenKichThuoc,
+                formChan: selectedVariant.tenFormChan,
+                gia: selectedVariant.giaBan || selectedVariant.giaNiemYet,
+                hinhAnh: img,
+                soLuong: qty,
+                tonKho: selectedVariant.soLuong
+            });
+        }
+
+        function handleBuyNow() {
+            handleAddToCart();
+            window.location.href = '/checkout.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Victor Sport - Giày Thể Thao & Bóng Đá Chính Hãng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <!-- Top Notice -->
+    <div class="bg-dark text-white text-center py-2 small fw-semibold">
+        <span><i class="fa-solid fa-truck-fast text-danger me-2"></i> Miễn phí vận chuyển toàn quốc cho đơn hàng từ 1.000.000 ₫</span>
+    </div>
+
+    <!-- Header Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top py-3">
+        <div class="container">
+            <a class="navbar-brand text-danger" href="/index.html">
+                <i class="fa-solid fa-bolt text-danger"></i> VICTOR<span class="text-dark">SPORT</span>
+                <span class="brand-badge">PRO</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/index.html"><i class="fa-solid fa-house me-1"></i> Trang chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#shop-section"><i class="fa-solid fa-store me-1"></i> Sản phẩm</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/order-success.html"><i class="fa-solid fa-clock-rotate-left me-1"></i> Tra cứu đơn hàng</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="/cart.html" class="cart-btn">
+                        <i class="fa-solid fa-bag-shopping text-danger"></i>
+                        <span>Giỏ hàng</span>
+                        <span class="cart-badge" style="display: none;">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7 py-4">
+                    <span class="badge bg-danger px-3 py-2 text-uppercase mb-3 fw-bold">Bộ Sưu Tập Giày Đá Bóng & Thể Thao Mới</span>
+                    <h1 class="hero-title mb-3">BỨT PHÁ TỐC ĐỘ.<br>LÀM CHỦ TRẬN ĐẤU.</h1>
+                    <p class="hero-subtitle mb-4">Trải nghiệm những mẫu giày thể thao đỉnh cao từ Nike, Adidas, Mizuno, Puma chính hãng với trợ lực hoàn hảo và độ bám sân vượt trội.</p>
+                    <a href="#shop-section" class="btn btn-danger btn-lg px-4 py-3 fw-bold rounded-pill shadow">
+                        <i class="fa-solid fa-fire me-2"></i> Khám Phá Ngay
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Value Highlights -->
+    <div class="container mb-5">
+        <div class="row g-3">
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-badge">
+                    <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div>
+                        <div class="fw-bold">100% Chính Hãng</div>
+                        <small class="text-muted">Cam kết bảo đảm chất lượng</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-badge">
+                    <div class="feature-icon"><i class="fa-solid fa-truck-fast"></i></div>
+                    <div>
+                        <div class="fw-bold">Giao Hàng Hỏa Tốc</div>
+                        <small class="text-muted">Nhanh chóng trong 24h - 48h</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-badge">
+                    <div class="feature-icon"><i class="fa-solid fa-rotate-left"></i></div>
+                    <div>
+                        <div class="fw-bold">Đổi Trả 7 Ngày</div>
+                        <small class="text-muted">Dễ dàng đổi size vừa ý</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-badge">
+                    <div class="feature-icon"><i class="fa-solid fa-headset"></i></div>
+                    <div>
+                        <div class="fw-bold">Tư Vấn Chuyên Sâu</div>
+                        <small class="text-muted">Hỗ trợ chọn form chân chuẩn</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Shop Section -->
+    <div class="container mb-5" id="shop-section">
+        <div class="row">
+            <!-- Filter Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="filter-card">
+                    <div class="filter-title">
+                        <i class="fa-solid fa-filter text-danger"></i> Bộ Lọc Tìm Kiếm
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Từ khóa sản phẩm</label>
+                        <div class="input-group">
+                            <input type="text" id="searchKeyword" class="form-control" placeholder="Tên sản phẩm...">
+                            <button class="btn btn-outline-secondary" type="button" id="btnSearch">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Brand Filter -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Thương hiệu</label>
+                        <select id="filterBrand" class="form-select">
+                            <option value="">-- Tất cả thương hiệu --</option>
+                        </select>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Trạng thái</label>
+                        <select id="filterStatus" class="form-select">
+                            <option value="">Tất cả</option>
+                            <option value="true" selected>Đang kinh doanh</option>
+                        </select>
+                    </div>
+
+                    <div class="d-grid gap-2 pt-2">
+                        <button class="btn btn-primary-sport" id="btnApplyFilter">
+                            <i class="fa-solid fa-check me-1"></i> Lọc sản phẩm
+                        </button>
+                        <button class="btn btn-outline-sport" id="btnResetFilter">
+                            <i class="fa-solid fa-arrow-rotate-right me-1"></i> Đặt lại
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Banner Khuyến mãi nhỏ bên hông -->
+                <div class="p-4 rounded-4 text-white" style="background: linear-gradient(135deg, #e11d48, #4f46e5);">
+                    <h5 class="fw-bold mb-2"><i class="fa-solid fa-tag"></i> VOUCHER GIẢM 200K</h5>
+                    <p class="small mb-3">Nhập mã <strong>PGG00002</strong> tại bước thanh toán cho đơn hàng từ 2 triệu!</p>
+                    <a href="/cart.html" class="btn btn-light btn-sm fw-bold rounded-pill text-danger px-3">Dùng ngay</a>
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="col-lg-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h3 class="fw-bold mb-1">DANH SÁCH GIÀY THỂ THAO</h3>
+                        <p class="text-muted small mb-0" id="productCountInfo">Đang tải danh sách sản phẩm...</p>
+                    </div>
+                </div>
+
+                <!-- Products Grid Container -->
+                <div class="row g-4" id="productList">
+                    <!-- Dynamic Items loaded via JS -->
+                </div>
+
+                <!-- Pagination -->
+                <nav class="mt-5" id="paginationNav" style="display: none;">
+                    <ul class="pagination justify-content-center" id="paginationList"></ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white pt-5 pb-4 border-top">
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <h5 class="fw-bold text-danger mb-3"><i class="fa-solid fa-bolt"></i> VICTOR SPORT</h5>
+                    <p class="small text-secondary">Hệ thống phân phối giày bóng đá và giày thể thao chính hãng hàng đầu. Đồng hành cùng bạn trên mọi sân cỏ và cung đường tập luyện.</p>
+                    <div class="small text-secondary">
+                        <p class="mb-1"><i class="fa-solid fa-location-dot me-2 text-danger"></i> Hà Nội: 68 Trần Thái Tông, Cầu Giấy</p>
+                        <p class="mb-1"><i class="fa-solid fa-phone me-2 text-danger"></i> Hotline: 1900 8888 (8:00 - 22:00)</p>
+                        <p class="mb-0"><i class="fa-solid fa-envelope me-2 text-danger"></i> Email: contact@victorsport.vn</p>
+                    </div>
+                </div>
+                <div class="col-md-2 col-6">
+                    <h6 class="fw-bold mb-3">Sản Phẩm</h6>
+                    <ul class="list-unstyled small text-secondary">
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-secondary">Giày đá bóng sân cỏ</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-secondary">Giày chạy bộ (Running)</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-secondary">Sneaker thời trang</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-secondary">Phụ kiện thể thao</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 col-6">
+                    <h6 class="fw-bold mb-3">Chính Sách</h6>
+                    <ul class="list-unstyled small text-secondary">
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-secondary">Chính sách bảo hành</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-secondary">Chính sách đổi size</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-secondary">Phương thức vận chuyển</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-secondary">Bảo mật thông tin</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="fw-bold mb-3">Nhận Ưu Đãi Độc Quyền</h6>
+                    <p class="small text-secondary">Đăng ký để nhận voucher giảm giá 10% cho đơn hàng đầu tiên!</p>
+                    <div class="input-group">
+                        <input type="email" class="form-control" placeholder="Nhập email của bạn...">
+                        <button class="btn btn-danger fw-bold" type="button">Đăng ký</button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center pt-3 border-top border-secondary small text-secondary">
+                © 2026 DATN Victor Sport. Tất cả quyền được bảo lưu.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS & App JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        let currentPage = 0;
+        const pageSize = 9;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBrands();
+            loadProducts(0);
+
+            document.getElementById('btnSearch').addEventListener('click', () => loadProducts(0));
+            document.getElementById('searchKeyword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') loadProducts(0);
+            });
+            document.getElementById('btnApplyFilter').addEventListener('click', () => loadProducts(0));
+            document.getElementById('btnResetFilter').addEventListener('click', () => {
+                document.getElementById('searchKeyword').value = '';
+                document.getElementById('filterBrand').value = '';
+                document.getElementById('filterStatus').value = 'true';
+                loadProducts(0);
+            });
+        });
+
+        async function loadBrands() {
+            try {
+                const res = await fetch('/api/thuong-hieu/all');
+                const data = await res.json();
+                if (data.status === 200 && data.data) {
+                    const select = document.getElementById('filterBrand');
+                    data.data.forEach(b => {
+                        const opt = document.createElement('option');
+                        opt.value = b.id;
+                        opt.textContent = b.tenThuongHieu;
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (err) {
+                console.error('Lỗi khi tải thương hiệu:', err);
+            }
+        }
+
+        async function loadProducts(page) {
+            currentPage = page;
+            const container = document.getElementById('productList');
+            const info = document.getElementById('productCountInfo');
+            container.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-danger" role="status"></div><p class="mt-2 text-muted">Đang tải danh sách giày thể thao...</p></div>';
+
+            const keyword = document.getElementById('searchKeyword').value.trim();
+            const brandId = document.getElementById('filterBrand').value;
+            const status = document.getElementById('filterStatus').value;
+
+            let url = `/api/san-pham?page=${page}&size=${pageSize}`;
+            if (keyword) url += `&keyword=${encodeURIComponent(keyword)}`;
+            if (brandId) url += `&thuongHieuId=${brandId}`;
+            if (status) url += `&trangThai=${status}`;
+
+            try {
+                const res = await fetch(url);
+                const resp = await res.json();
+
+                if (resp.status === 200 && resp.data) {
+                    const pageData = resp.data;
+                    const items = pageData.content || [];
+                    info.textContent = `Hiển thị ${items.length} trên tổng số ${pageData.totalElements} sản phẩm`;
+
+                    if (items.length === 0) {
+                        container.innerHTML = `
+                            <div class="col-12 text-center py-5">
+                                <i class="fa-solid fa-box-open fa-3x text-muted mb-3"></i>
+                                <h5 class="fw-bold">Không tìm thấy sản phẩm nào!</h5>
+                                <p class="text-muted">Vui lòng thử tìm kiếm với từ khóa hoặc bộ lọc khác.</p>
+                            </div>
+                        `;
+                        document.getElementById('paginationNav').style.display = 'none';
+                        return;
+                    }
+
+                    container.innerHTML = '';
+                    for (const sp of items) {
+                        // Lấy biến thể đầu tiên để lấy giá và ảnh
+                        const ctRes = await fetch(`/api/chi-tiet-san-pham/by-san-pham/${sp.id}`);
+                        const ctData = await ctRes.json();
+                        const variants = (ctData.status === 200 && ctData.data) ? ctData.data : [];
+
+                        let minGiaBan = null;
+                        let giaNiemYet = null;
+                        let imgUrl = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80';
+
+                        if (variants.length > 0) {
+                            const first = variants[0];
+                            minGiaBan = first.giaBan || first.giaNiemYet;
+                            giaNiemYet = first.giaNiemYet;
+                            if (first.danhSachAnh && first.danhSachAnh.length > 0) {
+                                imgUrl = first.danhSachAnh[0].duongDanAnh;
+                            }
+                        }
+
+                        const cardHtml = `
+                            <div class="col-md-4 col-sm-6">
+                                <div class="product-card">
+                                    <div class="product-img-wrapper">
+                                        <img src="${imgUrl}" alt="${sp.tenSanPham}" class="product-img" onerror="this.src='https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&auto=format&fit=crop&q=80'">
+                                    </div>
+                                    <div class="p-3 d-flex flex-column flex-grow-1">
+                                        <div class="product-brand mb-1">${sp.tenThuongHieu || 'VICTOR SPORT'}</div>
+                                        <a href="/product-detail.html?id=${sp.id}" class="product-name" title="${sp.tenSanPham}">${sp.tenSanPham}</a>
+                                        <div class="mt-auto pt-2">
+                                            <div class="d-flex align-items-baseline mb-3">
+                                                <span class="product-price">${minGiaBan ? formatVND(minGiaBan) : 'Liên hệ'}</span>
+                                                ${(giaNiemYet && minGiaBan && giaNiemYet > minGiaBan) ? `<span class="product-old-price">${formatVND(giaNiemYet)}</span>` : ''}
+                                            </div>
+                                            <div class="d-grid gap-2">
+                                                <a href="/product-detail.html?id=${sp.id}" class="btn btn-outline-sport btn-sm">
+                                                    <i class="fa-solid fa-eye me-1"></i> Xem chi tiết
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        container.insertAdjacentHTML('beforeend', cardHtml);
+                    }
+
+                    renderPagination(pageData.totalPages, pageData.pageNumber);
+                }
+            } catch (err) {
+                console.error('Lỗi khi tải sản phẩm:', err);
+                container.innerHTML = '<div class="col-12 text-center text-danger py-4">Có lỗi xảy ra khi kết nối máy chủ!</div>';
+            }
+        }
+
+        function renderPagination(totalPages, activePage) {
+            const nav = document.getElementById('paginationNav');
+            const list = document.getElementById('paginationList');
+            if (totalPages <= 1) {
+                nav.style.display = 'none';
+                return;
+            }
+            nav.style.display = 'block';
+            list.innerHTML = '';
+
+            // Nút Prev
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${activePage === 0 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#shop-section" onclick="loadProducts(${activePage - 1})"><i class="fa-solid fa-chevron-left"></i></a>`;
+            list.appendChild(prevLi);
+
+            for (let i = 0; i < totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === activePage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link ${i === activePage ? 'bg-danger border-danger' : ''}" href="#shop-section" onclick="loadProducts(${i})">${i + 1}</a>`;
+                list.appendChild(li);
+            }
+
+            // Nút Next
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${activePage === totalPages - 1 ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#shop-section" onclick="loadProducts(${activePage + 1})"><i class="fa-solid fa-chevron-right"></i></a>`;
+            list.appendChild(nextLi);
+        }
+    </script>
+</body>
+</html>

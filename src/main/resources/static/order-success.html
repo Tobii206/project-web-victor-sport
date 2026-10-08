@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tra Cứu & Đặt Hàng Thành Công - Victor Sport</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top py-3">
+        <div class="container">
+            <a class="navbar-brand text-danger" href="/index.html">
+                <i class="fa-solid fa-bolt text-danger"></i> VICTOR<span class="text-dark">SPORT</span>
+                <span class="brand-badge">PRO</span>
+            </a>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                    <li class="nav-item"><a class="nav-link" href="/index.html"><i class="fa-solid fa-house me-1"></i> Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/index.html#shop-section"><i class="fa-solid fa-store me-1"></i> Cửa hàng</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/order-success.html"><i class="fa-solid fa-clock-rotate-left me-1"></i> Tra cứu đơn hàng</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="/cart.html" class="cart-btn">
+                        <i class="fa-solid fa-bag-shopping text-danger"></i>
+                        <span>Giỏ hàng</span>
+                        <span class="cart-badge" style="display: none;">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <!-- Search Order Box -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-7">
+                <div class="cart-card p-4 shadow-sm text-center">
+                    <h4 class="fw-bold mb-2"><i class="fa-solid fa-magnifying-glass-location text-danger me-2"></i> TRA CỨU TIẾN ĐỘ ĐƠN HÀNG</h4>
+                    <p class="text-muted small mb-3">Nhập mã đơn hàng của bạn (ví dụ: <code>HD00001</code>) để theo dõi trạng thái giao hàng.</p>
+                    <div class="input-group">
+                        <input type="text" id="orderSearchInput" class="form-control text-uppercase" placeholder="Nhập mã đơn hàng (VD: HD00001)...">
+                        <button class="btn btn-primary-sport px-4" type="button" id="btnSearchOrder">
+                            Tra cứu ngay
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Result Area -->
+        <div id="orderResultArea">
+            <!-- Dynamic Content -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white pt-5 pb-4 border-top mt-5">
+        <div class="container text-center small text-secondary">
+            © 2026 DATN Victor Sport. Tất cả quyền được bảo lưu.
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS & App JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+
+            if (orderId) {
+                document.getElementById('orderSearchInput').value = orderId;
+                fetchOrderDetail(orderId, true);
+            }
+
+            document.getElementById('btnSearchOrder').addEventListener('click', () => {
+                const code = document.getElementById('orderSearchInput').value.trim();
+                if (code) fetchOrderDetail(code, false);
+            });
+
+            document.getElementById('orderSearchInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const code = document.getElementById('orderSearchInput').value.trim();
+                    if (code) fetchOrderDetail(code, false);
+                }
+            });
+        });
+
+        async function fetchOrderDetail(maHoaDon, isNewOrder = false) {
+            const area = document.getElementById('orderResultArea');
+            area.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-danger" role="status"></div>
+                    <p class="mt-2 text-muted">Đang tải thông tin đơn hàng...</p>
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`/api/don-hang/tra-cuu/${encodeURIComponent(maHoaDon)}`);
+                const resp = await res.json();
+
+                if (resp.status !== 200 || !resp.data) {
+                    throw new Error(resp.message || 'Không tìm thấy đơn hàng!');
+                }
+
+                const order = resp.data;
+                renderOrderInfo(order, isNewOrder);
+            } catch (err) {
+                area.innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="alert alert-danger d-inline-block px-5 py-4 rounded-4 shadow-sm">
+                            <i class="fa-solid fa-circle-exclamation fa-3x mb-3"></i>
+                            <h5 class="fw-bold mb-1">Không tìm thấy đơn hàng!</h5>
+                            <p class="mb-0 small">${err.message}</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderOrderInfo(order, isNewOrder) {
+            const area = document.getElementById('orderResultArea');
+
+            // QR VietQR nếu chọn chuyển khoản
+            const isBankTransfer = order.tenPhuongThucThanhToan && order.tenPhuongThucThanhToan.includes('khoản');
+            const qrUrl = `https://img.vietqr.io/image/MB-0388999888-compact2.png?amount=${order.tongTienSauGiam}&addInfo=${order.maHoaDon}&accountName=VICTOR%20SPORT`;
+
+            const html = `
+                ${isNewOrder ? `
+                    <div class="text-center mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle mb-3" style="width: 72px; height: 72px;">
+                            <i class="fa-solid fa-check fa-2x"></i>
+                        </div>
+                        <h2 class="fw-bold text-success">ĐẶT HÀNG THÀNH CÔNG!</h2>
+                        <p class="text-muted">Cảm ơn bạn đã lựa chọn Victor Sport. Mã đơn hàng của bạn là <strong class="text-danger fs-5">${order.maHoaDon}</strong>.</p>
+                    </div>
+                ` : ''}
+
+                <div class="row g-4">
+                    <!-- Cột trái: Thông tin nhận hàng & Chi tiết sản phẩm -->
+                    <div class="col-lg-7">
+                        <div class="cart-card p-4 shadow-sm mb-4">
+                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                                <h5 class="fw-bold mb-0">THÔNG TIN ĐƠN HÀNG: <span class="text-danger">${order.maHoaDon}</span></h5>
+                                <span class="badge ${getStatusBadge(order.trangThai)} px-3 py-2">${order.tenTrangThai}</span>
+                            </div>
+
+                            <div class="row g-2 small mb-4">
+                                <div class="col-sm-6"><strong>Người nhận:</strong> ${order.tenKhachHang}</div>
+                                <div class="col-sm-6"><strong>Số điện thoại:</strong> ${order.soDienThoai}</div>
+                                <div class="col-12"><strong>Địa chỉ giao:</strong> ${order.diaChi}</div>
+                                <div class="col-sm-6"><strong>Ngày đặt:</strong> ${formatDateTime(order.ngayTao)}</div>
+                                <div class="col-sm-6"><strong>Thanh toán:</strong> ${order.tenPhuongThucThanhToan}</div>
+                                ${order.ghiChu ? `<div class="col-12"><strong>Ghi chú:</strong> ${order.ghiChu}</div>` : ''}
+                            </div>
+
+                            <h6 class="fw-bold border-bottom pb-2 mb-3">DANH SÁCH SẢN PHẨM</h6>
+                            <div class="table-responsive">
+                                <table class="table align-middle small mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Sản phẩm</th>
+                                            <th>Đơn giá</th>
+                                            <th class="text-center">Số lượng</th>
+                                            <th class="text-end">Thành tiền</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${order.danhSachSanPham.map(item => `
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <img src="${item.hinhAnh}" class="rounded border" style="width: 44px; height: 44px; object-fit: cover;">
+                                                        <div>
+                                                            <div class="fw-bold">${item.tenSanPham}</div>
+                                                            <div class="text-muted" style="font-size: 0.75rem;">${item.mauSac} | Size ${item.kichThuoc} | ${item.formChan}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>${formatVND(item.donGia)}</td>
+                                                <td class="text-center fw-bold">${item.soLuong}</td>
+                                                <td class="text-end fw-bold text-danger">${formatVND(item.thanhTien)}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="border-top pt-3 mt-3 small">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-muted">Tiền hàng:</span>
+                                    <span>${formatVND(order.tongTien)}</span>
+                                </div>
+                                ${order.tongTienGiam > 0 ? `
+                                    <div class="d-flex justify-content-between mb-1 text-success">
+                                        <span>Giảm giá:</span>
+                                        <span>-${formatVND(order.tongTienGiam)}</span>
+                                    </div>
+                                ` : ''}
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Phí ship:</span>
+                                    <span>${order.phiVanChuyen === 0 ? 'Miễn phí' : formatVND(order.phiVanChuyen)}</span>
+                                </div>
+                                <div class="d-flex justify-content-between border-top pt-2 fw-bold fs-6">
+                                    <span>Tổng thanh toán:</span>
+                                    <span class="text-danger fs-5">${formatVND(order.tongTienSauGiam)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${isBankTransfer ? `
+                            <div class="cart-card p-4 shadow-sm border-primary text-center">
+                                <h5 class="fw-bold text-primary mb-2"><i class="fa-solid fa-qrcode me-2"></i> THANH TOÁN CHUYỂN KHOẢN VIETQR</h5>
+                                <p class="small text-muted mb-3">Mở ứng dụng ngân hàng bất kỳ để quét mã QR chuyển khoản chính xác nội dung đơn hàng.</p>
+                                <img src="${qrUrl}" alt="Mã QR thanh toán" class="img-fluid rounded border p-2 bg-white shadow-sm" style="max-width: 250px;">
+                                <div class="mt-3 small">
+                                    <p class="mb-1"><strong>Nội dung chuyển khoản:</strong> <code class="fs-6">${order.maHoaDon}</code></p>
+                                    <p class="mb-0"><strong>Số tiền:</strong> <strong class="text-danger fs-6">${formatVND(order.tongTienSauGiam)}</strong></p>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Cột phải: Timeline tiến độ giao hàng -->
+                    <div class="col-lg-5">
+                        <div class="cart-card p-4 shadow-sm">
+                            <h5 class="fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-timeline text-danger me-2"></i> LỊCH TRÌNH ĐƠN HÀNG</h5>
+
+                            <div class="timeline">
+                                ${order.lichSu.map((ls, idx) => `
+                                    <div class="timeline-item">
+                                        <div class="timeline-dot completed"></div>
+                                        <div class="fw-bold ${idx === order.lichSu.length - 1 ? 'text-danger' : 'text-dark'}">${ls.tenTrangThai}</div>
+                                        <div class="small text-muted">${formatDateTime(ls.thoiGian)}</div>
+                                        <div class="small text-secondary mt-1">${ls.ghiChu || ''}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div class="mt-4 text-center">
+                            <a href="/index.html#shop-section" class="btn btn-outline-sport">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Tiếp tục mua sắm
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            area.innerHTML = html;
+        }
+
+        function getStatusBadge(st) {
+            return switchStatusBadge(st);
+        }
+
+        function switchStatusBadge(st) {
+            switch (st) {
+                case 1: return 'bg-warning text-dark';
+                case 2: return 'bg-info text-white';
+                case 3: return 'bg-primary text-white';
+                case 4: return 'bg-secondary text-white';
+                case 5: return 'bg-success text-white';
+                case 6: return 'bg-danger text-white';
+                default: return 'bg-dark text-white';
+            }
+        }
+
+        function formatDateTime(dtStr) {
+            if (!dtStr) return '';
+            const dt = new Date(dtStr);
+            return dt.toLocaleString('vi-VN', {
+                hour: '2-digit', minute: '2-digit',
+                day: '2-digit', month: '2-digit', year: 'numeric'
+            });
+        }
+    </script>
+</body>
+</html>

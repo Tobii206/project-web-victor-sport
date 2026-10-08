@@ -2,7 +2,9 @@ package com.example.victorsport.Entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-
+import lombok.Getter;
+import lombok.Setter;
+@Getter @Setter
 @Entity
 @Table(name = "san_pham")
 public class SanPham {

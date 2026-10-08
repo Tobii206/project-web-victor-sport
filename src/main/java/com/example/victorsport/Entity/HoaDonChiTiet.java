@@ -2,7 +2,9 @@ package com.example.victorsport.Entity;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-
+import lombok.Getter;
+import lombok.Setter;
+@Getter @Setter
 @Entity
 @Table(name = "hoa_don_chi_tiet")
 public class HoaDonChiTiet {

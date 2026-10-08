@@ -3,7 +3,9 @@ package com.example.victorsport.Entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
+import lombok.Getter;
+import lombok.Setter;
+@Getter @Setter
 @Entity
 @Table(name = "chi_tiet_dot_giam_gia")
 public class ChiTietDotGiamGia {
