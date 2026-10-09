@@ -20,6 +20,7 @@
         <% } %>
 
         <form method="post" action="/login" autocomplete="off">
+            <input type="hidden" name="quayLai" value="${quayLai}">
             <div class="field">
                 <label for="emailDangNhap">Email</label>
                 <input class="input" id="emailDangNhap" name="emailDangNhap" type="email" value="" autocomplete="off" autocapitalize="none" spellcheck="false" required>

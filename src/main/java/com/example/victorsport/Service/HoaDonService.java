@@ -23,6 +23,7 @@ public class HoaDonService {
                 SELECT id, id_nhan_vien, loai_don, ma_hoa_don, ten_khach_hang, so_dien_thoai_khach_hang,
                        ngay_tao, tong_tien_sau_giam, trang_thai_hien_tai,
                        CASE WHEN trang_thai_hien_tai = 0 THEN N'Đơn chờ'
+                            WHEN trang_thai_hien_tai = 1 THEN N'Chờ xác nhận'
                             WHEN trang_thai_hien_tai = 2 THEN N'Đã xác nhận đơn'
                             WHEN trang_thai_hien_tai = 3 THEN N'Đang chuẩn bị hàng'
                             WHEN trang_thai_hien_tai = 4 THEN N'Đang giao hàng'
@@ -40,6 +41,7 @@ public class HoaDonService {
         String sql = """
                 SELECT hd.*, nv.ten_nhan_vien,
                        CASE WHEN hd.trang_thai_hien_tai = 0 THEN N'Đơn chờ'
+                            WHEN hd.trang_thai_hien_tai = 1 THEN N'Chờ xác nhận'
                             WHEN hd.trang_thai_hien_tai = 2 THEN N'Đã xác nhận đơn'
                             WHEN hd.trang_thai_hien_tai = 3 THEN N'Đang chuẩn bị hàng'
                             WHEN hd.trang_thai_hien_tai = 4 THEN N'Đang giao hàng'

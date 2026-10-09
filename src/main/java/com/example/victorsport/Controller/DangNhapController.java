@@ -21,10 +21,19 @@ public class DangNhapController {
         this.dangNhapService = dangNhapService;
     }
 
-    @GetMapping({"/", "/login"})
-    public String hienThiTrangDangNhap(HttpSession phienDangNhap, HttpServletResponse phanHoi) {
+    @GetMapping("/login")
+    public String hienThiTrangDangNhap(HttpSession phienDangNhap, HttpServletResponse phanHoi,
+                                       @RequestParam(value = "quayLai", defaultValue = "pos") String quayLai,
+                                       Model model) {
         chongLuuCacheTrangDangNhap(phanHoi);
+        model.addAttribute("quayLai", "pos");
+        if ("tai-khoan".equals(quayLai)) {
+            model.addAttribute("quayLai", "tai-khoan");
+        }
         if (phienDangNhap.getAttribute(KHOA_NGUOI_DUNG_DANG_NHAP) instanceof NguoiDungDangNhap) {
+            if ("tai-khoan".equals(quayLai)) {
+                return "redirect:/tai-khoan";
+            }
             return "redirect:/pos";
         }
         return "login";
@@ -33,15 +42,22 @@ public class DangNhapController {
     @PostMapping("/login")
     public String dangNhap(@RequestParam("emailDangNhap") String email,
                            @RequestParam("matKhauDangNhap") String matKhau,
+                           @RequestParam(value = "quayLai", defaultValue = "pos") String quayLai,
                            HttpSession phienDangNhap,
                            RedirectAttributes thuocTinhChuyenHuong) {
         DangNhapService.KetQuaDangNhap ketQua = dangNhapService.dangNhap(email, matKhau);
         if (!ketQua.isThanhCong()) {
             thuocTinhChuyenHuong.addFlashAttribute("error", ketQua.getThongBao());
+            if ("tai-khoan".equals(quayLai)) {
+                return "redirect:/login?quayLai=tai-khoan";
+            }
             return "redirect:/login";
         }
 
         phienDangNhap.setAttribute(KHOA_NGUOI_DUNG_DANG_NHAP, ketQua.getNguoiDung());
+        if ("tai-khoan".equals(quayLai)) {
+            return "redirect:/tai-khoan";
+        }
         return "redirect:/pos";
     }
 
