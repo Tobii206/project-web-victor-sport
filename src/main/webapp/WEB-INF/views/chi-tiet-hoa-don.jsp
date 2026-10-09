@@ -32,6 +32,19 @@
                     <a class="button secondary" href="/quan-ly/hoa-don">Quay lại danh sách</a>
                 </div>
                 <div class="panel-body">
+                    <c:if test="${hoaDon.trang_thai_hien_tai == 0 and hoaDon.loai_don == 0 and hoaDon.id_nhan_vien == currentUser.id}">
+                        <div class="invoice-actions">
+                            <form method="post" action="/pos/don-cho/mo">
+                                <input type="hidden" name="idDonCho" value="${hoaDon.id}">
+                                <button class="button" type="submit">Tiếp tục bán</button>
+                            </form>
+                            <form method="post" action="/pos/don-cho/huy">
+                                <input type="hidden" name="idDonCho" value="${hoaDon.id}">
+                                <input type="hidden" name="quayLai" value="hoa-don">
+                                <button class="button danger" type="submit">Hủy đơn chờ</button>
+                            </form>
+                        </div>
+                    </c:if>
                     <div class="invoice-info">
                         <div>
                             <p><strong>Khách hàng:</strong> <c:out value="${hoaDon.ten_khach_hang}"/></p>

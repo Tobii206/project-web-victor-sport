@@ -13,12 +13,15 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.Objects;
 
 @Service
@@ -126,6 +129,44 @@ public class BanHangTaiQuayService {
                 ketQua.getString("ten_phuong_thuc_thanh_toan"),
                 ketQua.getString("nha_cung_cap")
         ));
+    }
+
+    public LuaChonKhachHang layKhachHang(Integer idKhachHang) {
+        List<LuaChonKhachHang> danhSach = jdbcTemplate.query("""
+                SELECT id, ma_khach_hang, ten_khach_hang, so_dien_thoai, email
+                FROM khach_hang
+                WHERE id = ? AND ISNULL(xoa_mem, 0) = 0 AND ISNULL(trang_thai, 1) = 1
+                """, (ketQua, soDong) -> new LuaChonKhachHang(
+                ketQua.getInt("id"), ketQua.getString("ma_khach_hang"), ketQua.getString("ten_khach_hang"),
+                ketQua.getString("so_dien_thoai"), ketQua.getString("email")
+        ), idKhachHang);
+        if (danhSach.isEmpty()) {
+            throw new IllegalArgumentException("Khách hàng không còn tồn tại hoặc đã ngừng hoạt động.");
+        }
+        return danhSach.get(0);
+    }
+
+    @Transactional
+    public Integer themKhachHangMoi(String ten, String soDienThoai, String email, Integer idNhanVien) {
+        ten = layGiaTriMacDinh(ten, "");
+        soDienThoai = layGiaTriMacDinh(soDienThoai, "");
+        email = layGiaTriMacDinh(email, "");
+        if (ten.isEmpty() || ten.length() > 100) {
+            throw new IllegalArgumentException("Vui lòng nhập tên khách hàng, tối đa 100 ký tự.");
+        }
+        if (!soDienThoai.isEmpty() && !soDienThoai.matches("0[0-9]{9}")) {
+            throw new IllegalArgumentException("Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0.");
+        }
+        if (!email.isEmpty() && (email.length() > 100 || !email.matches("[^\\s@]+@[^\\s@]+\\.[^\\s@]+"))) {
+            throw new IllegalArgumentException("Email không hợp lệ hoặc dài quá 100 ký tự.");
+        }
+        // Bảng khách hàng yêu cầu tài khoản và mật khẩu, tự tạo cho khách mua tại quầy.
+        String taiKhoan = "quay_" + UUID.randomUUID().toString().replace("-", "");
+        String matKhau = new BCryptPasswordEncoder().encode(UUID.randomUUID().toString());
+        return jdbcTemplate.queryForObject("""
+                INSERT INTO khach_hang (ten_khach_hang, ten_tai_khoan, mat_khau, so_dien_thoai, email, nguoi_tao)
+                OUTPUT INSERTED.id VALUES (?, ?, ?, ?, ?, ?)
+                """, Integer.class, ten, taiKhoan, matKhau, soDienThoai, email, idNhanVien);
     }
 
     public List<LuaChonPhieuGiamGia> layPhieuGiamGiaKhaDung(BigDecimal tamTinh) {
@@ -283,17 +324,35 @@ public class BanHangTaiQuayService {
 
     @Transactional
     public Integer thanhToan(GioHangTaiQuay gioHang, YeuCauThanhToan yeuCau, NguoiDungDangNhap nhanVien) {
+        return thanhToan(gioHang, yeuCau, nhanVien, null);
+    }
+
+    @Transactional
+    public Integer thanhToan(GioHangTaiQuay gioHang, YeuCauThanhToan yeuCau,
+                             NguoiDungDangNhap nhanVien, Integer idDonCho) {
         if (gioHang == null || gioHang.isRong()) {
             throw new IllegalArgumentException("Giỏ hàng đang trống.");
         }
+        if (idDonCho != null) {
+            kiemTraDonCho(idDonCho, nhanVien.getId());
+        }
 
         for (SanPhamTrongGio sanPham : gioHang.getDanhSachSanPham()) {
-            Integer soLuongTon = jdbcTemplate.queryForObject(
-                    "SELECT ISNULL(so_luong, 0) FROM chi_tiet_san_pham WHERE id = ?",
+            List<Integer> tonKho = jdbcTemplate.queryForList(
+                    """
+                    SELECT ISNULL(ct.so_luong, 0) FROM chi_tiet_san_pham ct WITH (UPDLOCK, HOLDLOCK)
+                    WHERE ct.id = ? AND ISNULL(ct.xoa_mem, 0) = 0 AND ISNULL(ct.trang_thai, 1) = 1
+                      AND EXISTS (SELECT 1 FROM san_pham sp WHERE sp.id = ct.id_san_pham
+                          AND ISNULL(sp.xoa_mem, 0) = 0 AND ISNULL(sp.trang_thai_kinh_doanh, 1) = 1)
+                    """,
                     Integer.class,
                     sanPham.getIdChiTietSanPham()
             );
-            if (soLuongTon == null || sanPham.getSoLuongMua() > soLuongTon) {
+            if (tonKho.isEmpty()) {
+                throw new IllegalArgumentException("Sản phẩm " + sanPham.getTenSanPham() + " không còn được bán.");
+            }
+            Integer soLuongTon = tonKho.get(0);
+            if (soLuongTon == null || sanPham.getSoLuongMua() <= 0 || sanPham.getSoLuongMua() > soLuongTon) {
                 throw new IllegalArgumentException("Sản phẩm " + sanPham.getTenSanPham() + " không đủ tồn kho.");
             }
         }
@@ -303,31 +362,42 @@ public class BanHangTaiQuayService {
         ThongTinKhachHang thongTinKhachHang = layThongTinKhachHang(idKhachHang, yeuCau);
         Integer idPhuongThucThanhToan = yeuCau.getIdPhuongThucThanhToan() == null ? 1 : yeuCau.getIdPhuongThucThanhToan();
 
-        KeyHolder khoaTuTang = new GeneratedKeyHolder();
-        jdbcTemplate.update(ketNoi -> {
-            PreparedStatement cauLenh = ketNoi.prepareStatement("""
-                    INSERT INTO hoa_don (
-                        id_khach_hang, id_nhan_vien, id_phieu_giam_gia, loai_don, phi_van_chuyen,
-                        tong_tien, tong_tien_sau_giam, ten_khach_hang, dia_chi_khach_hang,
-                        so_dien_thoai_khach_hang, email_khach_hang, trang_thai_hien_tai,
-                        ngay_thanh_toan, ghi_chu, nguoi_tao
-                    ) VALUES (?, ?, ?, 0, 0, ?, ?, ?, ?, ?, ?, 5, SYSDATETIME(), ?, ?)
-                    """, Statement.RETURN_GENERATED_KEYS);
-            ganSoNguyenCoTheNull(cauLenh, 1, idKhachHang);
-            cauLenh.setInt(2, nhanVien.getId());
-            ganSoNguyenCoTheNull(cauLenh, 3, tongKet.getIdPhieuGiamGia());
-            cauLenh.setBigDecimal(4, tongKet.getTamTinh());
-            cauLenh.setBigDecimal(5, tongKet.getTongThanhToan());
-            cauLenh.setString(6, thongTinKhachHang.getTenKhachHang());
-            cauLenh.setString(7, thongTinKhachHang.getDiaChi());
-            cauLenh.setString(8, thongTinKhachHang.getSoDienThoai());
-            cauLenh.setString(9, thongTinKhachHang.getEmail());
-            cauLenh.setString(10, yeuCau.getGhiChu());
-            cauLenh.setInt(11, nhanVien.getId());
-            return cauLenh;
-        }, khoaTuTang);
+        Integer idHoaDon;
+        if (idDonCho != null) {
+            idHoaDon = idDonCho;
+            capNhatThongTinDonCho(idHoaDon, yeuCau, tongKet);
+            jdbcTemplate.update("""
+                    UPDATE hoa_don SET trang_thai_hien_tai = 5, ngay_thanh_toan = SYSDATETIME()
+                    WHERE id = ?
+                    """, idHoaDon);
+            jdbcTemplate.update("DELETE FROM hoa_don_chi_tiet WHERE id_hoa_don = ?", idHoaDon);
+        } else {
+            KeyHolder khoaTuTang = new GeneratedKeyHolder();
+            jdbcTemplate.update(ketNoi -> {
+                PreparedStatement cauLenh = ketNoi.prepareStatement("""
+                        INSERT INTO hoa_don (
+                            id_khach_hang, id_nhan_vien, id_phieu_giam_gia, loai_don, phi_van_chuyen,
+                            tong_tien, tong_tien_sau_giam, ten_khach_hang, dia_chi_khach_hang,
+                            so_dien_thoai_khach_hang, email_khach_hang, trang_thai_hien_tai,
+                            ngay_thanh_toan, ghi_chu, nguoi_tao
+                        ) VALUES (?, ?, ?, 0, 0, ?, ?, ?, ?, ?, ?, 5, SYSDATETIME(), ?, ?)
+                        """, Statement.RETURN_GENERATED_KEYS);
+                ganSoNguyenCoTheNull(cauLenh, 1, idKhachHang);
+                cauLenh.setInt(2, nhanVien.getId());
+                ganSoNguyenCoTheNull(cauLenh, 3, tongKet.getIdPhieuGiamGia());
+                cauLenh.setBigDecimal(4, tongKet.getTamTinh());
+                cauLenh.setBigDecimal(5, tongKet.getTongThanhToan());
+                cauLenh.setString(6, thongTinKhachHang.getTenKhachHang());
+                cauLenh.setString(7, thongTinKhachHang.getDiaChi());
+                cauLenh.setString(8, thongTinKhachHang.getSoDienThoai());
+                cauLenh.setString(9, thongTinKhachHang.getEmail());
+                cauLenh.setString(10, yeuCau.getGhiChu());
+                cauLenh.setInt(11, nhanVien.getId());
+                return cauLenh;
+            }, khoaTuTang);
 
-        Integer idHoaDon = Objects.requireNonNull(khoaTuTang.getKey()).intValue();
+            idHoaDon = Objects.requireNonNull(khoaTuTang.getKey()).intValue();
+        }
         for (SanPhamTrongGio sanPham : gioHang.getDanhSachSanPham()) {
             jdbcTemplate.update("""
                     INSERT INTO hoa_don_chi_tiet (id_hoa_don, id_chi_tiet_san_pham, so_luong, don_gia, ghi_chu)
@@ -355,14 +425,133 @@ public class BanHangTaiQuayService {
                 """, idHoaDon, "Hoàn tất bán hàng tại quầy", nhanVien.getId(), nhanVien.getId());
 
         if (tongKet.getIdPhieuGiamGia() != null) {
-            jdbcTemplate.update("""
+            int soPhieuCapNhat = jdbcTemplate.update("""
                     UPDATE phieu_giam_gia
                     SET so_luong_su_dung = so_luong_su_dung - 1
                     WHERE id = ? AND so_luong_su_dung > 0
                     """, tongKet.getIdPhieuGiamGia());
+            if (soPhieuCapNhat == 0) {
+                throw new IllegalArgumentException("Phiếu giảm giá đã hết lượt sử dụng. Vui lòng chọn lại phiếu.");
+            }
         }
 
         return idHoaDon;
+    }
+
+    public List<Map<String, Object>> layDanhSachDonCho(Integer idNhanVien) {
+        return jdbcTemplate.queryForList("""
+                SELECT id, ma_hoa_don, ten_khach_hang, tong_tien_sau_giam, ngay_tao
+                FROM hoa_don
+                WHERE id_nhan_vien = ? AND trang_thai_hien_tai = 0
+                  AND loai_don = 0 AND ISNULL(xoa_mem, 0) = 0
+                ORDER BY id DESC
+                """, idNhanVien);
+    }
+
+    public Map<String, Object> layDonCho(Integer idDonCho, Integer idNhanVien) {
+        List<Map<String, Object>> danhSach = jdbcTemplate.queryForList("""
+                SELECT * FROM hoa_don
+                WHERE id = ? AND id_nhan_vien = ? AND trang_thai_hien_tai = 0
+                  AND loai_don = 0 AND ISNULL(xoa_mem, 0) = 0
+                """, idDonCho, idNhanVien);
+        if (danhSach.isEmpty()) {
+            throw new IllegalArgumentException("Đơn chờ không còn tồn tại hoặc không thuộc nhân viên này.");
+        }
+        return danhSach.get(0);
+    }
+
+    public GioHangTaiQuay layGioHangDonCho(Integer idDonCho, Integer idNhanVien) {
+        layDonCho(idDonCho, idNhanVien);
+        List<SanPhamTrongGio> danhSach = jdbcTemplate.query("""
+                SELECT ct.id, sp.ma_san_pham, sp.ten_san_pham, ms.ten_mau_sac, kt.ten_kich_thuoc,
+                       hdct.so_luong, ISNULL(ct.so_luong, 0) AS so_luong_ton, hdct.don_gia
+                FROM hoa_don_chi_tiet hdct
+                JOIN chi_tiet_san_pham ct ON ct.id = hdct.id_chi_tiet_san_pham
+                JOIN san_pham sp ON sp.id = ct.id_san_pham
+                JOIN mau_sac ms ON ms.id = ct.id_mau_sac
+                JOIN kich_thuoc kt ON kt.id = ct.id_kich_thuoc
+                WHERE hdct.id_hoa_don = ? AND ISNULL(hdct.xoa_mem, 0) = 0
+                ORDER BY hdct.id
+                """, (ketQua, soDong) -> new SanPhamTrongGio(
+                ketQua.getInt("id"), ketQua.getString("ma_san_pham"), ketQua.getString("ten_san_pham"),
+                ketQua.getString("ten_mau_sac"), ketQua.getString("ten_kich_thuoc"),
+                ketQua.getInt("so_luong"), ketQua.getInt("so_luong_ton"), ketQua.getBigDecimal("don_gia")
+        ), idDonCho);
+        GioHangTaiQuay gioHang = new GioHangTaiQuay();
+        gioHang.getDanhSachSanPham().addAll(danhSach);
+        return gioHang;
+    }
+
+    @Transactional
+    public Integer luuDonCho(GioHangTaiQuay gioHang, YeuCauThanhToan yeuCau,
+                            NguoiDungDangNhap nhanVien, Integer idDonCho) {
+        if (idDonCho == null) {
+            // Khóa dòng nhân viên để hai lần tạo cùng lúc không vượt quá 10 đơn.
+            jdbcTemplate.queryForObject("SELECT id FROM nhan_vien WITH (UPDLOCK, HOLDLOCK) WHERE id = ?",
+                    Integer.class, nhanVien.getId());
+            Integer soDonCho = jdbcTemplate.queryForObject("""
+                    SELECT COUNT(*) FROM hoa_don
+                    WHERE id_nhan_vien = ? AND trang_thai_hien_tai = 0
+                      AND loai_don = 0 AND ISNULL(xoa_mem, 0) = 0
+                    """, Integer.class, nhanVien.getId());
+            if (soDonCho != null && soDonCho >= 10) {
+                throw new IllegalArgumentException("Mỗi nhân viên chỉ được có tối đa 10 đơn chờ. Hãy thanh toán hoặc hủy bớt đơn.");
+            }
+            idDonCho = jdbcTemplate.queryForObject("""
+                    INSERT INTO hoa_don (id_nhan_vien, loai_don, tong_tien, tong_tien_sau_giam,
+                        ten_khach_hang, dia_chi_khach_hang, so_dien_thoai_khach_hang,
+                        trang_thai_hien_tai, nguoi_tao)
+                    OUTPUT INSERTED.id
+                    VALUES (?, 0, 0, 0, N'Khách vãng lai', N'Mua trực tiếp tại cửa hàng Victor Sport', '', 0, ?)
+                    """, Integer.class, nhanVien.getId(), nhanVien.getId());
+        } else {
+            kiemTraDonCho(idDonCho, nhanVien.getId());
+        }
+        TongKetBanHang tongKet = tinhTongKet(gioHang, yeuCau.getIdPhieuGiamGia());
+        capNhatThongTinDonCho(idDonCho, yeuCau, tongKet);
+        jdbcTemplate.update("DELETE FROM hoa_don_chi_tiet WHERE id_hoa_don = ?", idDonCho);
+        for (SanPhamTrongGio sanPham : gioHang.getDanhSachSanPham()) {
+            if (sanPham.getSoLuongMua() <= 0) {
+                throw new IllegalArgumentException("Số lượng sản phẩm phải lớn hơn 0.");
+            }
+            jdbcTemplate.update("""
+                    INSERT INTO hoa_don_chi_tiet (id_hoa_don, id_chi_tiet_san_pham, so_luong, don_gia, ghi_chu)
+                    VALUES (?, ?, ?, ?, ?)
+                    """, idDonCho, sanPham.getIdChiTietSanPham(), sanPham.getSoLuongMua(), sanPham.getDonGia(), "Đơn chờ tại quầy");
+        }
+        return idDonCho;
+    }
+
+    private void capNhatThongTinDonCho(Integer idDonCho, YeuCauThanhToan yeuCau, TongKetBanHang tongKet) {
+        ThongTinKhachHang khachHang = layThongTinKhachHang(yeuCau.getIdKhachHang(), yeuCau);
+        jdbcTemplate.update("""
+                UPDATE hoa_don SET id_khach_hang = ?, id_phieu_giam_gia = ?, tong_tien = ?,
+                    tong_tien_sau_giam = ?, ten_khach_hang = ?, dia_chi_khach_hang = ?,
+                    so_dien_thoai_khach_hang = ?, email_khach_hang = ?, ghi_chu = ?, ngay_cap_nhat = SYSDATETIME()
+                WHERE id = ?
+                """, yeuCau.getIdKhachHang(), tongKet.getIdPhieuGiamGia(), tongKet.getTamTinh(),
+                tongKet.getTongThanhToan(), khachHang.getTenKhachHang(), khachHang.getDiaChi(),
+                khachHang.getSoDienThoai(), khachHang.getEmail(), yeuCau.getGhiChu(), idDonCho);
+    }
+
+    private void kiemTraDonCho(Integer idDonCho, Integer idNhanVien) {
+        List<Map<String, Object>> danhSach = jdbcTemplate.queryForList("""
+                SELECT id FROM hoa_don WITH (UPDLOCK, HOLDLOCK)
+                WHERE id = ? AND id_nhan_vien = ? AND trang_thai_hien_tai = 0
+                  AND loai_don = 0 AND ISNULL(xoa_mem, 0) = 0
+                """, idDonCho, idNhanVien);
+        if (danhSach.isEmpty()) {
+            throw new IllegalArgumentException("Đơn chờ không còn tồn tại hoặc không thuộc nhân viên này.");
+        }
+    }
+
+    @Transactional
+    public void huyDonCho(Integer idDonCho, Integer idNhanVien) {
+        kiemTraDonCho(idDonCho, idNhanVien);
+        jdbcTemplate.update("DELETE FROM lich_su_hoa_don WHERE id_hoa_don = ?", idDonCho);
+        jdbcTemplate.update("DELETE FROM giao_dich_thanh_toan WHERE id_hoa_don = ?", idDonCho);
+        jdbcTemplate.update("DELETE FROM hoa_don_chi_tiet WHERE id_hoa_don = ?", idDonCho);
+        jdbcTemplate.update("DELETE FROM hoa_don WHERE id = ?", idDonCho);
     }
 
     private ThongTinKhachHang layThongTinKhachHang(Integer idKhachHang, YeuCauThanhToan yeuCau) {

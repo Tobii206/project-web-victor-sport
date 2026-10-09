@@ -35,6 +35,9 @@
                     <c:if test="${not empty error}">
                         <div class="alert error"><c:out value="${error}"/></div>
                     </c:if>
+                    <c:if test="${not empty success}">
+                        <div class="alert success"><c:out value="${success}"/></div>
+                    </c:if>
                     <form class="search-row" method="get" action="/quan-ly/hoa-don">
                         <input class="input" name="tuKhoa" value="<c:out value='${tuKhoa}'/>"
                                placeholder="Tìm mã hóa đơn, tên khách hàng, số điện thoại" aria-label="Tìm hóa đơn">
@@ -67,7 +70,20 @@
                                     <td><fmt:formatDate value="${hd.ngay_tao}" pattern="dd/MM/yyyy HH:mm"/></td>
                                     <td class="money"><fmt:formatNumber value="${hd.tong_tien_sau_giam}" groupingUsed="true"/> đ</td>
                                     <td><c:out value="${hd.ten_trang_thai}"/></td>
-                                    <td><a class="button secondary" href="/quan-ly/hoa-don/${hd.id}">Xem chi tiết</a></td>
+                                    <td><div class="invoice-actions">
+                                        <a class="button secondary" href="/quan-ly/hoa-don/${hd.id}">Xem chi tiết</a>
+                                        <c:if test="${hd.trang_thai_hien_tai == 0 and hd.loai_don == 0 and hd.id_nhan_vien == currentUser.id}">
+                                            <form method="post" action="/pos/don-cho/mo">
+                                                <input type="hidden" name="idDonCho" value="${hd.id}">
+                                                <button class="button" type="submit">Tiếp tục bán</button>
+                                            </form>
+                                            <form method="post" action="/pos/don-cho/huy">
+                                                <input type="hidden" name="idDonCho" value="${hd.id}">
+                                                <input type="hidden" name="quayLai" value="hoa-don">
+                                                <button class="button danger" type="submit">Hủy đơn chờ</button>
+                                            </form>
+                                        </c:if>
+                                    </div></td>
                                 </tr>
                             </c:forEach>
                             <c:if test="${empty danhSachHoaDon}">

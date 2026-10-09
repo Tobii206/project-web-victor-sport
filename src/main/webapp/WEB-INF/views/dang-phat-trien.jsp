@@ -26,7 +26,7 @@
         <main class="content-layout">
             <section class="panel">
                 <div class="panel-header">
-                    <h2>Đang phát triển</h2>
+                   
                 </div>
                 <div class="panel-body placeholder-blank"></div>
             </section>

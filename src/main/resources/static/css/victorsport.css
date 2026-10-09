@@ -227,6 +227,29 @@ a {
     overflow-wrap: anywhere;
 }
 
+.invoice-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.customer-dialog {
+    width: min(440px, 90vw);
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 24px;
+    color: #172033;
+}
+
+.customer-dialog h2 {
+    margin: 0 0 20px;
+    font-size: 20px;
+}
+
+.customer-dialog::backdrop {
+    background: rgba(15, 23, 42, 0.45);
+}
+
 .panel {
     border: 1px solid #e2e8f0;
     border-radius: 8px;

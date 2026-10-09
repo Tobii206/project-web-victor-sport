@@ -26,6 +26,44 @@
         </div>
     </header>
 
+    <section class="content-layout">
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Đơn chờ của bạn (${soDonCho}/10)</h2>
+                <a class="button secondary" href="/quan-ly/hoa-don">Quản lý hóa đơn</a>
+            </div>
+            <div class="panel-body">
+                <div class="muted">Tạo hoặc lưu đơn chờ bằng nút bên dưới thông tin khách hàng. Đơn chờ chưa trừ tồn kho.</div>
+                <div class="invoice-table">
+                    <table class="table">
+                        <thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Tạm tính sau giảm</th><th>Thao tác</th></tr></thead>
+                        <tbody>
+                        <c:forEach items="${danhSachDonCho}" var="don">
+                            <tr>
+                                <td><c:out value="${don.ma_hoa_don}"/></td>
+                                <td><c:out value="${don.ten_khach_hang}"/></td>
+                                <td class="money"><fmt:formatNumber value="${don.tong_tien_sau_giam}" groupingUsed="true"/> đ</td>
+                                <td><div class="invoice-actions">
+                                    <form method="post" action="/pos/don-cho/mo">
+                                        <input type="hidden" name="idDonCho" value="${don.id}">
+                                        <button class="button secondary" type="submit">
+                                            <c:choose><c:when test="${don.id == donChoDangChon.id}">Đang chọn</c:when><c:otherwise>Tiếp tục bán</c:otherwise></c:choose>
+                                        </button>
+                                    </form>
+                                    <form method="post" action="/pos/don-cho/huy">
+                                        <input type="hidden" name="idDonCho" value="${don.id}">
+                                        <button class="button danger" type="submit">Hủy đơn chờ</button>
+                                    </form>
+                                </div></td>
+                            </tr>
+                        </c:forEach>
+                        <c:if test="${empty danhSachDonCho}"><tr><td colspan="4" class="muted">Chưa có đơn chờ.</td></tr></c:if>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
     <main class="pos-layout">
         <section class="panel">
             <div class="panel-header">
@@ -85,7 +123,7 @@
 
         <aside class="panel">
             <div class="panel-header">
-                <h2>Giỏ bán hàng</h2>
+                <h2>Giỏ bán hàng <c:if test="${not empty donChoDangChon}">- <c:out value="${donChoDangChon.ma_hoa_don}"/></c:if></h2>
                 <form method="post" action="/pos/cart/clear">
                     <button class="button secondary" type="submit">Làm mới</button>
                 </form>
@@ -102,6 +140,7 @@
                                 <form method="post" action="/pos/cart/update">
                                     <input type="hidden" name="detailId" value="${item.idChiTietSanPham}">
                                     <input class="input qty-input" type="number" name="quantity" min="0" max="${item.soLuongTon}" value="${item.soLuongMua}">
+                                    <button class="button secondary" type="submit">Cập nhật</button>
                                 </form>
                                 <div class="money"><fmt:formatNumber value="${item.thanhTien}" type="number" groupingUsed="true"/> đ</div>
                                 <form method="post" action="/pos/cart/remove">
@@ -155,28 +194,26 @@
                     </div>
                 </form>
 
-                <form class="checkout-grid" method="post" action="/pos/checkout">
+                <form class="checkout-grid" method="post" action="/pos/khach-hang/chon">
                     <div class="field">
                         <label for="customerId">Khách quen</label>
-                        <select class="select" id="customerId" name="customerId">
+                        <select class="select" id="customerId" name="customerId" onchange="this.form.submit()">
                             <option value="">Khách vãng lai</option>
+                            <c:if test="${not empty khachHangDangChon}">
+                                <option value="${khachHangDangChon.id}" selected><c:out value="${khachHangDangChon.maKhachHang}"/> - <c:out value="${khachHangDangChon.tenKhachHang}"/></option>
+                            </c:if>
                             <c:forEach items="${customers}" var="customer">
+                                <c:if test="${customer.id != khachHangDangChon.id}">
                                 <option value="${customer.id}">${customer.maKhachHang} - ${customer.tenKhachHang} - ${customer.soDienThoai}</option>
+                                </c:if>
                             </c:forEach>
                         </select>
                     </div>
-                    <div class="field">
-                        <label for="customerName">Tên khách vãng lai</label>
-                        <input class="input" id="customerName" name="customerName" placeholder="Khách vãng lai">
-                    </div>
-                    <div class="field">
-                        <label for="customerPhone">Số điện thoại</label>
-                        <input class="input" id="customerPhone" name="customerPhone" placeholder="Có thể để trống">
-                    </div>
-                    <div class="field">
-                        <label for="customerEmail">Email</label>
-                        <input class="input" id="customerEmail" name="customerEmail" placeholder="Có thể để trống">
-                    </div>
+                    <button class="button secondary" type="button" onclick="document.getElementById('themKhachHang').showModal()">Thêm khách hàng mới</button>
+                </form>
+                <form class="checkout-grid" method="post" action="/pos/checkout">
+                    <input type="hidden" name="customerId" value="${khachHangDangChon.id}">
+                    <input type="hidden" name="customerAddress" value="<c:out value='${donChoDangChon.dia_chi_khach_hang}'/>">
                     <div class="field">
                         <label for="paymentMethodId">Phương thức thanh toán</label>
                         <select class="select" id="paymentMethodId" name="paymentMethodId">
@@ -187,14 +224,45 @@
                     </div>
                     <div class="field">
                         <label for="note">Ghi chú</label>
-                        <textarea class="textarea" id="note" name="note"></textarea>
+                        <textarea class="textarea" id="note" name="note"><c:out value="${donChoDangChon.ghi_chu}"/></textarea>
                     </div>
-                    <button class="button full" type="submit" <c:if test="${cart.rong}">disabled</c:if>>Thanh toán và tạo hóa đơn</button>
+                    <button class="button secondary full" type="submit" name="hanhDong" value="luu-don-cho"
+                            <c:if test="${donChoDaMat or (empty donChoDangChon and soDonCho >= 10)}">disabled</c:if>>
+                        <c:choose><c:when test="${not empty donChoDangChon}">Lưu đơn chờ</c:when><c:otherwise>Tạo đơn chờ</c:otherwise></c:choose>
+                    </button>
+                    <button class="button full" type="submit" name="hanhDong" value="thanh-toan" <c:if test="${cart.rong or donChoDaMat}">disabled</c:if>>Thanh toán và tạo hóa đơn</button>
                 </form>
             </div>
         </aside>
     </main>
     </div>
 </div>
+<dialog id="themKhachHang" class="customer-dialog">
+    <h2>Thêm khách hàng mới</h2>
+    <c:if test="${not empty loiThemKhachHang}">
+        <div class="alert error"><c:out value="${loiThemKhachHang}"/></div>
+    </c:if>
+    <form method="post" action="/pos/khach-hang/them">
+        <div class="field">
+            <label for="tenKhachHangMoi">Tên khách hàng</label>
+            <input class="input" id="tenKhachHangMoi" name="tenKhachHangMoi" maxlength="100" required value="<c:out value='${tenMoi}'/>">
+        </div>
+        <div class="field">
+            <label for="soDienThoaiMoi">Số điện thoại</label>
+            <input class="input" id="soDienThoaiMoi" name="soDienThoaiMoi" type="tel" maxlength="10" pattern="0[0-9]{9}" placeholder="Có thể để trống" value="<c:out value='${soDienThoaiMoi}'/>">
+        </div>
+        <div class="field">
+            <label for="emailMoi">Email</label>
+            <input class="input" id="emailMoi" name="emailMoi" type="email" maxlength="100" placeholder="Có thể để trống" value="<c:out value='${emailMoi}'/>">
+        </div>
+        <div class="invoice-actions">
+            <button class="button" type="submit">Lưu khách hàng</button>
+            <button class="button secondary" type="button" onclick="document.getElementById('themKhachHang').close()">Đóng</button>
+        </div>
+    </form>
+</dialog>
+<c:if test="${not empty loiThemKhachHang}">
+    <script>document.getElementById('themKhachHang').showModal();</script>
+</c:if>
 </body>
 </html>
