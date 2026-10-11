@@ -19,6 +19,14 @@ public class DangNhapService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    public boolean laTaiKhoanNhanVien(String taiKhoan) {
+        if (taiKhoan == null || taiKhoan.isBlank()) { return false; }
+        Integer soTaiKhoan = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM nhan_vien WHERE LOWER(email) = ?",
+                Integer.class, taiKhoan.trim().toLowerCase(java.util.Locale.ROOT));
+        return soTaiKhoan != null && soTaiKhoan > 0;
+    }
+
     // Chỉ xử lý một lần đăng nhập để đếm số lần sai chính xác.
     public synchronized KetQuaDangNhap dangNhap(String email, String matKhau) {
         String emailChuanHoa = "";
@@ -39,6 +47,8 @@ public class DangNhapService {
 
         NguoiDungDangNhap nguoiDung = timNhanVienTheoEmailVaMatKhau(emailChuanHoa, matKhau);
         if (nguoiDung != null) {
+            nguoiDung = new PhanQuyenService(jdbcTemplate).layQuyen(nguoiDung.getId());
+            if (nguoiDung == null) return KetQuaDangNhap.thatBai("Tài khoản hoặc quyền không còn hoạt động.");
             soLanDangNhapSai.remove(emailChuanHoa);
             return KetQuaDangNhap.thanhCong(nguoiDung);
         }
@@ -61,6 +71,7 @@ public class DangNhapService {
                   AND nv.mat_khau = ?
                   AND ISNULL(nv.trang_thai, 1) = 1
                   AND ISNULL(nv.xoa_mem, 0) = 0
+                  AND ISNULL(qh.trang_thai, 1) = 1 AND ISNULL(qh.xoa_mem, 0) = 0
                 """;
         List<NguoiDungDangNhap> danhSach = jdbcTemplate.query(cauLenhSql, (ketQua, soDong) -> new NguoiDungDangNhap(
                 ketQua.getInt("id"),

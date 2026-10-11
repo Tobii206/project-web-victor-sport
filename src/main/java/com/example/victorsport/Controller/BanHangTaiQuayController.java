@@ -127,7 +127,7 @@ public class BanHangTaiQuayController {
             thuocTinhChuyenHuong.addFlashAttribute("success", "Đã chọn chế độ tự động áp dụng phiếu tốt nhất.");
         } else {
             phienDangNhap.setAttribute(KHOA_PHIEU_GIAM_GIA, idPhieuGiamGia);
-            thuocTinhChuyenHuong.addFlashAttribute("success", "Đã chọn phiếu giảm giá thủ công.");
+            thuocTinhChuyenHuong.addFlashAttribute("success", "Đã chọn phiếu giảm giá");
         }
         return "redirect:/pos";
     }

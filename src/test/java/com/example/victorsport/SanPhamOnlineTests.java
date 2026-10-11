@@ -19,6 +19,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class SanPhamOnlineTests {
     @Test
+    void taiLaiTrangChiXoaGioKhachChuaDangNhapVaKhongGhiDatabase() throws Exception {
+        SanPhamOnlineService service = mock(SanPhamOnlineService.class);
+        MockMvc mvc = trang(service);
+        MockHttpSession khach = new MockHttpSession();
+        khach.setAttribute("gioHangOnline", new HashMap<>(Map.of(9, 2)));
+        khach.setAttribute("muaNgayOnline", new HashMap<>(Map.of(20, 1)));
+        khach.setAttribute("duLieuKhac", "Giữ nguyên");
+        mvc.perform(post("/gio-hang/xoa-khi-tai-lai").session(khach)).andExpect(status().isNoContent());
+        assertNull(khach.getAttribute("gioHangOnline"));
+        assertNull(khach.getAttribute("muaNgayOnline"));
+        assertEquals("Giữ nguyên", khach.getAttribute("duLieuKhac"));
+        for (String khoaTaiKhoan : new String[]{"khachHangOnlineDangNhap", "nguoiDungDangNhap"}) {
+            MockHttpSession dangNhap = new MockHttpSession();
+            dangNhap.setAttribute(khoaTaiKhoan, 1);
+            dangNhap.setAttribute("gioHangOnline", new HashMap<>(Map.of(9, 2)));
+            mvc.perform(post("/gio-hang/xoa-khi-tai-lai").session(dangNhap)).andExpect(status().isNoContent());
+            assertEquals(Map.of(9, 2), dangNhap.getAttribute("gioHangOnline"));
+        }
+        verifyNoInteractions(service);
+    }
+
+    @Test
     void khongDuocChonPhienBanCuaSanPhamKhac() throws Exception {
         SanPhamOnlineService service = mock(SanPhamOnlineService.class);
         when(service.layPhienBanTheoId(9)).thenReturn(Map.of("id_san_pham", 2));

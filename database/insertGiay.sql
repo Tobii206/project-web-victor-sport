@@ -69,8 +69,7 @@ INSERT INTO chat_lieu (ten_chat_lieu) VALUES
 
 INSERT INTO quyen_han (ten_quyen_han) VALUES
 (N'Quản trị viên'),
-(N'Nhân viên bán hàng'),
-(N'Nhân viên kho');
+(N'Nhân viên');
 
 INSERT INTO nhan_vien (
     id_quyen_han, ten_nhan_vien, mat_khau, email, so_dien_thoai,
@@ -79,7 +78,7 @@ INSERT INTO nhan_vien (
 (1, N'Nguyễn Minh Quân', '123456', 'admin.victorsport@gmail.com', '0900000001', '1998-02-12', N'Hà Nội', N'Cầu Giấy', N'Dịch Vọng', N'12 Xuân Thủy'),
 (1, N'Nguyễn Thành Long', '123456', 'thlong080306@gmail.com', '0900000806', '2006-03-08', N'Hà Nội', N'Cầu Giấy', N'Dịch Vọng', N'Victor Sport'),
 (2, N'Lê Thanh Huyền', '123456', 'huyen.victorsport@gmail.com', '0900000002', '2000-07-21', N'Hà Nội', N'Nam Từ Liêm', N'Mỹ Đình 1', N'25 Lê Đức Thọ'),
-(3, N'Trần Đức Anh', '123456', 'anh.victorsport@gmail.com', '0900000003', '1999-11-04', N'Hà Nội', N'Thanh Xuân', N'Nhân Chính', N'88 Nguyễn Trãi');
+(2, N'Trần Đức Anh', '123456', 'anh.victorsport@gmail.com', '0900000003', '1999-11-04', N'Hà Nội', N'Thanh Xuân', N'Nhân Chính', N'88 Nguyễn Trãi');
 
 INSERT INTO khach_hang (
     ten_khach_hang, ten_tai_khoan, mat_khau, email, so_dien_thoai,
@@ -114,34 +113,45 @@ INSERT INTO san_pham (
 (2, 2, 6, 6, 1, 1, N'Adidas Samba OG Black White', N'Sneaker thể thao cổ điển.', N'Form thấp, đế gum, phong cách lifestyle nhưng vẫn giữ tinh thần thể thao.');
 
 INSERT INTO chi_tiet_san_pham (
-    id_san_pham, id_mau_sac, id_kich_thuoc, id_form_chan, so_luong, gia_niem_yet, gia_ban, ghi_chu
+    id_san_pham, id_mau_sac, id_kich_thuoc, id_form_chan, so_luong, gia_ban, ghi_chu
 ) VALUES
-(1, 6, 3, 1, 18, 2190000, 1990000, N'Vàng neon size 40'),
-(1, 2, 4, 1, 15, 2190000, 1990000, N'Đen size 41'),
-(2, 2, 4, 2, 12, 2390000, 2190000, N'Đen size 41'),
-(2, 1, 5, 2, 10, 2390000, 2190000, N'Trắng size 42'),
-(3, 3, 3, 1, 11, 1990000, 1790000, N'Đỏ size 40'),
-(3, 4, 4, 1, 9, 1990000, 1790000, N'Xanh size 41'),
-(4, 1, 3, 2, 8, 3290000, 2990000, N'Trắng size 40'),
-(4, 2, 5, 2, 6, 3290000, 2990000, N'Đen size 42'),
-(5, 5, 4, 3, 14, 4390000, 3990000, N'Xám size 41'),
-(6, 4, 4, 2, 20, 3490000, 3190000, N'Xanh size 41'),
-(7, 1, 3, 2, 16, 2890000, 2590000, N'Trắng size 40'),
-(8, 2, 2, 2, 13, 2790000, 2490000, N'Đen size 39');
+(1, 6, 3, 1, 18, 1990000, N'Vàng neon size 40'),
+(1, 2, 4, 1, 15, 1990000, N'Đen size 41'),
+(2, 2, 4, 2, 12, 2190000, N'Đen size 41'),
+(2, 1, 5, 2, 10, 2190000, N'Trắng size 42'),
+(3, 3, 3, 1, 11, 1790000, N'Đỏ size 40'),
+(3, 4, 4, 1, 9, 1790000, N'Xanh size 41'),
+(4, 1, 3, 2, 8, 2990000, N'Trắng size 40'),
+(4, 2, 5, 2, 6, 2990000, N'Đen size 42'),
+(5, 5, 4, 3, 14, 3990000, N'Xám size 41'),
+(6, 4, 4, 2, 20, 3190000, N'Xanh size 41'),
+(7, 1, 3, 2, 16, 2590000, N'Trắng size 40'),
+(8, 2, 2, 2, 13, 2490000, N'Đen size 39');
 
 INSERT INTO anh_chi_tiet_san_pham (id_chi_tiet_san_pham, duong_dan_anh, la_anh_dai_dien, mo_ta) VALUES
-(1, 'images/products/nike-mercurial-vapor-15-tf-neon.jpg', 1, N'Nike Mercurial Vapor 15 Academy TF vàng neon'),
-(2, 'images/products/nike-mercurial-vapor-15-tf-black.jpg', 1, N'Nike Mercurial Vapor 15 Academy TF đen'),
-(3, 'images/products/adidas-predator-accuracy-tf-black.jpg', 1, N'Adidas Predator Accuracy.3 TF đen'),
-(4, 'images/products/adidas-predator-accuracy-tf-white.jpg', 1, N'Adidas Predator Accuracy.3 TF trắng'),
-(5, 'images/products/puma-future-match-tt-red.jpg', 1, N'Puma Future Match TT đỏ'),
-(6, 'images/products/puma-future-match-tt-blue.jpg', 1, N'Puma Future Match TT xanh'),
-(7, 'images/products/mizuno-morelia-neo-iv-white.jpg', 1, N'Mizuno Morelia Neo IV Pro AS trắng'),
-(8, 'images/products/mizuno-morelia-neo-iv-black.jpg', 1, N'Mizuno Morelia Neo IV Pro AS đen'),
-(9, 'images/products/asics-gel-kayano-30-grey.jpg', 1, N'Asics Gel-Kayano 30 xám'),
-(10, 'images/products/nike-pegasus-40-blue.jpg', 1, N'Nike Air Zoom Pegasus 40 xanh'),
-(11, 'images/products/new-balance-550-white-green.jpg', 1, N'New Balance 550 White Green'),
-(12, 'images/products/adidas-samba-og-black-white.jpg', 1, N'Adidas Samba OG Black White');
+(1, '/images/products/nike-mercurial-vapor-15-1.png', 1, N'Nike Mercurial Vapor 15 Academy TF vàng neon'),
+(2, '/images/products/nike-mercurial-vapor-15-1.png', 1, N'Nike Mercurial Vapor 15 Academy TF đen'),
+(3, '/images/products/adidas-predator-accuracy-3-1.png', 1, N'Adidas Predator Accuracy.3 TF đen'),
+(4, '/images/products/adidas-predator-accuracy-3-1.png', 1, N'Adidas Predator Accuracy.3 TF trắng'),
+(5, '/images/products/puma-future-match-tt-1.png', 1, N'Puma Future Match TT đỏ'),
+(6, '/images/products/puma-future-match-tt-1.png', 1, N'Puma Future Match TT xanh'),
+(7, '/images/products/mizuno-morelia-neo-iv-1.png', 1, N'Mizuno Morelia Neo IV Pro AS trắng'),
+(8, '/images/products/mizuno-morelia-neo-iv-1.png', 1, N'Mizuno Morelia Neo IV Pro AS đen'),
+(9, '/images/products/asics-gel-kayano-30-1.png', 1, N'Asics Gel-Kayano 30 xám'),
+(10, '/images/products/nike-air-zoom-pegasus-1.png', 1, N'Nike Air Zoom Pegasus 40 xanh'),
+(11, '/images/products/new-balance-550-1.png', 1, N'New Balance 550 White Green'),
+(12, '/images/products/adidas-samba-og-1.png', 1, N'Adidas Samba OG Black White'),
+(11, '/images/products/new-balance-550-2.png', 0, N'Ảnh sản phẩm'),
+(11, '/images/products/new-balance-550-3.png', 0, N'Ảnh sản phẩm'),
+(11, '/images/products/new-balance-550-4.png', 0, N'Ảnh sản phẩm'),
+(12, '/images/products/adidas-samba-og-2.png', 0, N'Ảnh sản phẩm'),
+(12, '/images/products/adidas-samba-og-3.png', 0, N'Ảnh sản phẩm'),
+(12, '/images/products/adidas-samba-og-4.png', 0, N'Ảnh sản phẩm');
+-- Bổ sung các góc ảnh cho những mẫu giày còn lại.
+INSERT INTO anh_chi_tiet_san_pham (id_chi_tiet_san_pham, duong_dan_anh, la_anh_dai_dien, mo_ta)
+SELECT a.id_chi_tiet_san_pham, REPLACE(a.duong_dan_anh, '-1.png', '-' + CAST(so.stt AS VARCHAR(1)) + '.png'), 0, N'Ảnh sản phẩm'
+FROM anh_chi_tiet_san_pham a CROSS JOIN (VALUES (2), (3), (4)) so(stt)
+WHERE a.id_chi_tiet_san_pham BETWEEN 1 AND 10 AND a.duong_dan_anh LIKE '/images/products/%-1.png';
 
 INSERT INTO gio_hang (id_khach_hang) VALUES
 (1),
@@ -238,5 +248,4 @@ INSERT INTO chuc_nang (ma_chuc_nang, ten_chuc_nang, mo_ta) VALUES
 
 INSERT INTO quyen_han_chuc_nang (id_quyen_han, id_chuc_nang) VALUES
 (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6),
-(2, 1), (2, 3), (2, 4), (2, 5),
-(3, 1), (3, 2), (3, 3);
+(2, 1), (2, 3), (2, 4), (2, 5);

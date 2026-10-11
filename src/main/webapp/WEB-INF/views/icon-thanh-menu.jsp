@@ -1,5 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<c:if test="${empty sessionScope.khachHangOnlineDangNhap and empty sessionScope.nguoiDungDangNhap}">
+    <script src="/js/gio-hang-khach-vang-lai.js?v=2"></script>
+</c:if>
 <c:set var="soLuongTrongGio" value="0"/>
 <c:forEach items="${sessionScope.gioHangOnline}" var="mucGio">
     <c:set var="soLuongTrongGio" value="${soLuongTrongGio + mucGio.value}"/>

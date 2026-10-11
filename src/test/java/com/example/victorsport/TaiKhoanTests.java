@@ -23,9 +23,43 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class TaiKhoanTests {
     @Test
+    void nhanVienVaQuanLyDangNhapTrenCungTrangVaGiuDungQuyen() throws Exception {
+        com.example.victorsport.Service.DangNhapService nv = mock(com.example.victorsport.Service.DangNhapService.class);
+        TaiKhoanService kh = mock(TaiKhoanService.class);
+        NguoiDungDangNhap quanLy = new NguoiDungDangNhap(1, "ql@example.com", "Quản lý", "Quản trị viên"); quanLy.themChucNang("ORDER_WRITE");
+        when(nv.laTaiKhoanNhanVien("ql@example.com")).thenReturn(true);
+        when(nv.dangNhap("ql@example.com", "123456")).thenReturn(
+                com.example.victorsport.Service.DangNhapService.KetQuaDangNhap.thanhCong(quanLy));
+        MockHttpSession session = new MockHttpSession();
+        String idCu = session.getId();
+        MockMvcBuilders.standaloneSetup(new DangNhapController(nv, kh)).build()
+                .perform(post("/login").session(session).param("taiKhoan", "ql@example.com").param("matKhau", "123456"))
+                .andExpect(redirectedUrl("/pos"));
+        assertSame(quanLy, session.getAttribute(DangNhapController.KHOA_NGUOI_DUNG_DANG_NHAP));
+        assertNotEquals(idCu, session.getId());
+        assertNull(session.getAttribute("khachHangOnlineDangNhap"));
+        verifyNoInteractions(kh);
+    }
+
+    @Test
+    void saiMatKhauNhanVienKhongChuyenSangDangNhapKhachHang() throws Exception {
+        com.example.victorsport.Service.DangNhapService nv = mock(com.example.victorsport.Service.DangNhapService.class);
+        TaiKhoanService kh = mock(TaiKhoanService.class);
+        when(nv.laTaiKhoanNhanVien("nv@example.com")).thenReturn(true);
+        when(nv.dangNhap("nv@example.com", "sai")).thenReturn(
+                com.example.victorsport.Service.DangNhapService.KetQuaDangNhap.thatBai("Tài khoản bị khóa"));
+        MockHttpSession session = new MockHttpSession();
+        MockMvcBuilders.standaloneSetup(new DangNhapController(nv, kh)).build()
+                .perform(post("/login").session(session).param("taiKhoan", "nv@example.com").param("matKhau", "sai"))
+                .andExpect(redirectedUrl("/login")).andExpect(flash().attribute("error", "Tài khoản bị khóa"));
+        assertNull(session.getAttribute(DangNhapController.KHOA_NGUOI_DUNG_DANG_NHAP));
+        verifyNoInteractions(kh);
+    }
+
+    @Test
     void khachChuaDangNhapKhongDocHoSoTuDatabase() throws Exception {
         TaiKhoanService service = mock(TaiKhoanService.class);
-        taoTrang(service).perform(get("/tai-khoan")).andExpect(view().name("tai-khoan"))
+        taoTrang(service).perform(get("/tai-khoan")).andExpect(redirectedUrl("/login?quayLai=tai-khoan"))
                 .andExpect(header().string("Cache-Control", "no-store"))
                 .andExpect(model().attributeDoesNotExist("thongTin"));
         verifyNoInteractions(service);
@@ -66,13 +100,13 @@ class TaiKhoanTests {
         MockHttpSession session = new MockHttpSession();
         String idCu = session.getId();
         MockMvc mvc = taoTrang(service);
-        mvc.perform(post("/tai-khoan/dang-nhap").session(session)
+        mvc.perform(post("/login").session(session)
                         .param("taiKhoan", "nguyenan").param("matKhau", "123456"))
                 .andExpect(redirectedUrl("/tai-khoan"));
         assertEquals(7, session.getAttribute("khachHangOnlineDangNhap"));
         assertNotEquals(idCu, session.getId());
         assertNull(session.getAttribute(DangNhapController.KHOA_NGUOI_DUNG_DANG_NHAP));
-        mvc.perform(post("/tai-khoan/dang-xuat").session(session)).andExpect(redirectedUrl("/tai-khoan"));
+        mvc.perform(post("/tai-khoan/dang-xuat").session(session)).andExpect(redirectedUrl("/login"));
         assertTrue(session.isInvalid());
     }
 
@@ -104,6 +138,8 @@ class TaiKhoanTests {
         InternalResourceViewResolver resolver = new InternalResourceViewResolver();
         resolver.setPrefix("/WEB-INF/views/");
         resolver.setSuffix(".jsp");
-        return MockMvcBuilders.standaloneSetup(new TaiKhoanController(service)).setViewResolvers(resolver).build();
+        return MockMvcBuilders.standaloneSetup(new TaiKhoanController(service),
+                new DangNhapController(mock(com.example.victorsport.Service.DangNhapService.class), service))
+                .setViewResolvers(resolver).build();
     }
 }

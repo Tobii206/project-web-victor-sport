@@ -20,16 +20,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class TrangChuTests {
     @Test
+    void locKetHopGiuLaiSizeMauVaCacDieuKienDaChon() throws Exception {
+        TrangChuService service = mock(TrangChuService.class);
+        taoTrang(service).perform(get("/").param("thuongHieu", "2").param("nhuCau", "6")
+                        .param("chatLieu", "1").param("xuatXu", "2").param("kichThuoc", "2")
+                        .param("mauSac", "2").param("conHang", "true").param("sapXep", "gia-tang"))
+                .andExpect(status().isOk()).andExpect(model().attribute("kichThuocDangChon", 2))
+                .andExpect(model().attribute("mauSacDangChon", 2)).andExpect(model().attribute("conHang", true));
+        verify(service).timSanPham("", 2, 6, 1, 2, 2, 2, true, "gia-tang");
+    }
+
+    @Test
     void trangChuVaDangNhapNhanVienCoDuongDanRieng() throws Exception {
         TrangChuService service = mock(TrangChuService.class);
         when(service.layThuongHieu()).thenReturn(List.of(Map.of("id", 1, "ten_thuong_hieu", "Nike")));
-        when(service.timSanPham("Nike", 1, "gia-tang")).thenReturn(List.of(Map.of("ten_san_pham", "Giày Nike")));
+        when(service.timSanPham("Nike", 1, null, null, null, null, null, false, "gia-tang")).thenReturn(List.of(Map.of("ten_san_pham", "Giày Nike")));
         MockMvc mvc = taoTrang(service);
 
         mvc.perform(get("/").param("tuKhoa", "Nike").param("thuongHieu", "1").param("sapXep", "gia-tang"))
                 .andExpect(status().isOk()).andExpect(view().name("trang-chu"))
                 .andExpect(model().attributeExists("sanPham", "thuongHieu"));
-        verify(service).timSanPham("Nike", 1, "gia-tang");
+        verify(service).timSanPham("Nike", 1, null, null, null, null, null, false, "gia-tang");
         mvc.perform(get("/login")).andExpect(status().isOk()).andExpect(view().name("login"));
     }
 
@@ -41,7 +52,7 @@ class TrangChuTests {
                 .andExpect(status().isOk()).andExpect(view().name("trang-chu"))
                 .andExpect(model().attributeExists("loiDuLieu"))
                 .andExpect(model().attribute("sanPham", List.of()));
-        verify(service, never()).timSanPham(anyString(), nullable(Integer.class), anyString());
+        verify(service, never()).timSanPham(anyString(), nullable(Integer.class), nullable(Integer.class), nullable(Integer.class), nullable(Integer.class), nullable(Integer.class), nullable(Integer.class), anyBoolean(), anyString());
     }
 
     private MockMvc taoTrang(TrangChuService service) {
@@ -49,7 +60,7 @@ class TrangChuTests {
         viewResolver.setPrefix("/WEB-INF/views/");
         viewResolver.setSuffix(".jsp");
         return MockMvcBuilders.standaloneSetup(new TrangChuController(service),
-                new DangNhapController(mock(DangNhapService.class)))
+                new DangNhapController(mock(DangNhapService.class), mock(com.example.victorsport.Service.TaiKhoanService.class)))
                 .setViewResolvers(viewResolver).build();
     }
 }

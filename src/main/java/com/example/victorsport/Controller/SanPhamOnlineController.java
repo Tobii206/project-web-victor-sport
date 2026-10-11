@@ -20,10 +20,18 @@ public class SanPhamOnlineController {
     public String chiTiet(@PathVariable int id, Model model) {
         try {
             model.addAttribute("sanPham", service.laySanPham(id));
-            model.addAttribute("phienBan", service.layPhienBan(id));
+            List<Map<String, Object>> phienBan = service.layPhienBan(id);
+            int tongTonKho = 0;
+            for (Map<String, Object> mau : phienBan) tongTonKho += ((Number) mau.get("so_luong")).intValue();
+            model.addAttribute("phienBan", phienBan);
+            model.addAttribute("tongTonKho", tongTonKho);
             model.addAttribute("danhSachAnh", service.layAnh(id));
         } catch (IllegalArgumentException loi) { model.addAttribute("error", loi.getMessage()); }
         catch (DataAccessException loi) { model.addAttribute("error", "Chưa tải được sản phẩm. Vui lòng thử lại sau."); }
+        if (model.containsAttribute("sanPham")) {
+            try { model.addAttribute("sanPhamCungLoai", service.laySanPhamCungLoai(id)); }
+            catch (DataAccessException loi) { model.addAttribute("loiGoiY", "Chưa tải được sản phẩm gợi ý. Vui lòng thử lại sau."); }
+        }
         return "san-pham-online";
     }
 
@@ -68,6 +76,19 @@ public class SanPhamOnlineController {
         } catch (IllegalArgumentException loi) { tb.addFlashAttribute("error", loi.getMessage()); }
         catch (DataAccessException loi) { tb.addFlashAttribute("error", "Chưa cập nhật được giỏ hàng."); }
         return "redirect:/gio-hang";
+    }
+
+    @PostMapping("/gio-hang/xoa-khi-tai-lai")
+    @ResponseBody
+    @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
+    public void xoaGioKhachVangLai(HttpSession session) {
+        synchronized (session) {
+            if (session.getAttribute("khachHangOnlineDangNhap") == null
+                    && session.getAttribute("nguoiDungDangNhap") == null) {
+                session.removeAttribute("gioHangOnline");
+                session.removeAttribute("muaNgayOnline");
+            }
+        }
     }
 
     @GetMapping("/thanh-toan")

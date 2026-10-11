@@ -1,7 +1,5 @@
 package com.example.victorsport.Service;
 
-import com.example.victorsport.Dto.AnhSanPham;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +17,14 @@ public class SanPhamOnlineService {
     public Map<String, Object> laySanPham(int id) {
         List<Map<String, Object>> ds = jdbc.queryForList("""
                 SELECT sp.id, sp.ten_san_pham, sp.ma_san_pham, sp.mo_ta_chi_tiet, sp.mo_ta_ngan,
-                       th.ten_thuong_hieu
+                       th.id AS id_thuong_hieu, th.ten_thuong_hieu, cl.ten_chat_lieu,
+                       xx.ten_xuat_xu, vt.ten_vi_tri, pc.ten_phong_cach, cg.ten_co_giay
                 FROM san_pham sp JOIN thuong_hieu th ON th.id = sp.id_thuong_hieu
+                LEFT JOIN chat_lieu cl ON cl.id = sp.id_chat_lieu AND ISNULL(cl.xoa_mem, 0) = 0
+                LEFT JOIN xuat_xu xx ON xx.id = sp.id_xuat_xu AND ISNULL(xx.xoa_mem, 0) = 0
+                LEFT JOIN vi_tri_thi_dau vt ON vt.id = sp.id_vi_tri_thi_dau AND ISNULL(vt.xoa_mem, 0) = 0
+                LEFT JOIN phong_cach_choi pc ON pc.id = sp.id_phong_cach_choi AND ISNULL(pc.xoa_mem, 0) = 0
+                LEFT JOIN co_giay cg ON cg.id = sp.id_co_giay AND ISNULL(cg.xoa_mem, 0) = 0
                 WHERE sp.id = ? AND ISNULL(sp.xoa_mem, 0) = 0 AND ISNULL(sp.trang_thai_kinh_doanh, 1) = 1
                   AND ISNULL(th.xoa_mem, 0) = 0 AND ISNULL(th.trang_thai, 1) = 1
                 """, id);
@@ -30,26 +34,48 @@ public class SanPhamOnlineService {
 
     public List<Map<String, Object>> layPhienBan(int id) {
         List<Map<String, Object>> ds = jdbc.queryForList(sqlPhienBan() + " AND ct.id_san_pham = ? ORDER BY kt.ten_kich_thuoc, ms.ten_mau_sac, ct.id", id);
-        for (Map<String, Object> pb : ds) { ganAnh(pb); }
+        return ds;
+    }
+
+    public List<Map<String, Object>> laySanPhamCungLoai(int id) {
+        List<Map<String, Object>> ds = jdbc.queryForList("""
+                SELECT TOP 4 sp.id, sp.ma_san_pham, sp.ten_san_pham, th.ten_thuong_hieu,
+                       MIN(ct.gia_ban) AS gia_ban,
+                       SUM(ct.so_luong) AS so_luong,
+                       (SELECT TOP 1 a.duong_dan_anh FROM anh_chi_tiet_san_pham a
+                        JOIN chi_tiet_san_pham ca ON ca.id = a.id_chi_tiet_san_pham
+                        WHERE ca.id_san_pham = sp.id AND ISNULL(a.xoa_mem, 0) = 0
+                          AND ISNULL(ca.xoa_mem, 0) = 0 AND ISNULL(ca.trang_thai, 1) = 1
+                        ORDER BY a.la_anh_dai_dien DESC, a.id) AS anh
+                FROM san_pham sp
+                JOIN san_pham hien_tai ON hien_tai.id = ?
+                JOIN thuong_hieu th ON th.id = sp.id_thuong_hieu
+                JOIN chi_tiet_san_pham ct ON ct.id_san_pham = sp.id
+                LEFT JOIN vi_tri_thi_dau vt ON vt.id = sp.id_vi_tri_thi_dau
+                LEFT JOIN vi_tri_thi_dau vt_hien_tai ON vt_hien_tai.id = hien_tai.id_vi_tri_thi_dau
+                WHERE sp.id <> hien_tai.id AND ISNULL(sp.xoa_mem, 0) = 0
+                  AND ISNULL(sp.trang_thai_kinh_doanh, 1) = 1
+                  AND ISNULL(th.xoa_mem, 0) = 0 AND ISNULL(th.trang_thai, 1) = 1
+                  AND ISNULL(ct.xoa_mem, 0) = 0 AND ISNULL(ct.trang_thai, 1) = 1 AND ct.so_luong > 0
+                  AND (sp.id_vi_tri_thi_dau = hien_tai.id_vi_tri_thi_dau
+                       OR (vt.ten_vi_tri IN (N'Tiền đạo', N'Tiền vệ', N'Hậu vệ', N'Thủ môn')
+                           AND vt_hien_tai.ten_vi_tri IN (N'Tiền đạo', N'Tiền vệ', N'Hậu vệ', N'Thủ môn')))
+                GROUP BY sp.id, sp.ma_san_pham, sp.ten_san_pham, th.ten_thuong_hieu
+                ORDER BY sp.id DESC
+                """, id);
         return ds;
     }
 
     public Map<String, Object> layPhienBanTheoId(int id) {
         List<Map<String, Object>> ds = jdbc.queryForList(sqlPhienBan() + " AND ct.id = ?", id);
         if (ds.isEmpty()) { throw new IllegalArgumentException("Mẫu giày đã chọn không còn được bán."); }
-        ganAnh(ds.get(0));
         return ds.get(0);
-    }
-
-    private void ganAnh(Map<String, Object> pb) {
-        String anh = AnhSanPham.layAnhDaiDien((String) pb.get("ten_san_pham"));
-        if (anh != null) { pb.put("anh", anh); }
     }
 
     private String sqlPhienBan() {
         return """
                 SELECT ct.id, ct.id_san_pham, ct.ma_chi_tiet_san_pham, ct.so_luong,
-                       ISNULL(ct.gia_ban, ct.gia_niem_yet) AS gia_ban, ct.gia_niem_yet,
+                       ct.gia_ban AS gia_ban,
                        sp.ten_san_pham, kt.ten_kich_thuoc, ms.ten_mau_sac, fc.ten_form_chan,
                        (SELECT TOP 1 a.duong_dan_anh FROM anh_chi_tiet_san_pham a
                         WHERE a.id_chi_tiet_san_pham = ct.id AND ISNULL(a.xoa_mem, 0) = 0
@@ -62,19 +88,19 @@ public class SanPhamOnlineService {
                 WHERE ISNULL(ct.xoa_mem, 0) = 0 AND ISNULL(ct.trang_thai, 1) = 1
                   AND ISNULL(sp.xoa_mem, 0) = 0 AND ISNULL(sp.trang_thai_kinh_doanh, 1) = 1
                   AND ISNULL(th.xoa_mem, 0) = 0 AND ISNULL(th.trang_thai, 1) = 1
+                  AND ISNULL(kt.xoa_mem, 0) = 0 AND ISNULL(kt.trang_thai, 1) = 1
+                  AND ISNULL(ms.xoa_mem, 0) = 0 AND ISNULL(ms.trang_thai, 1) = 1
+                  AND ISNULL(fc.xoa_mem, 0) = 0 AND ISNULL(fc.trang_thai, 1) = 1
                 """;
     }
 
     public List<Map<String, Object>> layAnh(int id) {
-        Map<String, Object> sanPham = laySanPham(id);
-        List<Map<String, Object>> anhCoSan = AnhSanPham.layDanhSachAnh((String) sanPham.get("ten_san_pham"));
-        if (!anhCoSan.isEmpty()) { return anhCoSan; }
         return jdbc.queryForList("""
-                SELECT a.duong_dan_anh FROM anh_chi_tiet_san_pham a
+                SELECT DISTINCT a.duong_dan_anh, a.la_anh_dai_dien FROM anh_chi_tiet_san_pham a
                 JOIN chi_tiet_san_pham ct ON ct.id = a.id_chi_tiet_san_pham
                 WHERE ct.id_san_pham = ? AND ISNULL(a.xoa_mem, 0) = 0
                   AND ISNULL(ct.xoa_mem, 0) = 0 AND ISNULL(ct.trang_thai, 1) = 1
-                ORDER BY a.la_anh_dai_dien DESC, a.id
+                ORDER BY a.la_anh_dai_dien DESC, a.duong_dan_anh
                 """, id);
     }
 
@@ -116,7 +142,7 @@ public class SanPhamOnlineService {
             int capNhat = jdbc.update("""
                     UPDATE chi_tiet_san_pham SET so_luong = so_luong - ?
                     WHERE id = ? AND so_luong >= ? AND ISNULL(xoa_mem, 0) = 0 AND ISNULL(trang_thai, 1) = 1
-                      AND ISNULL(gia_ban, gia_niem_yet) = ?
+                      AND gia_ban = ?
                     """, soLuong, dong.get("id"), soLuong, dong.get("gia_ban"));
             if (capNhat != 1) { throw new IllegalArgumentException("Giá hoặc tồn kho đã thay đổi. Vui lòng kiểm tra lại đơn hàng."); }
         }

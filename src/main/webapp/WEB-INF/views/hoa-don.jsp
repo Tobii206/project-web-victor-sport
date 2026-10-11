@@ -4,21 +4,26 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <link rel="icon" type="image/svg+xml" href="/images/favicon-victorsport.svg?v=1">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý hóa đơn - Victor Sport</title>
-    <link rel="stylesheet" href="/css/victorsport.css">
+    <link rel="stylesheet" href="/css/victorsport.css?v=muot-1">
 </head>
 <body>
 <div class="app-shell">
     <jsp:include page="menu.jsp"/>
     <div class="main-area">
         <header class="topbar">
-            <div>
-                <h1>Quản lý hóa đơn</h1>
-                <div class="muted">Victor Sport</div>
+            <div class="topbar-heading">
+                <jsp:include page="nut-menu-admin.jsp"/>
+                <div>
+                    <h1>Quản lý hóa đơn</h1>
+                    <div class="muted">Victor Sport</div>
+                </div>
             </div>
             <div class="topbar-user">
+                <jsp:include page="nut-ve-trang-ban-hang.jsp"/>
                 <span><c:out value="${currentUser.hoTen}"/> - <c:out value="${currentUser.tenQuyen}"/></span>
                 <form method="post" action="/logout">
                     <button class="button secondary" type="submit">Đăng xuất</button>
@@ -72,7 +77,7 @@
                                     <td><c:out value="${hd.ten_trang_thai}"/></td>
                                     <td><div class="invoice-actions">
                                         <a class="button secondary" href="/quan-ly/hoa-don/${hd.id}">Xem chi tiết</a>
-                                        <c:if test="${hd.trang_thai_hien_tai == 0 and hd.loai_don == 0 and hd.id_nhan_vien == currentUser.id}">
+                                        <c:if test="${currentUser.banHangTaiQuay and hd.trang_thai_hien_tai == 0 and hd.loai_don == 0 and hd.id_nhan_vien == currentUser.id}">
                                             <form method="post" action="/pos/don-cho/mo">
                                                 <input type="hidden" name="idDonCho" value="${hd.id}">
                                                 <button class="button" type="submit">Tiếp tục bán</button>

@@ -1,0 +1,9 @@
+.payment-confirm { width: min(460px, calc(100% - 32px)); margin: auto; padding: 28px; border: 1px solid #dce5f4; border-radius: 20px; background: #fff; color: #142b52; box-shadow: 0 20px 60px #142b5233; }
+.payment-confirm::backdrop { background: #142b5280; }
+.payment-confirm h2 { margin: 0 0 18px; font-size: 24px; }
+.payment-confirm p { margin: 14px 0; line-height: 1.7; }
+.payment-confirm-total { padding: 14px; border-radius: 10px; background: #f4f7fc; }
+.payment-confirm-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.payment-confirm-actions button { padding: 12px 18px; border: 1px solid #dce5f4; border-radius: 10px; background: #f4f7fc; color: #142b52; font: inherit; font-weight: 600; cursor: pointer; }
+.payment-confirm-actions #dongYXacNhan { background: #ffb47c; border-color: #ffb47c; }
+.payment-confirm-actions button:focus-visible { outline: 2px solid #b94b11; outline-offset: 3px; }

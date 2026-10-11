@@ -37,7 +37,10 @@ public class BanHangTaiQuayService {
         String cauLenhSql = """
                 SELECT TOP 50 ct.id AS id_chi_tiet_san_pham, sp.ma_san_pham, sp.ten_san_pham, th.ten_thuong_hieu,
                        ms.ten_mau_sac, kt.ten_kich_thuoc, ISNULL(ct.so_luong, 0) AS so_luong,
-                       ISNULL(ct.gia_ban, ct.gia_niem_yet) AS gia_ban
+                       ct.gia_ban AS gia_ban,
+                       (SELECT TOP 1 a.duong_dan_anh FROM anh_chi_tiet_san_pham a
+                        WHERE a.id_chi_tiet_san_pham = ct.id AND a.la_anh_dai_dien = 1
+                          AND ISNULL(a.xoa_mem, 0) = 0 ORDER BY a.id) AS anh_dai_dien
                 FROM chi_tiet_san_pham ct
                 JOIN san_pham sp ON sp.id = ct.id_san_pham
                 JOIN thuong_hieu th ON th.id = sp.id_thuong_hieu
@@ -58,7 +61,8 @@ public class BanHangTaiQuayService {
                 ketQua.getString("ten_mau_sac"),
                 ketQua.getString("ten_kich_thuoc"),
                 ketQua.getInt("so_luong"),
-                ketQua.getBigDecimal("gia_ban")
+                ketQua.getBigDecimal("gia_ban"),
+                ketQua.getString("anh_dai_dien")
         ), tuKhoaTimKiem, tuKhoaTimKiem, tuKhoaTimKiem);
     }
 
@@ -66,7 +70,7 @@ public class BanHangTaiQuayService {
         String cauLenhSql = """
                 SELECT ct.id AS id_chi_tiet_san_pham, sp.ma_san_pham, sp.ten_san_pham, ms.ten_mau_sac,
                        kt.ten_kich_thuoc, ISNULL(ct.so_luong, 0) AS so_luong,
-                       ISNULL(ct.gia_ban, ct.gia_niem_yet) AS gia_ban
+                       ct.gia_ban AS gia_ban
                 FROM chi_tiet_san_pham ct
                 JOIN san_pham sp ON sp.id = ct.id_san_pham
                 JOIN mau_sac ms ON ms.id = ct.id_mau_sac
@@ -495,7 +499,7 @@ public class BanHangTaiQuayService {
                       AND loai_don = 0 AND ISNULL(xoa_mem, 0) = 0
                     """, Integer.class, nhanVien.getId());
             if (soDonCho != null && soDonCho >= 10) {
-                throw new IllegalArgumentException("Mỗi nhân viên chỉ được có tối đa 10 đơn chờ. Hãy thanh toán hoặc hủy bớt đơn.");
+                throw new IllegalArgumentException("Thêm tối đa 10 hóa đơn chờ");
             }
             idDonCho = jdbcTemplate.queryForObject("""
                     INSERT INTO hoa_don (id_nhan_vien, loai_don, tong_tien, tong_tien_sau_giam,

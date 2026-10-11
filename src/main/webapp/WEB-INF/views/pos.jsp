@@ -1,24 +1,30 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <link rel="icon" type="image/svg+xml" href="/images/favicon-victorsport.svg?v=1">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bán hàng tại quầy - Victor Sport</title>
-    <link rel="stylesheet" href="/css/victorsport.css">
+    <link rel="stylesheet" href="/css/victorsport.css?v=anh-pos-1">
 </head>
 <body>
 <div class="app-shell">
     <jsp:include page="menu.jsp"/>
     <div class="main-area">
     <header class="topbar">
-        <div>
-            <h1>Bán hàng tại quầy</h1>
-            <div class="muted">Victor Sport</div>
+        <div class="topbar-heading">
+            <jsp:include page="nut-menu-admin.jsp"/>
+            <div>
+                <h1>Bán hàng tại quầy</h1>
+                <div class="muted">Victor Sport</div>
+            </div>
         </div>
         <div class="topbar-user">
+            <jsp:include page="nut-ve-trang-ban-hang.jsp"/>
             <span>${currentUser.hoTen} - ${currentUser.tenQuyen}</span>
             <form method="post" action="/logout">
                 <button class="button secondary" type="submit">Đăng xuất</button>
@@ -96,8 +102,13 @@
                     <c:forEach items="${products}" var="product">
                         <tr>
                             <td>
-                                <strong>${product.tenSanPham}</strong>
-                                <div class="muted">${product.maSanPham} - ${product.tenThuongHieu}</div>
+                                <div class="pos-product-info">
+                                    <c:set var="anhMauTaiQuay" value="${product.anhDaiDien}"/>
+                                    <c:if test="${not empty anhMauTaiQuay and not fn:startsWith(anhMauTaiQuay, '/') and not fn:startsWith(anhMauTaiQuay, 'http')}"><c:set var="anhMauTaiQuay" value="/${anhMauTaiQuay}"/></c:if>
+                                    <c:if test="${not empty anhMauTaiQuay}"><img class="pos-product-image" src="<c:out value='${anhMauTaiQuay}'/>" alt="<c:out value='${product.tenSanPham}'/>" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.hidden=false;"></c:if>
+                                    <span class="pos-product-no-image" <c:if test="${not empty anhMauTaiQuay}">hidden</c:if>>Không có ảnh</span>
+                                    <div><strong><c:out value="${product.tenSanPham}"/></strong><div class="muted"><c:out value="${product.maSanPham}"/> - <c:out value="${product.tenThuongHieu}"/></div></div>
+                                </div>
                             </td>
                             <td>${product.tenMauSac}, ${product.tenKichThuoc}</td>
                             <td>${product.soLuongTon}</td>
@@ -211,7 +222,7 @@
                     </div>
                     <button class="button secondary" type="button" onclick="document.getElementById('themKhachHang').showModal()">Thêm khách hàng mới</button>
                 </form>
-                <form class="checkout-grid" method="post" action="/pos/checkout">
+                <form class="checkout-grid" method="post" action="/pos/checkout" data-xac-nhan-thanh-toan data-tong-tien="${summary.tongThanhToan}">
                     <input type="hidden" name="customerId" value="${khachHangDangChon.id}">
                     <input type="hidden" name="customerAddress" value="<c:out value='${donChoDangChon.dia_chi_khach_hang}'/>">
                     <div class="field">
@@ -227,7 +238,7 @@
                         <textarea class="textarea" id="note" name="note"><c:out value="${donChoDangChon.ghi_chu}"/></textarea>
                     </div>
                     <button class="button secondary full" type="submit" name="hanhDong" value="luu-don-cho"
-                            <c:if test="${donChoDaMat or (empty donChoDangChon and soDonCho >= 10)}">disabled</c:if>>
+                            <c:if test="${donChoDaMat}">disabled</c:if>>
                         <c:choose><c:when test="${not empty donChoDangChon}">Lưu đơn chờ</c:when><c:otherwise>Tạo đơn chờ</c:otherwise></c:choose>
                     </button>
                     <button class="button full" type="submit" name="hanhDong" value="thanh-toan" <c:if test="${cart.rong or donChoDaMat}">disabled</c:if>>Thanh toán và tạo hóa đơn</button>
@@ -264,5 +275,6 @@
 <c:if test="${not empty loiThemKhachHang}">
     <script>document.getElementById('themKhachHang').showModal();</script>
 </c:if>
+<%@ include file="xac-nhan-thanh-toan.jsp" %>
 </body>
 </html>

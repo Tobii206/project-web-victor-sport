@@ -33,10 +33,7 @@ public class ChiTietSanPham {
     @Column(name = "so_luong")
     private Integer soLuong;
 
-    @Column(name = "gia_niem_yet")
-    private BigDecimal giaNiemYet;
-
-    @Column(name = "gia_ban")
+    @Column(name = "gia_ban", nullable = false)
     private BigDecimal giaBan;
 
     @Column(name = "trang_thai")

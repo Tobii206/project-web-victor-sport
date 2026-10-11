@@ -42,7 +42,7 @@ class DonChoTests {
 
         IllegalArgumentException loi = assertThrows(IllegalArgumentException.class,
                 () -> service.luuDonCho(gioHang, yeuCau, nhanVien, null));
-        assertTrue(loi.getMessage().contains("10 đơn chờ"));
+        assertEquals("Thêm tối đa 10 hóa đơn chờ", loi.getMessage());
         verify(jdbc, never()).queryForObject(contains("INSERT INTO hoa_don"), eq(Integer.class), eq(2), eq(2));
         verify(jdbc, never()).update(anyString(), any(Object[].class));
     }
