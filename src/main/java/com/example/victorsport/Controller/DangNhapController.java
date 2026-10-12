@@ -44,7 +44,7 @@ public class DangNhapController {
         if (phienDangNhap.getAttribute("khachHangOnlineDangNhap") instanceof Integer) {
             return "redirect:/tai-khoan";
         }
-        return "login";
+        return "KhachHang/login";
     }
 
     @PostMapping("/login")

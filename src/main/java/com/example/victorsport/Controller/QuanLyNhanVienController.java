@@ -30,14 +30,14 @@ public class QuanLyNhanVienController {
         model.addAttribute("cacQuyen",service.cacQuyen());
         try { model.addAttribute("nhanVien",service.tim(loc)); }
         catch (IllegalArgumentException e) { model.addAttribute("error",e.getMessage());model.addAttribute("nhanVien",List.of()); }
-        return "quan-ly-nhan-vien";
+        return "Admin/quan-ly-nhan-vien";
     }
     @GetMapping("/them")
     public String them(HttpSession session,Model model) {
         if (quanLy(session,model)==null) return "redirect:/login";
         model.addAttribute("cacQuyen",service.cacQuyen());
         if (!model.containsAttribute("nhanVien")) model.addAttribute("nhanVien",Map.of("trang_thai",true));
-        return "sua-nhan-vien";
+        return "Admin/sua-nhan-vien";
     }
     @GetMapping("/{id}")
     public String sua(@PathVariable int id,HttpSession session,Model model,RedirectAttributes flash) {
@@ -47,7 +47,7 @@ public class QuanLyNhanVienController {
             if (!model.containsAttribute("nhanVien")) model.addAttribute("nhanVien",nv);
             model.addAttribute("idNhanVien",id);model.addAttribute("maNhanVien",nv.get("ma_nhan_vien"));
             model.addAttribute("cacQuyen",service.cacQuyen());
-            return "sua-nhan-vien";
+            return "Admin/sua-nhan-vien";
         } catch (IllegalArgumentException e) { flash.addFlashAttribute("error",e.getMessage());return "redirect:/quan-ly/nhan-vien"; }
     }
     @PostMapping({"/luu","/{id}/luu"})

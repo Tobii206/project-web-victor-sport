@@ -18,7 +18,7 @@
     <nav aria-label="Điều hướng chính">
         <a href="/" class="active">Trang chủ</a><a href="#san-pham">Sản phẩm</a><a href="#nhu-cau">Nhu cầu sử dụng</a><a href="#lien-he">Liên hệ</a>
     </nav>
-    <%@ include file="icon-thanh-menu.jsp" %>
+    <%@ include file="/WEB-INF/views/KhachHang/icon-thanh-menu.jsp" %>
 </header>
 <main>
     <section class="shop-hero store-container">

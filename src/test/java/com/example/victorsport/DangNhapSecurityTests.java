@@ -35,7 +35,7 @@ class DangNhapSecurityTests {
                 assertFalse(filter.getClass().getSimpleName().equals("UsernamePasswordAuthenticationFilter"));
             }
             MockMvc mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(boLoc).build();
-            mvc.perform(get("/login")).andExpect(status().isOk()).andExpect(view().name("login"));
+            mvc.perform(get("/login")).andExpect(status().isOk()).andExpect(view().name("KhachHang/login"));
             DangNhapService nv = context.getBean(DangNhapService.class);
             when(nv.laTaiKhoanNhanVien("nv@example.com")).thenReturn(true);
             when(nv.dangNhap("nv@example.com", "123456")).thenReturn(DangNhapService.KetQuaDangNhap.thanhCong(

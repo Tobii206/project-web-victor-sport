@@ -4,7 +4,7 @@
 <fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html><html lang="vi"><head>
     <link rel="icon" type="image/svg+xml" href="/images/favicon-victorsport.svg?v=1"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Giỏ hàng — VictorSport</title><link rel="stylesheet" href="/css/trang-chu.css?v=data-1"></head>
-<body><%@ include file="dau-trang-online.jsp" %><main class="store-container online-container">
+<body><%@ include file="/WEB-INF/views/KhachHang/dau-trang-online.jsp" %><main class="store-container online-container">
 <h1>Giỏ hàng của bạn</h1>
 <c:if test="${not empty error}"><div class="account-error" role="alert"><c:out value="${error}"/></div></c:if>
 <c:if test="${not empty success}"><div class="online-success" role="status"><c:out value="${success}"/></div></c:if>

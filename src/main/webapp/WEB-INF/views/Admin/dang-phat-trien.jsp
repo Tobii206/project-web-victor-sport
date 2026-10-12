@@ -10,18 +10,18 @@
 </head>
 <body>
 <div class="app-shell">
-    <jsp:include page="menu.jsp"/>
+    <jsp:include page="/WEB-INF/views/Admin/menu.jsp"/>
     <div class="main-area">
         <header class="topbar">
             <div class="topbar-heading">
-                <jsp:include page="nut-menu-admin.jsp"/>
+                <jsp:include page="/WEB-INF/views/Admin/nut-menu-admin.jsp"/>
                 <div>
                     <h1>${tenChucNang}</h1>
                     <div class="muted">Victor Sport</div>
                 </div>
             </div>
             <div class="topbar-user">
-                <jsp:include page="nut-ve-trang-ban-hang.jsp"/>
+                <jsp:include page="/WEB-INF/views/Admin/nut-ve-trang-ban-hang.jsp"/>
                 <span>${currentUser.hoTen} - ${currentUser.tenQuyen}</span>
                 <form method="post" action="/logout">
                     <button class="button secondary" type="submit">Đăng xuất</button>

@@ -9,7 +9,7 @@
     <title>Không có quyền truy cập — VictorSport</title>
 </head>
 <body>
-<%@ include file="dau-trang-online.jsp" %>
+<%@ include file="/WEB-INF/views/KhachHang/dau-trang-online.jsp" %>
 <main class="store-container account-container">
     <section class="account-card">
         <p class="eyebrow">QUYỀN TRUY CẬP</p>

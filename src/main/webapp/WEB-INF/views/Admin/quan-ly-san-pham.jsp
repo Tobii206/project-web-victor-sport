@@ -5,8 +5,8 @@
 <!DOCTYPE html><html lang="vi"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${currentUser.suaSanPham ? 'Quản lý sản phẩm' : 'Xem tồn kho'} — VictorSport</title>
 <link rel="icon" href="/images/favicon-victorsport.svg"><link rel="stylesheet" href="/css/victorsport.css?v=muot-1"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=1">
-</head><body><div class="app-shell"><jsp:include page="menu.jsp"/><div class="main-area">
-<%@ include file="dau-trang-san-pham.jsp" %>
+</head><body><div class="app-shell"><jsp:include page="/WEB-INF/views/Admin/menu.jsp"/><div class="main-area">
+<%@ include file="/WEB-INF/views/Admin/dau-trang-san-pham.jsp" %>
 <main class="content-layout"><section class="panel"><div class="panel-header"><h2>Danh sách sản phẩm</h2><c:if test="${currentUser.suaSanPham}"><a class="button" href="/quan-ly/san-pham/them">+ Thêm sản phẩm</a></c:if></div><div class="panel-body">
 <c:if test="${not empty error}"><div class="alert error" role="alert"><c:out value="${error}"/></div></c:if>
 <c:if test="${not empty success}"><div class="alert success" role="status"><c:out value="${success}"/></div></c:if>

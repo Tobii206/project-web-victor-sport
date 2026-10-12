@@ -8,7 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="/images/favicon-victorsport.svg?v=1"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><c:out value="${sanPham.ten_san_pham}" default="Chi tiết sản phẩm"/> — VictorSport</title>
 <link rel="stylesheet" href="/css/trang-chu.css?v=huong-dan-size-1"></head>
-<body><%@ include file="dau-trang-online.jsp" %>
+<body><%@ include file="/WEB-INF/views/KhachHang/dau-trang-online.jsp" %>
 <main class="store-container online-container">
     <p class="online-breadcrumb"><a href="/">Trang chủ</a> / <a href="/#san-pham">Sản phẩm</a> / <c:out value="${sanPham.ten_san_pham}"/></p>
     <c:if test="${not empty error}"><div class="account-error" role="alert"><c:out value="${error}"/></div></c:if>

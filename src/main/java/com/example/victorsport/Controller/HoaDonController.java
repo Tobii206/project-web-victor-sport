@@ -28,7 +28,7 @@ public class HoaDonController {
         model.addAttribute("activeMenu", "hoa-don");
         model.addAttribute("tuKhoa", tuKhoa);
         model.addAttribute("danhSachHoaDon", hoaDonService.layDanhSachHoaDon(tuKhoa));
-        return "hoa-don";
+        return "NhanVien/hoa-don";
     }
 
     @GetMapping("/quan-ly/hoa-don/{id}")
@@ -45,6 +45,6 @@ public class HoaDonController {
         model.addAttribute("activeMenu", "hoa-don");
         model.addAttribute("hoaDon", hoaDon);
         model.addAttribute("danhSachSanPham", hoaDonService.laySanPhamTrongHoaDon(id));
-        return "chi-tiet-hoa-don";
+        return "NhanVien/chi-tiet-hoa-don";
     }
 }

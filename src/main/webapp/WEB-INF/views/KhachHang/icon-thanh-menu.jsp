@@ -12,5 +12,5 @@
         <img src="/images/gio-hang.svg" alt="" width="24" height="24">
         <c:if test="${soLuongTrongGio > 0}"><span class="cart-count">${soLuongTrongGio}</span></c:if>
     </a>
-    <%@ include file="menu-tai-khoan.jsp" %>
+    <%@ include file="/WEB-INF/views/KhachHang/menu-tai-khoan.jsp" %>
 </div>

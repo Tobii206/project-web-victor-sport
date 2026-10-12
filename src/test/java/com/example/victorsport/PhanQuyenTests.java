@@ -48,7 +48,7 @@ class PhanQuyenTests {
             mvc.perform(post("/quan-ly/khach-hang").session(session)).andExpect(status().isForbidden());
             for (String duongDan : new String[]{"/quan-ly/nhan-vien", "/quan-ly/dot-giam-gia", "/quan-ly/phieu-giam-gia", "/quan-ly/gio-hang", "/quan-ly/hoa-don-khac"}) {
                 mvc.perform(get(duongDan).session(session)).andExpect(status().isForbidden())
-                        .andExpect(forwardedUrl("/WEB-INF/views/khong-co-quyen.jsp"));
+                        .andExpect(forwardedUrl("/WEB-INF/views/Admin/khong-co-quyen.jsp"));
                 mvc.perform(post(duongDan).session(session)).andExpect(status().isForbidden());
             }
             // Cùng phiên đăng nhập, thu hồi quyền ghi có hiệu lực ngay.

@@ -38,10 +38,10 @@ class TrangChuTests {
         MockMvc mvc = taoTrang(service);
 
         mvc.perform(get("/").param("tuKhoa", "Nike").param("thuongHieu", "1").param("sapXep", "gia-tang"))
-                .andExpect(status().isOk()).andExpect(view().name("trang-chu"))
+                .andExpect(status().isOk()).andExpect(view().name("KhachHang/trang-chu"))
                 .andExpect(model().attributeExists("sanPham", "thuongHieu"));
         verify(service).timSanPham("Nike", 1, null, null, null, null, null, false, "gia-tang");
-        mvc.perform(get("/login")).andExpect(status().isOk()).andExpect(view().name("login"));
+        mvc.perform(get("/login")).andExpect(status().isOk()).andExpect(view().name("KhachHang/login"));
     }
 
     @Test
@@ -49,7 +49,7 @@ class TrangChuTests {
         TrangChuService service = mock(TrangChuService.class);
         when(service.layThuongHieu()).thenThrow(new DataAccessResourceFailureException("Không kết nối được"));
         taoTrang(service).perform(get("/"))
-                .andExpect(status().isOk()).andExpect(view().name("trang-chu"))
+                .andExpect(status().isOk()).andExpect(view().name("KhachHang/trang-chu"))
                 .andExpect(model().attributeExists("loiDuLieu"))
                 .andExpect(model().attribute("sanPham", List.of()));
         verify(service, never()).timSanPham(anyString(), nullable(Integer.class), nullable(Integer.class), nullable(Integer.class), nullable(Integer.class), nullable(Integer.class), nullable(Integer.class), anyBoolean(), anyString());

@@ -32,6 +32,6 @@ public class MenuController {
 
         model.addAttribute("activeMenu", maChucNang);
         model.addAttribute("tenChucNang", TEN_CHUC_NANG.getOrDefault(maChucNang, "Chức năng"));
-        return "dang-phat-trien";
+        return "Admin/dang-phat-trien";
     }
 }

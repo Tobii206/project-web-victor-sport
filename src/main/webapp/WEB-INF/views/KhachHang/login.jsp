@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/css/trang-chu.css?v=muot-1">
 </head>
 <body>
-<%@ include file="dau-trang-online.jsp" %>
+<%@ include file="/WEB-INF/views/KhachHang/dau-trang-online.jsp" %>
 <main class="account-container store-container">
     <a class="account-back" href="/">← Về trang chủ</a>
     <div class="account-heading"><p class="eyebrow">TÀI KHOẢN VICTORSPORT</p><h1>Đăng nhập</h1></div>

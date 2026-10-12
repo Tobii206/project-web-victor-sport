@@ -48,7 +48,7 @@ public class PhanQuyenInterceptor implements HandlerInterceptor {
         if (duocTruyCap) return true;
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setHeader("Cache-Control", "no-store");
-        request.getRequestDispatcher("/WEB-INF/views/khong-co-quyen.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/Admin/khong-co-quyen.jsp").forward(request, response);
         return false;
     }
 

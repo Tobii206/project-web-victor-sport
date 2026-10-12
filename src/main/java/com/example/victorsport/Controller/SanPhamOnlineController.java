@@ -32,7 +32,7 @@ public class SanPhamOnlineController {
             try { model.addAttribute("sanPhamCungLoai", service.laySanPhamCungLoai(id)); }
             catch (DataAccessException loi) { model.addAttribute("loiGoiY", "Chưa tải được sản phẩm gợi ý. Vui lòng thử lại sau."); }
         }
-        return "san-pham-online";
+        return "KhachHang/san-pham-online";
     }
 
     @PostMapping("/san-pham/{id}/chon")
@@ -61,7 +61,7 @@ public class SanPhamOnlineController {
     @GetMapping("/gio-hang")
     public String gioHang(HttpSession session, Model model) {
         hienThiGio(layGio(session, "gioHangOnline"), model);
-        return "gio-hang-online";
+        return "KhachHang/gio-hang-online";
     }
 
     @PostMapping("/gio-hang/sua")
@@ -95,7 +95,7 @@ public class SanPhamOnlineController {
     public String thanhToan(@RequestParam(defaultValue = "gio") String loai, HttpSession session, Model model) {
         model.addAttribute("loai", "mua".equals(loai) ? "mua" : "gio");
         hienThiGio(layGio(session, khoaGio(loai)), model);
-        return "thanh-toan-online";
+        return "KhachHang/thanh-toan-online";
     }
 
     @PostMapping("/thanh-toan")
