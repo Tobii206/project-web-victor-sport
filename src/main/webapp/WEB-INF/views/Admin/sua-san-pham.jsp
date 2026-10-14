@@ -3,7 +3,7 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Thông tin sản phẩm — VictorSport</title>
-<link rel="icon" href="/images/favicon-victorsport.svg"><link rel="stylesheet" href="/css/victorsport.css?v=muot-1"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=1"></head><body>
+<link rel="icon" href="/images/favicon-victorsport.svg"><link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=admin-20261014"></head><body>
 <div class="app-shell"><jsp:include page="/WEB-INF/views/Admin/menu.jsp"/><div class="main-area"><%@ include file="/WEB-INF/views/Admin/dau-trang-san-pham.jsp" %><main class="content-layout">
 <div class="product-admin-actions"><a class="button secondary" href="/quan-ly/san-pham">← Danh sách sản phẩm</a><c:if test="${not empty idSanPham}"><strong><c:out value="${maSanPham}"/></strong></c:if></div>
 <c:if test="${not empty error}"><div class="alert error" role="alert"><c:out value="${error}"/></div></c:if><c:if test="${not empty success}"><div class="alert success" role="status"><c:out value="${success}"/></div></c:if>

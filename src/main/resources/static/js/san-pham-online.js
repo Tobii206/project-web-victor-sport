@@ -20,6 +20,9 @@ function hienThiMau() {
     if (!mau) { return; }
     var gia = Number(mau.dataset.gia);
     document.getElementById('giaBan').textContent = gia.toLocaleString('vi-VN') + ' đ';
+    var giaGoc = document.getElementById('giaGoc');
+    giaGoc.hidden = Number(mau.dataset.giaGoc) <= gia;
+    giaGoc.textContent = Number(mau.dataset.giaGoc).toLocaleString('vi-VN') + ' đ';
     document.getElementById('tonKho').textContent = 'Còn ' + mau.dataset.ton + ' sản phẩm';
     soLuong.max = mau.dataset.ton;
     if (Number(soLuong.value) > Number(mau.dataset.ton)) { soLuong.value = mau.dataset.ton; }

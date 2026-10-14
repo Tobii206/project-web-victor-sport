@@ -3,14 +3,14 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html><html lang="vi"><head>
-    <link rel="icon" type="image/svg+xml" href="/images/favicon-victorsport.svg?v=1"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Giỏ hàng — VictorSport</title><link rel="stylesheet" href="/css/trang-chu.css?v=data-1"></head>
+    <link rel="icon" type="image/svg+xml" href="/images/favicon-victorsport.svg?v=1"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Giỏ hàng — VictorSport</title><link rel="stylesheet" href="/css/trang-chu.css?v=gia-giam-1"></head>
 <body><%@ include file="/WEB-INF/views/KhachHang/dau-trang-online.jsp" %><main class="store-container online-container">
 <h1>Giỏ hàng của bạn</h1>
 <c:if test="${not empty error}"><div class="account-error" role="alert"><c:out value="${error}"/></div></c:if>
 <c:if test="${not empty success}"><div class="online-success" role="status"><c:out value="${success}"/></div></c:if>
 <c:forEach items="${danhSach}" var="dong">
     <div class="account-card online-cart-row">
-        <div><a href="/san-pham/${dong.id_san_pham}"><strong><c:out value="${dong.ten_san_pham}"/></strong></a><p class="subtle"><c:out value="${dong.ten_kich_thuoc}"/> · <c:out value="${dong.ten_mau_sac}"/> · <c:out value="${dong.ten_form_chan}"/></p><p><fmt:formatNumber value="${dong.gia_ban}"/> đ / đôi</p></div>
+        <div><a href="/san-pham/${dong.id_san_pham}"><strong><c:out value="${dong.ten_san_pham}"/></strong></a><p class="subtle"><c:out value="${dong.ten_kich_thuoc}"/> · <c:out value="${dong.ten_mau_sac}"/> · <c:out value="${dong.ten_form_chan}"/></p><p><fmt:formatNumber value="${dong.gia_sau_giam}"/> đ / đôi <c:if test="${dong.gia_sau_giam lt dong.gia_goc}"><del class="gia-goc"><fmt:formatNumber value="${dong.gia_goc}"/> đ</del></c:if></p></div>
         <form method="post" action="/gio-hang/sua"><input type="hidden" name="idPhienBan" value="${dong.id}"><input class="online-cart-quantity" type="number" name="soLuong" value="${dong.so_luong_mua}" min="0" aria-label="Số lượng"><button class="store-button" type="submit">Cập nhật</button></form>
         <strong><fmt:formatNumber value="${dong.thanh_tien}"/> đ</strong>
         <form method="post" action="/gio-hang/sua"><input type="hidden" name="idPhienBan" value="${dong.id}"><input type="hidden" name="soLuong" value="0"><button class="account-logout" type="submit">Xóa</button></form>

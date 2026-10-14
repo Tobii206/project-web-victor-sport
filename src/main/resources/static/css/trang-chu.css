@@ -320,3 +320,5 @@ details p { font-size: 13px; line-height: 1.8; color: #5f6f89; }
 @media (prefers-reduced-motion: reduce) {
     .shop-featured-slide { transition: none; transform: none; }
 }
+
+.gia-goc { display: inline-block; margin-left: 8px; color: #8995a6; font-size: 15px; font-weight: 400; }

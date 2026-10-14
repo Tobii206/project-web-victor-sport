@@ -2,6 +2,11 @@ package com.example.victorsport.Controller;
 
 import com.example.victorsport.Service.QuanLySanPhamService;
 import com.example.victorsport.Dto.NguoiDungDangNhap;
+import com.example.victorsport.Dto.SanPhamForm;
+import com.example.victorsport.Dto.MauGiayForm;
+import com.example.victorsport.Service.KiemTraForm;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -70,9 +75,9 @@ public class QuanLySanPhamController {
         } catch(IllegalArgumentException e) {flash.addFlashAttribute("error",e.getMessage());return "redirect:/quan-ly/san-pham";}
     }
     @PostMapping({"/luu","/{id}/luu"})
-    public String luu(@PathVariable(required=false) Integer id,@RequestParam Map<String,String> data,HttpSession session,Model model,RedirectAttributes flash) {
+    public String luu(@PathVariable(required=false) Integer id,@Valid @ModelAttribute SanPhamForm duLieu,BindingResult loiForm,@RequestParam Map<String,String> data,HttpSession session,Model model,RedirectAttributes flash) {
         var user=nguoiDung(session,model);if(user==null)return "redirect:/login";
-        try {int ketQua=service.luu(id,data,user.getId());flash.addFlashAttribute("success","Đã lưu sản phẩm. Bạn có thể thêm các mẫu size, màu và ảnh bên dưới.");return "redirect:/quan-ly/san-pham/"+ketQua;}
+        try {KiemTraForm.kiemTra(loiForm);int ketQua=service.luu(id,data,user.getId());flash.addFlashAttribute("success","Đã lưu sản phẩm. Bạn có thể thêm các mẫu size, màu và ảnh bên dưới.");return "redirect:/quan-ly/san-pham/"+ketQua;}
         catch(IllegalArgumentException e) {flash.addFlashAttribute("error",e.getMessage());}
         catch(DataAccessException e) {flash.addFlashAttribute("error","Không lưu được sản phẩm. Vui lòng thử lại.");}
         // Giữ dữ liệu vừa nhập để người dùng sửa lỗi.
@@ -88,9 +93,9 @@ public class QuanLySanPhamController {
         return "redirect:/quan-ly/san-pham";
     }
     @PostMapping("/{id}/mau/luu")
-    public String luuMau(@PathVariable int id,@RequestParam(required=false) Integer idMau,@RequestParam Map<String,String> data,HttpSession session,Model model,RedirectAttributes flash) {
+    public String luuMau(@PathVariable int id,@RequestParam(required=false) Integer idMau,@Valid @ModelAttribute MauGiayForm duLieu,BindingResult loiForm,@RequestParam Map<String,String> data,HttpSession session,Model model,RedirectAttributes flash) {
         var user=nguoiDung(session,model);if(user==null)return "redirect:/login";
-        try {service.luuMau(id,idMau,data,user.getId());flash.addFlashAttribute("success","Đã lưu mẫu giày và tồn kho.");}
+        try {KiemTraForm.kiemTra(loiForm);service.luuMau(id,idMau,data,user.getId());flash.addFlashAttribute("success","Đã lưu mẫu giày và tồn kho.");}
         catch(IllegalArgumentException | DataAccessException e) {
             flash.addFlashAttribute("error",e instanceof IllegalArgumentException?e.getMessage():"Không lưu được mẫu giày. Vui lòng thử lại.");
             Map<String,Object> form=new LinkedHashMap<>(data);if(idMau!=null)form.put("id",idMau);

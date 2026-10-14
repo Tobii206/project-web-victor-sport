@@ -46,6 +46,7 @@ class PhanQuyenTests {
             }
             mvc.perform(get("/quan-ly/khach-hang").session(session)).andExpect(status().isOk());
             mvc.perform(post("/quan-ly/khach-hang").session(session)).andExpect(status().isForbidden());
+            mvc.perform(get("/quan-ly/khach-hang/them").session(session)).andExpect(status().isForbidden());
             for (String duongDan : new String[]{"/quan-ly/nhan-vien", "/quan-ly/dot-giam-gia", "/quan-ly/phieu-giam-gia", "/quan-ly/gio-hang", "/quan-ly/hoa-don-khac"}) {
                 mvc.perform(get(duongDan).session(session)).andExpect(status().isForbidden())
                         .andExpect(forwardedUrl("/WEB-INF/views/Admin/khong-co-quyen.jsp"));
@@ -61,6 +62,8 @@ class PhanQuyenTests {
             when(service.layQuyen(2)).thenReturn(taoNguoiDung("Quản trị viên"));
             mvc.perform(get("/quan-ly/san-pham").session(session)).andExpect(status().isForbidden());
             mvc.perform(get("/quan-ly/nhan-vien").session(session)).andExpect(status().isOk());
+            mvc.perform(get("/quan-ly/khach-hang/them").session(session)).andExpect(status().isOk());
+            mvc.perform(post("/quan-ly/khach-hang/1/luu").session(session)).andExpect(status().isOk());
             when(service.layQuyen(2)).thenReturn(taoNguoiDung("Quản trị viên", "PRODUCT_READ", "PRODUCT_WRITE"));
             mvc.perform(get("/quan-ly/san-pham/them").session(session)).andExpect(status().isOk());
             mvc.perform(post("/quan-ly/san-pham/8/mau/luu").session(session)).andExpect(status().isOk());

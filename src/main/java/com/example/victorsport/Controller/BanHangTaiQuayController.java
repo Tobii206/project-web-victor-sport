@@ -1,6 +1,11 @@
 package com.example.victorsport.Controller;
 
 import com.example.victorsport.Dto.GioHangTaiQuay;
+import com.example.victorsport.Dto.KhachHangTaiQuayForm;
+import com.example.victorsport.Service.KiemTraForm;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import com.example.victorsport.Dto.NguoiDungDangNhap;
 import com.example.victorsport.Dto.SanPhamTrongGio;
 import com.example.victorsport.Service.BanHangTaiQuayService;
@@ -93,15 +98,17 @@ public class BanHangTaiQuayController {
     }
 
     @PostMapping("/pos/khach-hang/them")
-    public String themKhachHang(@RequestParam("tenKhachHangMoi") String ten,
-                                @RequestParam(value = "soDienThoaiMoi", required = false) String soDienThoai,
-                                @RequestParam(value = "emailMoi", required = false) String email,
+    public String themKhachHang(@Valid @ModelAttribute KhachHangTaiQuayForm form, BindingResult loiForm,
                                 HttpSession phienDangNhap, Model model, RedirectAttributes thongBao) {
         NguoiDungDangNhap nhanVien = DangNhapController.layNguoiDungDangNhap(phienDangNhap, model);
         if (nhanVien == null) {
             return "redirect:/login";
         }
+        String ten = form.getTenKhachHangMoi();
+        String soDienThoai = form.getSoDienThoaiMoi();
+        String email = form.getEmailMoi();
         try {
+            KiemTraForm.kiemTra(loiForm);
             Integer idKhachHang = banHangTaiQuayService.themKhachHangMoi(ten, soDienThoai, email, nhanVien.getId());
             phienDangNhap.setAttribute(KHOA_KHACH_HANG, idKhachHang);
             thongBao.addFlashAttribute("success", "Đã thêm khách hàng mới và chọn cho đơn hiện tại.");

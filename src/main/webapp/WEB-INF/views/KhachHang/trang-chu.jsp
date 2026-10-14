@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VictorSport — Cửa hàng giày thể thao</title>
     <link rel="icon" type="image/svg+xml" href="/images/favicon-victorsport.svg?v=1">
-    <link rel="stylesheet" href="/css/trang-chu.css?v=data-2">
+    <link rel="stylesheet" href="/css/trang-chu.css?v=gia-giam-1">
 </head>
 <body class="store-page">
 <header class="store-header">
@@ -92,7 +92,7 @@
                         <h3><a href="/san-pham/${sp.id}"><c:out value="${sp.ten_san_pham}"/></a></h3>
                         <div class="shop-product-tags"><c:if test="${not empty sp.ten_vi_tri}"><span><c:out value="${sp.ten_vi_tri}"/></span></c:if><c:if test="${not empty sp.ten_chat_lieu}"><span><c:out value="${sp.ten_chat_lieu}"/></span></c:if></div>
                         <p class="shop-product-description"><c:out value="${sp.mo_ta_ngan}"/></p>
-                        <p class="product-price"><small>Từ</small> <fmt:formatNumber value="${sp.gia_ban}" maxFractionDigits="0" groupingUsed="true"/> đ</p>
+                        <p class="product-price"><small>Từ</small> <fmt:formatNumber value="${sp.gia_sau_giam}" maxFractionDigits="0" groupingUsed="true"/> đ <c:if test="${sp.gia_sau_giam lt sp.gia_goc}"><del class="gia-goc"><fmt:formatNumber value="${sp.gia_goc}"/> đ</del></c:if></p>
                         <p class="subtle">${sp.so_size} lựa chọn size<c:if test="${not empty sp.ten_xuat_xu}"> · <c:out value="${sp.ten_xuat_xu}"/></c:if></p>
                         <a class="online-detail-link" href="/san-pham/${sp.id}">Xem chi tiết và chọn size →</a>
                     </div>

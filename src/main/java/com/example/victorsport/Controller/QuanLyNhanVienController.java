@@ -1,6 +1,10 @@
 package com.example.victorsport.Controller;
 
 import com.example.victorsport.Dto.NguoiDungDangNhap;
+import com.example.victorsport.Dto.NhanVienForm;
+import com.example.victorsport.Service.KiemTraForm;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 import com.example.victorsport.Service.QuanLyNhanVienService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -51,9 +55,10 @@ public class QuanLyNhanVienController {
         } catch (IllegalArgumentException e) { flash.addFlashAttribute("error",e.getMessage());return "redirect:/quan-ly/nhan-vien"; }
     }
     @PostMapping({"/luu","/{id}/luu"})
-    public String luu(@PathVariable(required=false) Integer id,@RequestParam Map<String,String> data,HttpSession session,Model model,RedirectAttributes flash) {
+    public String luu(@PathVariable(required=false) Integer id,@Valid @ModelAttribute NhanVienForm duLieu,BindingResult loiForm,@RequestParam Map<String,String> data,HttpSession session,Model model,RedirectAttributes flash) {
         var user=quanLy(session,model);if(user==null) return "redirect:/login";
         try {
+            KiemTraForm.kiemTra(loiForm);
             service.luu(id,data,user.getId());
             flash.addFlashAttribute("success",id==null?"Đã thêm nhân viên.":"Đã cập nhật thông tin nhân viên.");
             return "redirect:/quan-ly/nhan-vien";

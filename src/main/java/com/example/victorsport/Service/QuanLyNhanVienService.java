@@ -51,7 +51,7 @@ public class QuanLyNhanVienService {
     public int luu(Integer id, Map<String, String> data, int nguoiSua) {
         String ten = chuoi(data,"ten_nhan_vien",100,true);
         String email = chuoi(data,"email",100,true).toLowerCase(Locale.ROOT);
-        if (!email.matches("[^\\s@]+@[^\\s@]+\\.[^\\s@]+")) throw new IllegalArgumentException("Email không hợp lệ.");
+        if (!KiemTraThongTin.laEmailGmail(email)) throw new IllegalArgumentException("Email phải đúng định dạng, ví dụ: ten@gmail.com.");
         String sdt = chuoi(data,"so_dien_thoai",10,false);
         if (!sdt.isEmpty() && !sdt.matches("0[0-9]{9}")) throw new IllegalArgumentException("Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0.");
         String matKhau = data.getOrDefault("mat_khau", "");

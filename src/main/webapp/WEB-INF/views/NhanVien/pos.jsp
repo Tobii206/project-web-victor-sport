@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bán hàng tại quầy - Victor Sport</title>
-    <link rel="stylesheet" href="/css/victorsport.css?v=anh-pos-1">
+    <link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014">
 </head>
 <body>
 <div class="app-shell">
@@ -112,7 +112,7 @@
                             </td>
                             <td>${product.tenMauSac}, ${product.tenKichThuoc}</td>
                             <td>${product.soLuongTon}</td>
-                            <td class="money"><fmt:formatNumber value="${product.giaBan}" type="number" groupingUsed="true"/> đ</td>
+                            <td class="money"><fmt:formatNumber value="${product.giaSauGiam}" type="number" groupingUsed="true"/> đ <c:if test="${product.giaSauGiam lt product.giaBan}"><del class="gia-goc"><fmt:formatNumber value="${product.giaBan}" groupingUsed="true"/> đ</del></c:if></td>
                             <td>
                                 <form method="post" action="/pos/cart/add">
                                     <input type="hidden" name="detailId" value="${product.idChiTietSanPham}">
@@ -260,11 +260,11 @@
         </div>
         <div class="field">
             <label for="soDienThoaiMoi">Số điện thoại</label>
-            <input class="input" id="soDienThoaiMoi" name="soDienThoaiMoi" type="tel" maxlength="10" pattern="0[0-9]{9}" placeholder="Có thể để trống" value="<c:out value='${soDienThoaiMoi}'/>">
+            <input class="input" id="soDienThoaiMoi" name="soDienThoaiMoi" type="tel" maxlength="10" pattern="0[0-9]{9}" title="Số điện thoại phải đủ 10 chữ số và bắt đầu bằng 0" placeholder="Có thể để trống" value="<c:out value='${soDienThoaiMoi}'/>">
         </div>
         <div class="field">
             <label for="emailMoi">Email</label>
-            <input class="input" id="emailMoi" name="emailMoi" type="email" maxlength="100" placeholder="Có thể để trống" value="<c:out value='${emailMoi}'/>">
+            <input class="input" id="emailMoi" name="emailMoi" type="email" pattern="[a-zA-Z0-9]+([._%+\-][a-zA-Z0-9]+)*@[gG][mM][aA][iI][lL]\.[cC][oO][mM]" title="Email phải có dạng ten@gmail.com" maxlength="100" placeholder="Có thể để trống" value="<c:out value='${emailMoi}'/>">
         </div>
         <div class="invoice-actions">
             <button class="button" type="submit">Lưu khách hàng</button>

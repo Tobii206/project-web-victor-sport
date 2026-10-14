@@ -7,12 +7,67 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 @Service
 public class SanPhamOnlineService {
     private final JdbcTemplate jdbc;
 
     public SanPhamOnlineService(JdbcTemplate jdbc) { this.jdbc = jdbc; }
+
+    public Map<Integer,Integer> layGioDaLuu(int idKhachHang) {
+        kiemTraKhachHang(idKhachHang, false);
+        Map<Integer,Integer> gio=new LinkedHashMap<>();
+        var ds=jdbc.queryForList("""
+                SELECT ct.id_chi_tiet_san_pham,ct.so_luong FROM chi_tiet_gio_hang ct
+                JOIN gio_hang g ON g.id=ct.id_gio_hang
+                WHERE g.id_khach_hang=? AND ISNULL(g.xoa_mem,0)=0 AND g.trang_thai=1
+                  AND ISNULL(ct.xoa_mem,0)=0 AND ct.so_luong>0 ORDER BY ct.id
+                """,idKhachHang);
+        for(var dong:ds) gio.put(((Number)dong.get("id_chi_tiet_san_pham")).intValue(),((Number)dong.get("so_luong")).intValue());
+        return gio;
+    }
+
+    @Transactional
+    public Map<Integer,Integer> themVaoGioDaLuu(int idKhachHang,int idPhienBan,int soLuong) {
+        int idGio=layVaKhoaGio(idKhachHang);
+        var pb=layPhienBanTheoId(idPhienBan);
+        kiemTraSoLuong(pb,soLuong);
+        var ds=jdbc.queryForList("SELECT so_luong,xoa_mem FROM chi_tiet_gio_hang WHERE id_gio_hang=? AND id_chi_tiet_san_pham=?",idGio,idPhienBan);
+        int tong=soLuong;
+        if(!ds.isEmpty()&&!Boolean.TRUE.equals(ds.get(0).get("xoa_mem"))) tong+=((Number)ds.get(0).get("so_luong")).intValue();
+        kiemTraSoLuong(pb,tong);
+        if(ds.isEmpty()) jdbc.update("INSERT INTO chi_tiet_gio_hang(id_gio_hang,id_chi_tiet_san_pham,so_luong,don_gia) VALUES (?,?,?,?)",idGio,idPhienBan,tong,pb.get("gia_ban"));
+        else jdbc.update("UPDATE chi_tiet_gio_hang SET so_luong=?,don_gia=?,xoa_mem=0 WHERE id_gio_hang=? AND id_chi_tiet_san_pham=?",tong,pb.get("gia_ban"),idGio,idPhienBan);
+        return layGioDaLuu(idKhachHang);
+    }
+
+    @Transactional
+    public Map<Integer,Integer> suaGioDaLuu(int idKhachHang,int idPhienBan,int soLuong) {
+        int idGio=layVaKhoaGio(idKhachHang);
+        if(soLuong<=0) {
+            jdbc.update("UPDATE chi_tiet_gio_hang SET xoa_mem=1 WHERE id_gio_hang=? AND id_chi_tiet_san_pham=?",idGio,idPhienBan);
+        } else {
+            var pb=layPhienBanTheoId(idPhienBan);kiemTraSoLuong(pb,soLuong);
+            jdbc.update("UPDATE chi_tiet_gio_hang SET so_luong=?,don_gia=? WHERE id_gio_hang=? AND id_chi_tiet_san_pham=? AND ISNULL(xoa_mem,0)=0",soLuong,pb.get("gia_ban"),idGio,idPhienBan);
+        }
+        return layGioDaLuu(idKhachHang);
+    }
+
+    private void kiemTraKhachHang(int idKhachHang,boolean khoa) {
+        String sql="SELECT id FROM khach_hang "+(khoa?"WITH (UPDLOCK,HOLDLOCK) ":"")+"WHERE id=? AND ISNULL(xoa_mem,0)=0 AND ISNULL(trang_thai,1)=1";
+        if(jdbc.queryForList(sql,idKhachHang).isEmpty()) throw new IllegalArgumentException("Tài khoản khách hàng không còn hoạt động. Vui lòng đăng nhập lại.");
+    }
+
+    private int layVaKhoaGio(int idKhachHang) {
+        // Khóa theo khách để hai thiết bị không tạo trùng giỏ hoặc ghi đè số lượng.
+        kiemTraKhachHang(idKhachHang,true);
+        var ds=jdbc.queryForList("SELECT id FROM gio_hang WHERE id_khach_hang=?",idKhachHang);
+        if(ds.isEmpty()) return jdbc.queryForObject("INSERT INTO gio_hang(id_khach_hang) OUTPUT INSERTED.id VALUES (?)",Integer.class,idKhachHang);
+        int id=((Number)ds.get(0).get("id")).intValue();
+        jdbc.update("UPDATE gio_hang SET trang_thai=1,xoa_mem=0 WHERE id=?",id);
+        return id;
+    }
 
     public Map<String, Object> laySanPham(int id) {
         List<Map<String, Object>> ds = jdbc.queryForList("""
@@ -34,6 +89,7 @@ public class SanPhamOnlineService {
 
     public List<Map<String, Object>> layPhienBan(int id) {
         List<Map<String, Object>> ds = jdbc.queryForList(sqlPhienBan() + " AND ct.id_san_pham = ? ORDER BY kt.ten_kich_thuoc, ms.ten_mau_sac, ct.id", id);
+        for (var mau : ds) GiaGiamSanPham.themGia(jdbc, mau);
         return ds;
     }
 
@@ -63,12 +119,14 @@ public class SanPhamOnlineService {
                 GROUP BY sp.id, sp.ma_san_pham, sp.ten_san_pham, th.ten_thuong_hieu
                 ORDER BY sp.id DESC
                 """, id);
+        GiaGiamSanPham.themGiaDanhSach(jdbc, ds, null, null, true);
         return ds;
     }
 
     public Map<String, Object> layPhienBanTheoId(int id) {
         List<Map<String, Object>> ds = jdbc.queryForList(sqlPhienBan() + " AND ct.id = ?", id);
         if (ds.isEmpty()) { throw new IllegalArgumentException("Mẫu giày đã chọn không còn được bán."); }
+        GiaGiamSanPham.themGia(jdbc, ds.get(0));
         return ds.get(0);
     }
 
@@ -116,7 +174,8 @@ public class SanPhamOnlineService {
             Map<String, Object> dong = layPhienBanTheoId(id);
             int soLuong = gio.get(id);
             dong.put("so_luong_mua", soLuong);
-            dong.put("thanh_tien", ((BigDecimal) dong.get("gia_ban")).multiply(BigDecimal.valueOf(soLuong)));
+            dong.put("thanh_tien_goc", ((BigDecimal) dong.get("gia_ban")).multiply(BigDecimal.valueOf(soLuong)));
+            dong.put("thanh_tien", ((BigDecimal) dong.get("gia_sau_giam")).multiply(BigDecimal.valueOf(soLuong)));
             ds.add(dong);
         }
         return ds;
@@ -130,9 +189,19 @@ public class SanPhamOnlineService {
 
     @Transactional
     public Integer datHang(Map<Integer, Integer> gio, Integer idKhachHang, String ten, String sdt, String diaChi) {
+        return datHang(gio,idKhachHang,ten,sdt,diaChi,false);
+    }
+
+    @Transactional
+    public Integer datHang(Map<Integer, Integer> gio, Integer idKhachHang, String ten, String sdt, String diaChi,boolean muaNgay) {
         ten = ten.trim(); sdt = sdt.trim(); diaChi = diaChi.trim();
         if (ten.isEmpty() || ten.length() > 100 || !sdt.matches("0[0-9]{9}") || diaChi.isEmpty() || diaChi.length() > 255) {
             throw new IllegalArgumentException("Nhập tên, số điện thoại 10 chữ số bắt đầu bằng 0 và địa chỉ nhận hàng hợp lệ.");
+        }
+        Integer idGio=null;
+        if(idKhachHang!=null) {
+            if(muaNgay) kiemTraKhachHang(idKhachHang,false);
+            else {idGio=layVaKhoaGio(idKhachHang);gio=layGioDaLuu(idKhachHang);}
         }
         if (gio.isEmpty()) { throw new IllegalArgumentException("Chưa có sản phẩm để đặt hàng."); }
         List<Map<String, Object>> ds = layGioHang(gio);
@@ -147,16 +216,20 @@ public class SanPhamOnlineService {
             if (capNhat != 1) { throw new IllegalArgumentException("Giá hoặc tồn kho đã thay đổi. Vui lòng kiểm tra lại đơn hàng."); }
         }
         BigDecimal tong = tinhTong(ds);
+        BigDecimal tongGoc = BigDecimal.ZERO;
+        for (var dong : ds) tongGoc = tongGoc.add((BigDecimal) dong.get("thanh_tien_goc"));
         Integer id = jdbc.queryForObject("""
                 INSERT INTO hoa_don (id_khach_hang, loai_don, tong_tien, tong_tien_sau_giam,
                     ten_khach_hang, so_dien_thoai_khach_hang, dia_chi_khach_hang, trang_thai_hien_tai, ghi_chu)
                 OUTPUT INSERTED.id VALUES (?, 1, ?, ?, ?, ?, ?, 1, N'Thanh toán khi nhận hàng (COD)')
-                """, Integer.class, idKhachHang, tong, tong, ten, sdt, diaChi);
+                """, Integer.class, idKhachHang, tongGoc, tong, ten, sdt, diaChi);
         for (Map<String, Object> dong : ds) {
             jdbc.update("INSERT INTO hoa_don_chi_tiet (id_hoa_don, id_chi_tiet_san_pham, so_luong, don_gia) VALUES (?, ?, ?, ?)",
                     id, dong.get("id"), dong.get("so_luong_mua"), dong.get("gia_ban"));
         }
         jdbc.update("INSERT INTO lich_su_hoa_don (id_hoa_don, trang_thai, ghi_chu) VALUES (?, 1, N'Khách đặt hàng online, thanh toán khi nhận hàng')", id);
+        // Cùng giao dịch với hóa đơn: đặt hàng lỗi thì giỏ vẫn được giữ nguyên.
+        if(idGio!=null) jdbc.update("UPDATE chi_tiet_gio_hang SET xoa_mem=1 WHERE id_gio_hang=? AND ISNULL(xoa_mem,0)=0",idGio);
         return id;
     }
 }

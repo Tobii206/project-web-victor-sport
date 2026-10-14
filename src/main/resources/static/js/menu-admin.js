@@ -10,4 +10,5 @@ if (nutMenuAdmin && khungAdmin) {
         this.setAttribute('aria-label', dangHien ? 'Ẩn menu' : 'Hiện menu');
         this.title = dangHien ? 'Ẩn menu' : 'Hiện menu';
     };
+    if (window.innerWidth <= 640) { nutMenuAdmin.click(); }
 }

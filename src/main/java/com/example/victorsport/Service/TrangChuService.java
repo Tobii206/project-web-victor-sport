@@ -69,6 +69,10 @@ public class TrangChuService {
         if ("gia-tang".equals(sapXep)) sql += " ORDER BY gia_ban ASC, sp.id DESC";
         else if ("gia-giam".equals(sapXep)) sql += " ORDER BY gia_ban DESC, sp.id DESC";
         else sql += " ORDER BY sp.id DESC";
-        return jdbcTemplate.queryForList(sql, thamSo.toArray());
+        var ds = jdbcTemplate.queryForList(sql, thamSo.toArray());
+        GiaGiamSanPham.themGiaDanhSach(jdbcTemplate, ds, kichThuoc, mauSac, conHang);
+        if ("gia-tang".equals(sapXep)) ds.sort((a,b) -> ((java.math.BigDecimal)a.get("gia_sau_giam")).compareTo((java.math.BigDecimal)b.get("gia_sau_giam")));
+        if ("gia-giam".equals(sapXep)) ds.sort((a,b) -> ((java.math.BigDecimal)b.get("gia_sau_giam")).compareTo((java.math.BigDecimal)a.get("gia_sau_giam")));
+        return ds;
     }
 }

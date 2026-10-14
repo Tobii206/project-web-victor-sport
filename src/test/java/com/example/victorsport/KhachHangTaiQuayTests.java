@@ -56,9 +56,12 @@ class KhachHangTaiQuayTests {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute(DangNhapController.KHOA_NGUOI_DUNG_DANG_NHAP,
                 new NguoiDungDangNhap(2, "nv@example.com", "Nhân viên", "Bán hàng"));
-        when(service.themKhachHangMoi("An", "", "", 2)).thenReturn(99);
+        when(service.themKhachHangMoi("An", null, null, 2)).thenReturn(99);
 
-        assertEquals("redirect:/pos", controller.themKhachHang("An", "", "", session,
+        var form = new com.example.victorsport.Dto.KhachHangTaiQuayForm();
+        form.setTenKhachHangMoi("An");
+        assertEquals("redirect:/pos", controller.themKhachHang(form,
+                new org.springframework.validation.BeanPropertyBindingResult(form, "form"), session,
                 new ExtendedModelMap(), new RedirectAttributesModelMap()));
         assertEquals(99, session.getAttribute("idKhachHangTaiQuay"));
     }

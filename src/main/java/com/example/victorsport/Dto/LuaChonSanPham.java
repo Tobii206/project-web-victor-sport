@@ -11,6 +11,7 @@ public class LuaChonSanPham {
     private final String tenKichThuoc;
     private final Integer soLuongTon;
     private final BigDecimal giaBan;
+    private BigDecimal giaSauGiam;
     private final String anhDaiDien;
 
     public LuaChonSanPham(Integer idChiTietSanPham, String maSanPham, String tenSanPham, String tenThuongHieu,
@@ -23,6 +24,7 @@ public class LuaChonSanPham {
         this.tenKichThuoc = tenKichThuoc;
         this.soLuongTon = soLuongTon;
         this.giaBan = giaBan;
+        this.giaSauGiam = giaBan;
         this.anhDaiDien = anhDaiDien;
     }
 
@@ -57,6 +59,9 @@ public class LuaChonSanPham {
     public BigDecimal getGiaBan() {
         return giaBan;
     }
+
+    public BigDecimal getGiaSauGiam() { return giaSauGiam; }
+    public void setGiaSauGiam(BigDecimal giaSauGiam) { this.giaSauGiam = giaSauGiam; }
 
     public String getAnhDaiDien() { return anhDaiDien; }
 }

@@ -4,9 +4,9 @@
 
 body {
     margin: 0;
-    background: #f5f7fb;
-    color: #172033;
-    font-family: Arial, Helvetica, sans-serif;
+    background: #f3f5f9;
+    color: #172b4d;
+    font-family: "Segoe UI", Arial, sans-serif;
 }
 
 .pos-product-info { display: flex; align-items: center; gap: 12px; }
@@ -67,13 +67,18 @@ a {
 .select,
 .textarea {
     width: 100%;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
+    border: 1px solid #dce3ee;
+    border-radius: 8px;
     background: #ffffff;
     color: #172033;
     font: inherit;
     padding: 10px 12px;
+    min-height: 44px;
+    transition: border-color .2s ease, box-shadow .2s ease;
 }
+
+.input:focus, .select:focus, .textarea:focus { outline: none; border-color: #dd8a4c; box-shadow: 0 0 0 3px #fff0e4; }
+.input::placeholder, .textarea::placeholder { color: #8794a7; }
 
 .textarea {
     min-height: 76px;
@@ -84,25 +89,33 @@ a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 38px;
+    min-height: 42px;
     border: 0;
-    border-radius: 6px;
-    padding: 9px 14px;
-    background: #0f766e;
+    border-radius: 8px;
+    padding: 10px 16px;
+    background: #142b52;
     color: #ffffff;
     cursor: pointer;
     font-weight: 700;
     text-decoration: none;
+    font-family: inherit;
+    font-size: 14px;
 }
+
+.button:hover { background: #254878; }
+.button:focus-visible { outline: 3px solid #eaa16b; outline-offset: 3px; }
 
 .button.secondary {
-    background: #e2e8f0;
-    color: #172033;
+    background: #edf2f9;
+    color: #24436d;
 }
+.button.secondary:hover { background: #dfe8f5; }
 
 .button.danger {
-    background: #dc2626;
+    background: #fff0f0;
+    color: #be2838;
 }
+.button.danger:hover { background: #ffe0e3; }
 
 .button.full {
     width: 100%;
@@ -115,8 +128,8 @@ a {
 
 .alert {
     margin-bottom: 16px;
-    border-radius: 6px;
-    padding: 10px 12px;
+    border-radius: 10px;
+    padding: 14px 16px;
     font-size: 14px;
 }
 
@@ -145,15 +158,20 @@ a {
 .side-menu {
     background: #142b52;
     color: #d9e3f5;
-    min-height: 100vh;
-    padding: 24px 16px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 28px 16px;
     width: 270px;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #4c6486 #142b52;
     transition: transform .28s ease, opacity .28s ease, visibility .28s ease;
 }
 
 .side-brand {
-    padding: 0 4px 24px;
+    padding: 0 6px 24px;
     border-bottom: 1px solid #30496d;
     margin-bottom: 16px;
 }
@@ -175,7 +193,7 @@ a {
 
 .menu-list {
     display: grid;
-    gap: 6px;
+    gap: 8px;
 }
 
 .menu-item {
@@ -186,7 +204,7 @@ a {
     align-items: center;
     gap: 12px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     min-height: 48px;
     padding: 12px;
     text-decoration: none;
@@ -206,14 +224,18 @@ a {
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 14px 22px;
+    padding: 20px 30px;
     background: #ffffff;
     border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .topbar h1 {
     margin: 0;
-    font-size: 20px;
+    font-size: 23px;
+    line-height: 1.4;
 }
 
 .topbar-user {
@@ -226,6 +248,9 @@ a {
 }
 
 .topbar-heading { display: flex; align-items: center; gap: 14px; }
+.topbar-heading .muted { margin-top: 3px; font-size: 12px; }
+.topbar-user > span { padding: 10px 14px; border-radius: 8px; background: #f4f7fc; font-weight: 600; }
+.topbar-user form { margin: 0; }
 .admin-menu-toggle { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; flex-shrink: 0; border: 1px solid #cbd5e1; border-radius: 8px; background: #f5f7fb; color: #172033; cursor: pointer; }
 .admin-menu-toggle:hover { background: #e2e8f0; }
 .admin-menu-toggle:focus-visible, .admin-store-link:focus-visible { outline: 3px solid #0f766e; outline-offset: 3px; }
@@ -237,12 +262,12 @@ a {
 .pos-layout {
     display: grid;
     grid-template-columns: minmax(0, 1.35fr) minmax(360px, 0.65fr);
-    gap: 18px;
-    padding: 18px 22px;
+    gap: 24px;
+    padding: 28px 30px;
 }
 
 .content-layout {
-    padding: 18px 22px;
+    padding: 28px 30px;
 }
 
 .invoice-table {
@@ -282,9 +307,10 @@ a {
 
 .panel {
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    border-radius: 12px;
     background: #ffffff;
     overflow: hidden;
+    box-shadow: 0 4px 18px rgba(20,43,82,.035);
 }
 
 .panel-header {
@@ -292,17 +318,22 @@ a {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 14px 16px;
+    padding: 20px 24px;
     border-bottom: 1px solid #e2e8f0;
+    flex-wrap: wrap;
 }
 
 .panel-header h2 {
     margin: 0;
-    font-size: 17px;
+    font-size: 19px;
+    color: #142b52;
 }
+.panel-header > .button { background: #ffb47c; color: #142b52; }
+.panel-header > .button:hover { background: #ffa561; }
+.panel-header > .button.secondary { background: #edf2f9; color: #24436d; }
 
 .panel-body {
-    padding: 16px;
+    padding: 24px;
 }
 
 .search-row {
@@ -320,16 +351,22 @@ a {
 .table th,
 .table td {
     border-bottom: 1px solid #e2e8f0;
-    padding: 10px 8px;
+    padding: 16px 12px;
     text-align: left;
     vertical-align: middle;
 }
 
 .table th {
-    color: #475569;
+    color: #5d6d84;
     font-size: 12px;
     text-transform: uppercase;
+    background: #f4f7fc;
+    letter-spacing: .3px;
 }
+.table tbody tr:hover { background: #f8faff; }
+.table tbody tr:last-child td { border-bottom: 0; }
+.table .muted { font-size: 12px; margin-top: 5px; line-height: 1.6; }
+.table .button { min-height: 36px; font-size: 13px; padding: 8px 12px; white-space: nowrap; }
 
 .muted {
     color: #64748b;
@@ -401,6 +438,8 @@ a {
 
     .side-menu {
         min-height: auto;
+        position: static;
+        height: auto;
         width: 100%;
         max-height: 1000px;
         transition: max-height .28s ease, padding .28s ease, transform .28s ease, opacity .28s ease, visibility .28s ease;
@@ -422,6 +461,10 @@ a {
 }
 
 @media (max-width: 640px) {
+    .content-layout, .pos-layout { padding: 16px; }
+    .panel-body, .panel-header { padding: 18px; }
+    .topbar { padding: 16px; position: static; }
+    .topbar h1 { font-size: 20px; }
     .topbar {
         align-items: flex-start;
         flex-direction: column;
@@ -436,3 +479,5 @@ a {
         grid-template-columns: 1fr;
     }
 }
+
+.gia-goc { display: inline-block; margin-left: 8px; color: #8995a6; font-size: 15px; font-weight: 400; }

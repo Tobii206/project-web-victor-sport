@@ -230,6 +230,7 @@ CREATE TABLE dot_giam_gia (
     ten_dot_giam_gia NVARCHAR(255) NOT NULL,
     loai_giam_gia BIT DEFAULT 0,
     gia_tri_giam_gia DECIMAL(18,2) NOT NULL,
+    so_tien_giam_toi_da DECIMAL(18,2),
     ngay_bat_dau DATE NOT NULL,
     ngay_ket_thuc DATE NOT NULL,
     muc_uu_tien INT DEFAULT 0,

@@ -60,7 +60,7 @@ class TrangChuTests {
         viewResolver.setPrefix("/WEB-INF/views/");
         viewResolver.setSuffix(".jsp");
         return MockMvcBuilders.standaloneSetup(new TrangChuController(service),
-                new DangNhapController(mock(DangNhapService.class), mock(com.example.victorsport.Service.TaiKhoanService.class)))
+                new DangNhapController(mock(DangNhapService.class), mock(com.example.victorsport.Service.TaiKhoanService.class), mock(com.example.victorsport.Service.SanPhamOnlineService.class)))
                 .setViewResolvers(viewResolver).build();
     }
 }

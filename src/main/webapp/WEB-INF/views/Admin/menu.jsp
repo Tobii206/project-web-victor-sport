@@ -34,7 +34,7 @@
         <a class="menu-item ${activeMenu == 'nhan-vien' ? 'active' : ''}" href="/quan-ly/nhan-vien" aria-current="${activeMenu == 'nhan-vien' ? 'page' : 'false'}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2M10 16l2 2 2-2M12 18v3"/></svg><span>Quản lý nhân viên</span>
         </a>
-        </c:if><c:if test="${currentUser.xemKhachHang}"><a class="menu-item ${activeMenu == 'khach-hang' ? 'active' : ''}" href="/quan-ly/khach-hang" aria-current="${activeMenu == 'khach-hang' ? 'page' : 'false'}">
+        </c:if><c:if test="${currentUser.quanLy or currentUser.xemKhachHang}"><a class="menu-item ${activeMenu == 'khach-hang' ? 'active' : ''}" href="/quan-ly/khach-hang" aria-current="${activeMenu == 'khach-hang' ? 'page' : 'false'}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="3.5"/><path d="M2 21v-2a7 7 0 0 1 14 0v2M16 4a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 4 5v2"/></svg><span>Quản lý khách hàng</span>
         </a>
         </c:if>

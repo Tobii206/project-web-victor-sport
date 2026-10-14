@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class QuanLyNhanVienTests {
     private MockHttpSession session(String quyen) {
         var session=new MockHttpSession();
-        session.setAttribute(DangNhapController.KHOA_NGUOI_DUNG_DANG_NHAP,new NguoiDungDangNhap(1,"admin@example.com","Quản lý",quyen));
+        session.setAttribute(DangNhapController.KHOA_NGUOI_DUNG_DANG_NHAP,new NguoiDungDangNhap(1,"admin@gmail.com","Quản lý",quyen));
         return session;
     }
     private MockMvc mvc(QuanLyNhanVienService service) {
@@ -58,8 +58,8 @@ class QuanLyNhanVienTests {
     @Test void thongTinSaiKhongDuocGhiDatabase() {
         var jdbc=mock(JdbcTemplate.class);var service=new QuanLyNhanVienService(jdbc);
         assertThrows(IllegalArgumentException.class,()->service.luu(null,Map.of("ten_nhan_vien","Mới","email","email sai"),1));
-        assertThrows(IllegalArgumentException.class,()->service.luu(null,Map.of("ten_nhan_vien","Mới","email","nv@example.com","so_dien_thoai","123"),1));
-        assertThrows(IllegalArgumentException.class,()->service.luu(null,Map.of("ten_nhan_vien","Mới","email","nv@example.com","mat_khau","12"),1));
+        assertThrows(IllegalArgumentException.class,()->service.luu(null,Map.of("ten_nhan_vien","Mới","email","nv@gmail.com","so_dien_thoai","123"),1));
+        assertThrows(IllegalArgumentException.class,()->service.luu(null,Map.of("ten_nhan_vien","Mới","email","nv@gmail.com","mat_khau","12"),1));
         verifyNoInteractions(jdbc);
     }
 }

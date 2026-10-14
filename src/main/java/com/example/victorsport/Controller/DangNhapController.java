@@ -1,8 +1,14 @@
 package com.example.victorsport.Controller;
 
 import com.example.victorsport.Dto.NguoiDungDangNhap;
+import com.example.victorsport.Dto.DangNhapForm;
+import com.example.victorsport.Service.KiemTraForm;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import com.example.victorsport.Service.DangNhapService;
 import com.example.victorsport.Service.TaiKhoanService;
+import com.example.victorsport.Service.SanPhamOnlineService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -20,10 +26,12 @@ public class DangNhapController {
 
     private final DangNhapService dangNhapService;
     private final TaiKhoanService taiKhoanService;
+    private final SanPhamOnlineService sanPhamOnlineService;
 
-    public DangNhapController(DangNhapService dangNhapService, TaiKhoanService taiKhoanService) {
+    public DangNhapController(DangNhapService dangNhapService, TaiKhoanService taiKhoanService, SanPhamOnlineService sanPhamOnlineService) {
         this.dangNhapService = dangNhapService;
         this.taiKhoanService = taiKhoanService;
+        this.sanPhamOnlineService = sanPhamOnlineService;
     }
 
     @GetMapping("/login")
@@ -36,46 +44,44 @@ public class DangNhapController {
             model.addAttribute("quayLai", "tai-khoan");
         }
         if (phienDangNhap.getAttribute(KHOA_NGUOI_DUNG_DANG_NHAP) instanceof NguoiDungDangNhap) {
-            if ("tai-khoan".equals(quayLai)) {
-                return "redirect:/tai-khoan";
-            }
-            return "redirect:" + ((NguoiDungDangNhap) phienDangNhap.getAttribute(KHOA_NGUOI_DUNG_DANG_NHAP)).getTrangLamViec();
+            return "redirect:/";
         }
         if (phienDangNhap.getAttribute("khachHangOnlineDangNhap") instanceof Integer) {
-            return "redirect:/tai-khoan";
+            return "redirect:/";
         }
         return "KhachHang/login";
     }
 
     @PostMapping("/login")
-    public String dangNhap(@RequestParam("taiKhoan") String taiKhoan,
-                           @RequestParam("matKhau") String matKhau,
+    public String dangNhap(@Valid @ModelAttribute DangNhapForm form, BindingResult loiForm,
                            @RequestParam(value = "quayLai", defaultValue = "pos") String quayLai,
                            HttpServletRequest request,
                            RedirectAttributes thuocTinhChuyenHuong) {
         HttpSession phienDangNhap = request.getSession();
         if (phienDangNhap.getAttribute(KHOA_NGUOI_DUNG_DANG_NHAP) != null
                 || phienDangNhap.getAttribute("khachHangOnlineDangNhap") != null) {
-            return "redirect:/tai-khoan";
+            return "redirect:/";
         }
         try {
-            if (taiKhoan.isBlank() || matKhau.isBlank()) {
-                throw new IllegalArgumentException("Vui lòng nhập tài khoản và mật khẩu.");
-            }
+            KiemTraForm.kiemTra(loiForm);
+            String taiKhoan = form.getTaiKhoan();
+            String matKhau = form.getMatKhau();
             if (dangNhapService.laTaiKhoanNhanVien(taiKhoan)) {
                 DangNhapService.KetQuaDangNhap ketQua = dangNhapService.dangNhap(taiKhoan, matKhau);
                 if (!ketQua.isThanhCong()) { throw new IllegalArgumentException(ketQua.getThongBao()); }
                 request.changeSessionId();
                 phienDangNhap.removeAttribute("khachHangOnlineDangNhap");
                 phienDangNhap.setAttribute(KHOA_NGUOI_DUNG_DANG_NHAP, ketQua.getNguoiDung());
-                if ("tai-khoan".equals(quayLai)) { return "redirect:/tai-khoan"; }
-                return "redirect:" + ((NguoiDungDangNhap) phienDangNhap.getAttribute(KHOA_NGUOI_DUNG_DANG_NHAP)).getTrangLamViec();
+                return "redirect:/";
             }
             Integer id = taiKhoanService.dangNhapKhachHang(taiKhoan, matKhau);
+            var gioDaLuu=sanPhamOnlineService.layGioDaLuu(id);
             request.changeSessionId();
             phienDangNhap.removeAttribute(KHOA_NGUOI_DUNG_DANG_NHAP);
             phienDangNhap.setAttribute("khachHangOnlineDangNhap", id);
-            return "redirect:/tai-khoan";
+            phienDangNhap.setAttribute("gioHangOnline",gioDaLuu);
+            phienDangNhap.removeAttribute("muaNgayOnline");
+            return "redirect:/";
         } catch (IllegalArgumentException loi) {
             thuocTinhChuyenHuong.addFlashAttribute("error", loi.getMessage());
         } catch (DataAccessException loi) {

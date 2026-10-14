@@ -7,7 +7,7 @@
 <html lang="vi"><head>
     <link rel="icon" type="image/svg+xml" href="/images/favicon-victorsport.svg?v=1"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><c:out value="${sanPham.ten_san_pham}" default="Chi tiết sản phẩm"/> — VictorSport</title>
-<link rel="stylesheet" href="/css/trang-chu.css?v=huong-dan-size-1"></head>
+<link rel="stylesheet" href="/css/trang-chu.css?v=gia-giam-1"></head>
 <body><%@ include file="/WEB-INF/views/KhachHang/dau-trang-online.jsp" %>
 <main class="store-container online-container">
     <p class="online-breadcrumb"><a href="/">Trang chủ</a> / <a href="/#san-pham">Sản phẩm</a> / <c:out value="${sanPham.ten_san_pham}"/></p>
@@ -29,7 +29,7 @@
             <p class="eyebrow"><c:out value="${sanPham.ten_thuong_hieu}"/></p>
             <h1><c:out value="${sanPham.ten_san_pham}"/></h1>
             <p class="subtle">Mã sản phẩm: <c:out value="${sanPham.ma_san_pham}"/></p>
-            <p class="online-price"><span id="giaBan">Chọn mẫu giày</span></p>
+            <p class="online-price"><span id="giaBan">Chọn mẫu giày</span> <del id="giaGoc" hidden></del></p>
             <p id="tonKho" class="subtle">Chọn kích thước và màu để xem tồn kho.</p>
             <form method="post" action="/san-pham/${sanPham.id}/chon" id="formChonGiay">
                 <fieldset class="online-variants"><legend>Kích thước · Màu sắc · Dáng giày
@@ -41,7 +41,7 @@
                         <c:if test="${empty anhMau}"><c:set var="anhMau" value="/images/giay-mac-dinh.svg"/></c:if>
                         <c:if test="${not fn:startsWith(anhMau, '/') and not fn:startsWith(anhMau, 'http')}"><c:set var="anhMau" value="/${anhMau}"/></c:if>
                         <label class="online-variant">
-                            <input type="radio" name="idPhienBan" value="${pb.id}" data-gia="${pb.gia_ban}" data-ton="${pb.so_luong}" data-anh="<c:out value='${anhMau}'/>" required
+                            <input type="radio" name="idPhienBan" value="${pb.id}" data-gia="${pb.gia_sau_giam}" data-gia-goc="${pb.gia_goc}" data-ton="${pb.so_luong}" data-anh="<c:out value='${anhMau}'/>" required
                                 <c:if test="${pb.so_luong <= 0}">disabled</c:if>
                                 <c:if test="${pb.so_luong > 0 and not daChon}">checked<c:set var="daChon" value="true"/></c:if>>
                             <span><strong><c:out value="${pb.ten_kich_thuoc}"/></strong><small><c:out value="${pb.ten_mau_sac}"/> · <c:out value="${pb.ten_form_chan}"/></small><c:if test="${pb.so_luong <= 0}"><small>Hết hàng</small></c:if></span>
@@ -131,7 +131,7 @@
                     <div class="product-content">
                         <p class="product-brand"><c:out value="${sp.ten_thuong_hieu}"/> <span>· <c:out value="${sp.ma_san_pham}"/></span></p>
                         <h3><a href="/san-pham/${sp.id}"><c:out value="${sp.ten_san_pham}"/></a></h3>
-                        <p class="product-price"><small>Từ</small> <fmt:formatNumber value="${sp.gia_ban}" groupingUsed="true"/> đ</p>
+                        <p class="product-price"><small>Từ</small> <fmt:formatNumber value="${sp.gia_sau_giam}" groupingUsed="true"/> đ <c:if test="${sp.gia_sau_giam lt sp.gia_goc}"><del class="gia-goc"><fmt:formatNumber value="${sp.gia_goc}"/> đ</del></c:if></p>
                         <a class="online-detail-link" href="/san-pham/${sp.id}">Chọn size và mua hàng →</a>
                     </div>
                 </article>
@@ -149,4 +149,4 @@
     </div>
     <img src="/images/huong-dan-chon-size.png" alt="Bảng quy đổi size Việt Nam, size US, size UK và chiều dài bàn chân theo centimet">
 </dialog>
-<script src="/js/san-pham-online.js?v=huong-dan-size-1"></script></body></html>
+<script src="/js/san-pham-online.js?v=gia-giam-1"></script></body></html>

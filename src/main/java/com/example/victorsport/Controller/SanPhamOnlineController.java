@@ -1,6 +1,10 @@
 package com.example.victorsport.Controller;
 
 import com.example.victorsport.Service.SanPhamOnlineService;
+import com.example.victorsport.Dto.ThanhToanForm;
+import com.example.victorsport.Service.KiemTraForm;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Controller;
@@ -48,10 +52,14 @@ public class SanPhamOnlineController {
                 session.setAttribute("muaNgayOnline", muaNgay);
                 return "redirect:/thanh-toan?loai=mua";
             }
-            Map<Integer, Integer> gio = layGio(session, "gioHangOnline");
-            int tong = gio.getOrDefault(idPhienBan, 0) + soLuong;
-            service.kiemTraSoLuong(pb, tong);
-            gio.put(idPhienBan, tong);
+            Integer kh=(Integer)session.getAttribute("khachHangOnlineDangNhap");
+            if(kh!=null) session.setAttribute("gioHangOnline",service.themVaoGioDaLuu(kh,idPhienBan,soLuong));
+            else {
+                Map<Integer, Integer> gio = layGio(session, "gioHangOnline");
+                int tong = gio.getOrDefault(idPhienBan, 0) + soLuong;
+                service.kiemTraSoLuong(pb, tong);
+                gio.put(idPhienBan, tong);
+            }
             tb.addFlashAttribute("success", "Đã thêm sản phẩm vào giỏ hàng.");
         } catch (IllegalArgumentException loi) { tb.addFlashAttribute("error", loi.getMessage()); }
         catch (DataAccessException loi) { tb.addFlashAttribute("error", "Chưa thể thêm sản phẩm. Vui lòng thử lại."); }
@@ -60,14 +68,19 @@ public class SanPhamOnlineController {
 
     @GetMapping("/gio-hang")
     public String gioHang(HttpSession session, Model model) {
-        hienThiGio(layGio(session, "gioHangOnline"), model);
+        hienThiGio(session,"gioHangOnline", model);
         return "KhachHang/gio-hang-online";
     }
 
     @PostMapping("/gio-hang/sua")
     public String sua(@RequestParam int idPhienBan, @RequestParam int soLuong, HttpSession session, RedirectAttributes tb) {
-        Map<Integer, Integer> gio = layGio(session, "gioHangOnline");
         try {
+            Integer kh=(Integer)session.getAttribute("khachHangOnlineDangNhap");
+            if(kh!=null) {
+                session.setAttribute("gioHangOnline",service.suaGioDaLuu(kh,idPhienBan,soLuong));
+                return "redirect:/gio-hang";
+            }
+            Map<Integer, Integer> gio = layGio(session, "gioHangOnline");
             if (soLuong <= 0) { gio.remove(idPhienBan); }
             else if (gio.containsKey(idPhienBan)) {
                 service.kiemTraSoLuong(service.layPhienBanTheoId(idPhienBan), soLuong);
@@ -94,18 +107,22 @@ public class SanPhamOnlineController {
     @GetMapping("/thanh-toan")
     public String thanhToan(@RequestParam(defaultValue = "gio") String loai, HttpSession session, Model model) {
         model.addAttribute("loai", "mua".equals(loai) ? "mua" : "gio");
-        hienThiGio(layGio(session, khoaGio(loai)), model);
+        hienThiGio(session, khoaGio(loai), model);
         return "KhachHang/thanh-toan-online";
     }
 
     @PostMapping("/thanh-toan")
-    public String datHang(@RequestParam(defaultValue = "gio") String loai, @RequestParam String ten,
-                          @RequestParam String sdt, @RequestParam String diaChi, HttpSession session, RedirectAttributes tb) {
+    public String datHang(@RequestParam(defaultValue = "gio") String loai,
+                          @Valid @ModelAttribute ThanhToanForm form, BindingResult loiForm, HttpSession session, RedirectAttributes tb) {
+        String ten = form.getTen();
+        String sdt = form.getSdt();
+        String diaChi = form.getDiaChi();
         synchronized (session) {
-            Map<Integer, Integer> gio = layGio(session, khoaGio(loai));
             try {
+                KiemTraForm.kiemTra(loiForm);
+                Map<Integer, Integer> gio = layGio(session, khoaGio(loai));
                 Integer kh = (Integer) session.getAttribute("khachHangOnlineDangNhap");
-                Integer id = service.datHang(gio, kh, ten, sdt, diaChi);
+                Integer id = service.datHang(gio, kh, ten, sdt, diaChi,"mua".equals(loai));
                 gio.clear();
                 tb.addFlashAttribute("success", "Đặt hàng thành công. Mã hóa đơn: HD" + String.format("%05d", id) + ". Thanh toán khi nhận hàng.");
                 return "redirect:/gio-hang";
@@ -116,9 +133,10 @@ public class SanPhamOnlineController {
         }
     }
 
-    private void hienThiGio(Map<Integer, Integer> gio, Model model) {
-        model.addAttribute("gioDaChon", gio);
+    private void hienThiGio(HttpSession session,String khoa, Model model) {
         try {
+            Map<Integer,Integer> gio=layGio(session,khoa);
+            model.addAttribute("gioDaChon", gio);
             List<Map<String, Object>> ds = service.layGioHang(gio);
             model.addAttribute("danhSach", ds); model.addAttribute("tongTien", service.tinhTong(ds));
         } catch (IllegalArgumentException loi) { model.addAttribute("error", loi.getMessage()); }
@@ -129,6 +147,12 @@ public class SanPhamOnlineController {
 
     @SuppressWarnings("unchecked")
     private Map<Integer, Integer> layGio(HttpSession session, String khoa) {
+        Integer kh=(Integer)session.getAttribute("khachHangOnlineDangNhap");
+        if(kh!=null && "gioHangOnline".equals(khoa)) {
+            Map<Integer,Integer> gio=service.layGioDaLuu(kh);
+            session.setAttribute(khoa,gio);
+            return gio;
+        }
         Map<Integer, Integer> gio = (Map<Integer, Integer>) session.getAttribute(khoa);
         if (gio == null) { gio = new LinkedHashMap<>(); session.setAttribute(khoa, gio); }
         return gio;

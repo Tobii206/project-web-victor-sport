@@ -17,22 +17,41 @@ public class TaiKhoanService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    public synchronized void moKhoaSauDoiMatKhau(String taiKhoan) {
+        if(taiKhoan!=null) soLanSai.remove(taiKhoan.trim().toLowerCase(java.util.Locale.ROOT));
+    }
+
     public synchronized Integer dangNhapKhachHang(String taiKhoan, String matKhau) {
         if (taiKhoan == null || taiKhoan.isBlank() || matKhau == null || matKhau.isBlank()) {
             throw new IllegalArgumentException("Vui lòng nhập tài khoản và mật khẩu.");
         }
         taiKhoan = taiKhoan.trim().toLowerCase(java.util.Locale.ROOT);
+        KiemTraThongTin.kiemTraMatKhau(matKhau);
+        if(taiKhoan.contains("@")&&!KiemTraThongTin.laEmailGmail(taiKhoan))
+            throw new IllegalArgumentException("Email phải đúng định dạng, ví dụ: ten@gmail.com.");
         int soLan = soLanSai.getOrDefault(taiKhoan, 0);
         if (soLan >= 5) {
             throw new IllegalArgumentException("Tài khoản đã bị khóa do nhập sai 5 lần. Vui lòng liên hệ cửa hàng.");
         }
         List<Map<String, Object>> danhSach = jdbcTemplate.queryForList("""
-                SELECT id, mat_khau FROM khach_hang
+                SELECT id, ten_tai_khoan, mat_khau FROM khach_hang
                 WHERE LOWER(ten_tai_khoan) = ? AND ISNULL(xoa_mem, 0) = 0 AND ISNULL(trang_thai, 1) = 1
                 ORDER BY id
                 """, taiKhoan);
+        if(danhSach.isEmpty()) {
+            danhSach=jdbcTemplate.queryForList("""
+                    SELECT id, ten_tai_khoan, mat_khau FROM khach_hang
+                    WHERE LOWER(email)=? AND ISNULL(xoa_mem,0)=0 AND ISNULL(trang_thai,1)=1
+                    ORDER BY id
+                    """,taiKhoan);
+            if(danhSach.size()>1) throw new IllegalArgumentException("Email được dùng cho nhiều khách hàng. Vui lòng đăng nhập bằng tên tài khoản.");
+        }
         if (!danhSach.isEmpty()) {
             Map<String, Object> khachHang = danhSach.get(0);
+            // Tên tài khoản và email cùng dùng một bộ đếm số lần nhập sai.
+            taiKhoan=khachHang.getOrDefault("ten_tai_khoan",taiKhoan).toString().trim().toLowerCase(java.util.Locale.ROOT);
+            soLan=soLanSai.getOrDefault(taiKhoan,0);
+            if(soLan>=5) throw new IllegalArgumentException("Tài khoản đã bị khóa do nhập sai 5 lần. Vui lòng liên hệ cửa hàng.");
             String matKhauDaLuu = (String) khachHang.get("mat_khau");
             boolean dungMatKhau = false;
             if (matKhauDaLuu != null) {

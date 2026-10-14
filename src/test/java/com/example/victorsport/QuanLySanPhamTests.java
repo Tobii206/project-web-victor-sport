@@ -37,7 +37,9 @@ class QuanLySanPhamTests {
     }
     @Test void themThanhCongMoChiTietDeThemMau() throws Exception {
         var service=mock(QuanLySanPhamService.class);when(service.luu(isNull(),anyMap(),eq(1))).thenReturn(99);
-        mvc(service).perform(post("/quan-ly/san-pham/luu").session(session())).andExpect(redirectedUrl("/quan-ly/san-pham/99"));
+        mvc(service).perform(post("/quan-ly/san-pham/luu").session(session())
+                .param("ten_san_pham","Giày mới").param("id_thuong_hieu","1").param("trang_thai_kinh_doanh","1"))
+                .andExpect(redirectedUrl("/quan-ly/san-pham/99"));
     }
     @Test void tepKhongPhaiAnhKhongDuocGhiDatabase() throws Exception {
         var service=mock(QuanLySanPhamService.class);

@@ -37,17 +37,17 @@ class DangNhapSecurityTests {
             MockMvc mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(boLoc).build();
             mvc.perform(get("/login")).andExpect(status().isOk()).andExpect(view().name("KhachHang/login"));
             DangNhapService nv = context.getBean(DangNhapService.class);
-            when(nv.laTaiKhoanNhanVien("nv@example.com")).thenReturn(true);
-            when(nv.dangNhap("nv@example.com", "123456")).thenReturn(DangNhapService.KetQuaDangNhap.thanhCong(
+            when(nv.laTaiKhoanNhanVien("nv@gmail.com")).thenReturn(true);
+            when(nv.dangNhap("nv@gmail.com", "123456")).thenReturn(DangNhapService.KetQuaDangNhap.thanhCong(
                     PhanQuyenTests.taoNguoiDung("Nhân viên", "ORDER_WRITE")));
-            mvc.perform(post("/login").param("taiKhoan", "nv@example.com").param("matKhau", "123456"))
-                    .andExpect(redirectedUrl("/pos"));
-            verify(nv).dangNhap("nv@example.com", "123456");
+            mvc.perform(post("/login").param("taiKhoan", "nv@gmail.com").param("matKhau", "123456"))
+                    .andExpect(redirectedUrl("/"));
+            verify(nv).dangNhap("nv@gmail.com", "123456");
 
             TaiKhoanService kh = context.getBean(TaiKhoanService.class);
             when(kh.dangNhapKhachHang("nguyenan", "123456")).thenReturn(7);
             mvc.perform(post("/login").param("taiKhoan", "nguyenan").param("matKhau", "123456"))
-                    .andExpect(redirectedUrl("/tai-khoan"));
+                    .andExpect(redirectedUrl("/"));
             verify(kh).dangNhapKhachHang("nguyenan", "123456");
         }
     }
@@ -59,7 +59,7 @@ class DangNhapSecurityTests {
         @Bean DangNhapService dangNhapService() { return mock(DangNhapService.class); }
         @Bean TaiKhoanService taiKhoanService() { return mock(TaiKhoanService.class); }
         @Bean DangNhapController dangNhapController(DangNhapService nv, TaiKhoanService kh) {
-            return new DangNhapController(nv, kh);
+            return new DangNhapController(nv, kh, mock(com.example.victorsport.Service.SanPhamOnlineService.class));
         }
         @Bean InternalResourceViewResolver viewResolver() {
             return new InternalResourceViewResolver("/WEB-INF/views/", ".jsp");

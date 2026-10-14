@@ -53,7 +53,7 @@ public class BanHangTaiQuayService {
                   AND (sp.ten_san_pham LIKE ? OR sp.ma_san_pham LIKE ? OR th.ten_thuong_hieu LIKE ?)
                 ORDER BY sp.ten_san_pham, kt.gia_tri_kich_thuoc
                 """;
-        return jdbcTemplate.query(cauLenhSql, (ketQua, soDong) -> new LuaChonSanPham(
+        var ds = jdbcTemplate.query(cauLenhSql, (ketQua, soDong) -> new LuaChonSanPham(
                 ketQua.getInt("id_chi_tiet_san_pham"),
                 ketQua.getString("ma_san_pham"),
                 ketQua.getString("ten_san_pham"),
@@ -64,6 +64,8 @@ public class BanHangTaiQuayService {
                 ketQua.getBigDecimal("gia_ban"),
                 ketQua.getString("anh_dai_dien")
         ), tuKhoaTimKiem, tuKhoaTimKiem, tuKhoaTimKiem);
+        for (var mau : ds) mau.setGiaSauGiam(GiaGiamSanPham.giaSauGiam(jdbcTemplate, mau.getIdChiTietSanPham(), mau.getGiaBan()));
+        return ds;
     }
 
     public SanPhamTrongGio taoSanPhamTrongGio(Integer idChiTietSanPham, Integer soLuong) {
@@ -161,8 +163,8 @@ public class BanHangTaiQuayService {
         if (!soDienThoai.isEmpty() && !soDienThoai.matches("0[0-9]{9}")) {
             throw new IllegalArgumentException("Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0.");
         }
-        if (!email.isEmpty() && (email.length() > 100 || !email.matches("[^\\s@]+@[^\\s@]+\\.[^\\s@]+"))) {
-            throw new IllegalArgumentException("Email không hợp lệ hoặc dài quá 100 ký tự.");
+        if (!email.isEmpty() && !KiemTraThongTin.laEmailGmail(email)) {
+            throw new IllegalArgumentException("Email phải đúng định dạng ten@gmail.com và tối đa 100 ký tự.");
         }
         // Bảng khách hàng yêu cầu tài khoản và mật khẩu, tự tạo cho khách mua tại quầy.
         String taiKhoan = "quay_" + UUID.randomUUID().toString().replace("-", "");
@@ -289,43 +291,13 @@ public class BanHangTaiQuayService {
 
     private BigDecimal timUuDaiSanPham(GioHangTaiQuay gioHang) {
         BigDecimal tongTienGiam = BigDecimal.ZERO;
-        for (SanPhamTrongGio sanPham : gioHang.getDanhSachSanPham()) {
-            String cauLenhSql = """
-                    SELECT TOP 1 dgg.loai_giam_gia, COALESCE(ctdgg.gia_tri_giam_rieng, dgg.gia_tri_giam_gia) AS gia_tri,
-                           ctdgg.so_tien_giam_toi_da_rieng
-                    FROM chi_tiet_dot_giam_gia ctdgg
-                    JOIN dot_giam_gia dgg ON dgg.id = ctdgg.id_dot_giam_gia
-                    WHERE ctdgg.id_chi_tiet_san_pham = ?
-                      AND ISNULL(ctdgg.xoa_mem, 0) = 0
-                      AND ISNULL(dgg.xoa_mem, 0) = 0
-                      AND ISNULL(ctdgg.trang_thai, 1) = 1
-                      AND ISNULL(dgg.trang_thai, 1) = 1
-                      AND CAST(GETDATE() AS DATE) BETWEEN dgg.ngay_bat_dau AND dgg.ngay_ket_thuc
-                    ORDER BY dgg.muc_uu_tien DESC, gia_tri DESC
-                    """;
-            List<BigDecimal> danhSachTienGiam = jdbcTemplate.query(cauLenhSql, (ketQua, soDong) -> {
-                boolean laTienMat = ketQua.getBoolean("loai_giam_gia");
-                BigDecimal giaTri = ketQua.getBigDecimal("gia_tri");
-                BigDecimal thanhTien = sanPham.getThanhTien();
-                BigDecimal tienGiamSanPham;
-                if (laTienMat) {
-                    tienGiamSanPham = giaTri.multiply(BigDecimal.valueOf(sanPham.getSoLuongMua()));
-                } else {
-                    tienGiamSanPham = thanhTien.multiply(giaTri).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-                }
-                BigDecimal tienGiamToiDa = ketQua.getBigDecimal("so_tien_giam_toi_da_rieng");
-                if (tienGiamToiDa != null && tienGiamToiDa.compareTo(BigDecimal.ZERO) > 0) {
-                    tienGiamSanPham = tienGiamSanPham.min(tienGiamToiDa);
-                }
-                return tienGiamSanPham;
-            }, sanPham.getIdChiTietSanPham());
-            if (!danhSachTienGiam.isEmpty()) {
-                tongTienGiam = tongTienGiam.add(danhSachTienGiam.get(0));
-            }
+        for (SanPhamTrongGio sp : gioHang.getDanhSachSanPham()) {
+            BigDecimal giaSauGiam = GiaGiamSanPham.giaSauGiam(jdbcTemplate, sp.getIdChiTietSanPham(), sp.getDonGia());
+            BigDecimal giam = sp.getDonGia().subtract(giaSauGiam).multiply(BigDecimal.valueOf(sp.getSoLuongMua()));
+            tongTienGiam = tongTienGiam.add(giam);
         }
         return tongTienGiam.setScale(2, RoundingMode.HALF_UP);
     }
-
     @Transactional
     public Integer thanhToan(GioHangTaiQuay gioHang, YeuCauThanhToan yeuCau, NguoiDungDangNhap nhanVien) {
         return thanhToan(gioHang, yeuCau, nhanVien, null);

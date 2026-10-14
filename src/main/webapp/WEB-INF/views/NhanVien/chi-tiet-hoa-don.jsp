@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý hóa đơn - Victor Sport</title>
-    <link rel="stylesheet" href="/css/victorsport.css?v=muot-1">
+    <link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014">
 </head>
 <body>
 <div class="app-shell">

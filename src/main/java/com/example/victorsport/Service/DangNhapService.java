@@ -36,6 +36,8 @@ public class DangNhapService {
         if (emailChuanHoa.isBlank() || matKhau == null || matKhau.isBlank()) {
             return KetQuaDangNhap.thatBai("Vui lòng nhập email và mật khẩu.");
         }
+        if(matKhau.length()<6) return KetQuaDangNhap.thatBai("Mật khẩu phải có ít nhất 6 ký tự.");
+        if(!KiemTraThongTin.laEmailGmail(emailChuanHoa)) return KetQuaDangNhap.thatBai("Email phải đúng định dạng, ví dụ: ten@gmail.com.");
 
         int soLanSai = 0;
         if (soLanDangNhapSai.containsKey(emailChuanHoa)) {
