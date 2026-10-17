@@ -65,7 +65,7 @@ class TaiKhoanTests {
         String idCu = session.getId();
         MockMvcBuilders.standaloneSetup(new DangNhapController(nv, kh, mock(com.example.victorsport.Service.SanPhamOnlineService.class))).build()
                 .perform(post("/login").session(session).param("taiKhoan", "ql@gmail.com").param("matKhau", "123456"))
-                .andExpect(redirectedUrl("/"));
+                .andExpect(redirectedUrl("/quan-ly/san-pham"));
         assertSame(quanLy, session.getAttribute(DangNhapController.KHOA_NGUOI_DUNG_DANG_NHAP));
         assertNotEquals(idCu, session.getId());
         assertNull(session.getAttribute("khachHangOnlineDangNhap"));

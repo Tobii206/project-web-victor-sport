@@ -12,8 +12,23 @@ import java.util.LinkedHashMap;
 @Service
 public class SanPhamOnlineService {
     private final JdbcTemplate jdbc;
+    @org.springframework.beans.factory.annotation.Value("${thanhtoan.qr.ngan-hang:}")
+    private String nganHang = "";
+    @org.springframework.beans.factory.annotation.Value("${thanhtoan.qr.so-tai-khoan:}")
+    private String soTaiKhoan = "";
+    @org.springframework.beans.factory.annotation.Value("${thanhtoan.qr.chu-tai-khoan:}")
+    private String chuTaiKhoan = "";
 
     public SanPhamOnlineService(JdbcTemplate jdbc) { this.jdbc = jdbc; }
+
+    public Map<String,Object> layThongTinNguoiNhan(int idKhachHang) {
+        var ds=jdbc.queryForList("""
+                SELECT ten_khach_hang,so_dien_thoai FROM khach_hang
+                WHERE id=? AND ISNULL(xoa_mem,0)=0 AND ISNULL(trang_thai,1)=1
+                """,idKhachHang);
+        if(ds.isEmpty()) throw new IllegalArgumentException("Tài khoản không còn hoạt động. Vui lòng đăng nhập lại.");
+        return ds.get(0);
+    }
 
     public Map<Integer,Integer> layGioDaLuu(int idKhachHang) {
         kiemTraKhachHang(idKhachHang, false);
@@ -194,6 +209,76 @@ public class SanPhamOnlineService {
 
     @Transactional
     public Integer datHang(Map<Integer, Integer> gio, Integer idKhachHang, String ten, String sdt, String diaChi,boolean muaNgay) {
+        return datHang(gio,idKhachHang,ten,sdt,diaChi,muaNgay,"COD");
+    }
+
+    @Transactional
+    public Integer datHang(Map<Integer, Integer> gio, Integer idKhachHang, String ten, String sdt, String diaChi,boolean muaNgay,String phuongThuc) {
+        return datHang(gio,idKhachHang,ten,sdt,diaChi,muaNgay,phuongThuc,null,null);
+    }
+
+    public BigDecimal tongTienGoc(List<Map<String,Object>> ds) {
+        BigDecimal tong=BigDecimal.ZERO;
+        for(var dong:ds) tong=tong.add((BigDecimal)dong.get("thanh_tien_goc"));
+        return tong;
+    }
+
+    public BigDecimal tinhGiamPhieu(Map<String,Object> phieu,BigDecimal tongGoc) {
+        BigDecimal giaTri=(BigDecimal)phieu.get("gia_tri_giam_gia");
+        BigDecimal giam=giaTri;
+        if(!Boolean.TRUE.equals(phieu.get("loai_phieu_giam_gia")))
+            giam=tongGoc.multiply(giaTri).divide(BigDecimal.valueOf(100),2,java.math.RoundingMode.HALF_UP);
+        BigDecimal toiDa=(BigDecimal)phieu.get("so_tien_giam_toi_da");
+        if(toiDa!=null && toiDa.signum()>0) giam=giam.min(toiDa);
+        return giam.max(BigDecimal.ZERO).min(tongGoc).setScale(2,java.math.RoundingMode.HALF_UP);
+    }
+
+    public List<Map<String,Object>> layPhieuKhaDung(BigDecimal tongGoc) {
+        return layPhieuKhaDung(tongGoc,false);
+    }
+
+    public Integer chonPhieuTotNhat(List<Map<String,Object>> cacPhieu) {
+        Integer id=null;
+        BigDecimal giamTotNhat=BigDecimal.ZERO;
+        for(var phieu:cacPhieu) {
+            BigDecimal giam=(BigDecimal)phieu.get("tien_giam");
+            if(id==null || giam.compareTo(giamTotNhat)>0) {
+                id=((Number)phieu.get("id")).intValue();giamTotNhat=giam;
+            }
+        }
+        return id;
+    }
+
+    // Database hiện chỉ có loại tiền / phần trăm; phiếu freeship được đặt tên riêng.
+    public boolean laPhieuFreeship(Map<String,Object> phieu) {
+        String ten=String.valueOf(phieu.getOrDefault("ten_phieu_giam_gia","")).trim().toLowerCase(java.util.Locale.ROOT);
+        return ten.startsWith("freeship") || ten.startsWith("free ship") || ten.startsWith("miễn phí vận chuyển");
+    }
+
+    public List<Map<String,Object>> layPhieuKhaDung(BigDecimal tongGoc,boolean coDotGiamGia) {
+        var ds=jdbc.queryForList("""
+                SELECT * FROM phieu_giam_gia WHERE ISNULL(xoa_mem,0)=0 AND trang_thai=1
+                  AND CAST(GETDATE() AS DATE) BETWEEN ngay_bat_dau AND ngay_ket_thuc
+                  AND so_luong_su_dung>0 AND ISNULL(hoa_don_toi_thieu,0)<=? ORDER BY id DESC
+                """,tongGoc);
+        var ketQua=new ArrayList<Map<String,Object>>();
+        for(var phieu:ds) {
+            boolean freeship=laPhieuFreeship(phieu);
+            if(coDotGiamGia && !freeship) continue;
+            phieu.put("freeship",freeship);
+            phieu.put("tien_giam",freeship ? BigDecimal.ZERO : tinhGiamPhieu(phieu,tongGoc));
+            ketQua.add(phieu);
+        }
+        return ketQua;
+    }
+
+    @Transactional
+    public Integer datHang(Map<Integer, Integer> gio, Integer idKhachHang, String ten, String sdt, String diaChi,
+                           boolean muaNgay,String phuongThuc,Integer idPhieuGiamGia,BigDecimal tongTienDuKien) {
+        if (!"COD".equals(phuongThuc) && !"QR".equals(phuongThuc))
+            throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ.");
+        if ("QR".equals(phuongThuc) && (nganHang.isBlank() || soTaiKhoan.isBlank() || chuTaiKhoan.isBlank()))
+            throw new IllegalArgumentException("Cửa hàng chưa cấu hình tài khoản nhận tiền QR. Vui lòng chọn COD.");
         ten = ten.trim(); sdt = sdt.trim(); diaChi = diaChi.trim();
         if (ten.isEmpty() || ten.length() > 100 || !sdt.matches("0[0-9]{9}") || diaChi.isEmpty() || diaChi.length() > 255) {
             throw new IllegalArgumentException("Nhập tên, số điện thoại 10 chữ số bắt đầu bằng 0 và địa chỉ nhận hàng hợp lệ.");
@@ -216,20 +301,85 @@ public class SanPhamOnlineService {
             if (capNhat != 1) { throw new IllegalArgumentException("Giá hoặc tồn kho đã thay đổi. Vui lòng kiểm tra lại đơn hàng."); }
         }
         BigDecimal tong = tinhTong(ds);
-        BigDecimal tongGoc = BigDecimal.ZERO;
-        for (var dong : ds) tongGoc = tongGoc.add((BigDecimal) dong.get("thanh_tien_goc"));
+        BigDecimal tongGoc = tongTienGoc(ds);
+        Integer phieuApDung=null;
+        if(idPhieuGiamGia!=null) {
+            var cacPhieu=jdbc.queryForList("""
+                    SELECT * FROM phieu_giam_gia WITH (UPDLOCK,HOLDLOCK)
+                    WHERE id=? AND ISNULL(xoa_mem,0)=0 AND trang_thai=1 AND so_luong_su_dung>0
+                      AND CAST(GETDATE() AS DATE) BETWEEN ngay_bat_dau AND ngay_ket_thuc
+                      AND ISNULL(hoa_don_toi_thieu,0)<=?
+                    """,idPhieuGiamGia,tongGoc);
+            if(cacPhieu.isEmpty()) throw new IllegalArgumentException("Phiếu đã hết hạn, hết lượt hoặc đơn hàng chưa đủ điều kiện. Vui lòng chọn lại.");
+            BigDecimal giamTheoDot=tongGoc.subtract(tong);
+            boolean freeship=laPhieuFreeship(cacPhieu.get(0));
+            if(giamTheoDot.signum()>0 && !freeship)
+                throw new IllegalArgumentException("Đơn có sản phẩm đang giảm giá chỉ được dùng voucher freeship.");
+            if(!freeship) {
+                BigDecimal giamPhieu=tinhGiamPhieu(cacPhieu.get(0),tongGoc);
+                if(giamPhieu.signum()>0) {tong=tongGoc.subtract(giamPhieu);phieuApDung=idPhieuGiamGia;}
+            }
+            // Phí giao hàng hiện bằng 0: freeship không giảm vào tiền hàng, không trừ lượt.
+            if(tongTienDuKien==null || tong.compareTo(tongTienDuKien)!=0)
+                throw new IllegalArgumentException("Ưu đãi hoặc tổng tiền đã thay đổi. Vui lòng kiểm tra lại trước khi đặt hàng.");
+            if(phieuApDung!=null && jdbc.update("UPDATE phieu_giam_gia SET so_luong_su_dung=so_luong_su_dung-1 WHERE id=? AND so_luong_su_dung>0",phieuApDung)!=1)
+                throw new IllegalArgumentException("Phiếu đã hết lượt sử dụng. Vui lòng chọn lại.");
+        }
+        if ("QR".equals(phuongThuc) && (tong.signum() <= 0 || tong.stripTrailingZeros().scale() > 0))
+            throw new IllegalArgumentException("Số tiền chuyển khoản QR phải là số đồng nguyên và lớn hơn 0. Vui lòng chọn COD.");
         Integer id = jdbc.queryForObject("""
                 INSERT INTO hoa_don (id_khach_hang, loai_don, tong_tien, tong_tien_sau_giam,
                     ten_khach_hang, so_dien_thoai_khach_hang, dia_chi_khach_hang, trang_thai_hien_tai, ghi_chu)
-                OUTPUT INSERTED.id VALUES (?, 1, ?, ?, ?, ?, ?, 1, N'Thanh toán khi nhận hàng (COD)')
-                """, Integer.class, idKhachHang, tongGoc, tong, ten, sdt, diaChi);
+                OUTPUT INSERTED.id VALUES (?, 1, ?, ?, ?, ?, ?, 1, ?)
+                """, Integer.class, idKhachHang, tongGoc, tong, ten, sdt, diaChi,
+                "QR".equals(phuongThuc) ? "Chuyển khoản QR - chờ kiểm tra thanh toán" : "Thanh toán khi nhận hàng (COD)");
         for (Map<String, Object> dong : ds) {
             jdbc.update("INSERT INTO hoa_don_chi_tiet (id_hoa_don, id_chi_tiet_san_pham, so_luong, don_gia) VALUES (?, ?, ?, ?)",
                     id, dong.get("id"), dong.get("so_luong_mua"), dong.get("gia_ban"));
         }
-        jdbc.update("INSERT INTO lich_su_hoa_don (id_hoa_don, trang_thai, ghi_chu) VALUES (?, 1, N'Khách đặt hàng online, thanh toán khi nhận hàng')", id);
+        if(phieuApDung!=null) jdbc.update("UPDATE hoa_don SET id_phieu_giam_gia=? WHERE id=?",phieuApDung,id);
+        jdbc.update("INSERT INTO lich_su_hoa_don (id_hoa_don, trang_thai, ghi_chu) VALUES (?, 1, ?)", id,
+                "Khách đặt hàng online, " + ("QR".equals(phuongThuc) ? "chuyển khoản QR" : "thanh toán khi nhận hàng"));
+        if ("QR".equals(phuongThuc)) {
+            var cachThanhToan = jdbc.queryForList("""
+                    SELECT TOP 1 id FROM phuong_thuc_thanh_toan
+                    WHERE nha_cung_cap=N'VietQR' AND trang_thai=1 AND ISNULL(xoa_mem,0)=0 ORDER BY id
+                    """);
+            if (cachThanhToan.isEmpty()) throw new IllegalArgumentException("Chưa có phương thức VietQR đang hoạt động.");
+            String noiDung = "HD" + String.format("%05d",id);
+            String anhQr = "https://img.vietqr.io/image/" + maHoa(nganHang) + "-" + maHoa(soTaiKhoan)
+                    + "-compact2.png?amount=" + tong.toBigInteger() + "&addInfo=" + noiDung + "&accountName=" + maHoa(chuTaiKhoan);
+            jdbc.update("""
+                    INSERT INTO giao_dich_thanh_toan
+                    (id_hoa_don,id_phuong_thuc_thanh_toan,so_tien,trang_thai,ma_tham_chieu,duong_dan_thanh_toan,ghi_chu)
+                    VALUES (?,?,?,N'cho_thanh_toan',?,?,N'QR chuyển khoản - admin kiểm tra tiền trước khi xác nhận')
+                    """, id,cachThanhToan.get(0).get("id"),tong,noiDung,anhQr);
+        }
         // Cùng giao dịch với hóa đơn: đặt hàng lỗi thì giỏ vẫn được giữ nguyên.
         if(idGio!=null) jdbc.update("UPDATE chi_tiet_gio_hang SET xoa_mem=1 WHERE id_gio_hang=? AND ISNULL(xoa_mem,0)=0",idGio);
         return id;
+    }
+
+    private String maHoa(String giaTri) {
+        return java.net.URLEncoder.encode(giaTri.trim(), java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    public Map<String,Object> layThanhToanQr(int id,Integer idKhachHang,boolean dungPhien) {
+        if (!dungPhien && idKhachHang == null) return null;
+        var ds = jdbc.queryForList("""
+                SELECT TOP 1 hd.ma_hoa_don,hd.trang_thai_hien_tai,gd.so_tien,
+                       gd.ma_tham_chieu,gd.duong_dan_thanh_toan
+                FROM hoa_don hd JOIN giao_dich_thanh_toan gd ON gd.id_hoa_don=hd.id
+                JOIN phuong_thuc_thanh_toan pt ON pt.id=gd.id_phuong_thuc_thanh_toan
+                WHERE hd.id=? AND hd.loai_don IN (1,2) AND ISNULL(hd.xoa_mem,0)=0
+                  AND ISNULL(gd.xoa_mem,0)=0 AND pt.nha_cung_cap=N'VietQR'
+                  AND (?=1 OR hd.id_khach_hang=?) ORDER BY gd.id
+                """,id,dungPhien ? 1 : 0,idKhachHang);
+        if (ds.isEmpty()) return null;
+        var thanhToan = ds.get(0);
+        thanhToan.put("ngan_hang",nganHang);
+        thanhToan.put("so_tai_khoan",soTaiKhoan);
+        thanhToan.put("chu_tai_khoan",chuTaiKhoan);
+        return thanhToan;
     }
 }

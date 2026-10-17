@@ -99,7 +99,7 @@ class FormValidationTests {
 
     @Test void thongTinNguoiNhanSaiKhongDuocDatHang() throws Exception {
         var service = mock(SanPhamOnlineService.class);
-        var mvc = MockMvcBuilders.standaloneSetup(new SanPhamOnlineController(service)).build();
+        var mvc = MockMvcBuilders.standaloneSetup(new SanPhamOnlineController(service, mock(com.example.victorsport.Service.DiaChiKhachHangService.class))).build();
         mvc.perform(post("/thanh-toan").param("ten", "Khách").param("sdt", "123")
                 .param("diaChi", "Cầu Giấy"))
                 .andExpect(redirectedUrl("/thanh-toan?loai=gio"))

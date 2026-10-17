@@ -77,6 +77,16 @@
                                     <td><c:out value="${hd.ten_trang_thai}"/></td>
                                     <td><div class="invoice-actions">
                                         <a class="button secondary" href="/quan-ly/hoa-don/${hd.id}">Xem chi tiết</a>
+                                        <c:if test="${currentUser.quanLy and (hd.loai_don == 1 or hd.loai_don == 2) and hd.trang_thai_hien_tai >= 1 and hd.trang_thai_hien_tai <= 3}">
+                                            <form method="post" action="/quan-ly/hoa-don/${hd.id}/xac-nhan-thanh-toan" data-xac-nhan-thanh-toan data-ma-hoa-don="<c:out value='${hd.ma_hoa_don}'/>" data-tong-tien="${hd.tong_tien_sau_giam}" data-nhan-phuong-thuc="Trạng thái" data-tieu-de="Xác nhận thanh toán" data-phuong-thuc="Đang vận chuyển" data-noi-dung="Sau khi xác nhận, đơn hàng sẽ chuyển sang trạng thái Đang vận chuyển.">
+                                                <input type="hidden" name="quayLai" value="danh-sach"><button class="button" type="submit">Xác nhận thanh toán</button>
+                                            </form>
+                                        </c:if>
+                                        <c:if test="${currentUser.quanLy and (hd.loai_don == 1 or hd.loai_don == 2) and hd.trang_thai_hien_tai == 1}">
+                                            <form method="post" action="/quan-ly/hoa-don/${hd.id}/huy" data-xac-nhan-thanh-toan data-ma-hoa-don="<c:out value='${hd.ma_hoa_don}'/>" data-tong-tien="${hd.tong_tien_sau_giam}" data-tieu-de="Hủy hóa đơn" data-nhan-xac-nhan="Hủy hóa đơn" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đã hủy" data-noi-dung="Bạn có chắc muốn hủy hóa đơn này? Số lượng sản phẩm sẽ được hoàn lại tồn kho.">
+                                                <input type="hidden" name="quayLai" value="danh-sach"><button class="button danger" type="submit">Hủy hóa đơn</button>
+                                            </form>
+                                        </c:if>
                                         <c:if test="${currentUser.banHangTaiQuay and hd.trang_thai_hien_tai == 0 and hd.loai_don == 0 and hd.id_nhan_vien == currentUser.id}">
                                             <form method="post" action="/pos/don-cho/mo">
                                                 <input type="hidden" name="idDonCho" value="${hd.id}">
@@ -102,5 +112,6 @@
         </main>
     </div>
 </div>
+<%@ include file="/WEB-INF/views/KhachHang/xac-nhan-thanh-toan.jsp" %>
 </body>
 </html>

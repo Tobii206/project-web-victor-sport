@@ -259,8 +259,8 @@ details p { font-size: 13px; line-height: 1.8; color: #5f6f89; }
 .account-welcome a { display: inline-block; margin-top: 20px; color: #ffb47c; font-size: 13px; line-height: 1.8; }
 .account-form { display: grid; gap: 12px; margin-top: 28px; max-width: 480px; }
 .account-form label { margin-top: 10px; font-size: 13px; font-weight: 600; }
-.account-form input { width: 100%; min-width: 0; padding: 14px; border: 1px solid #d6dfec; border-radius: 8px; background: #f8faff; }
-.account-form input:focus { outline: 2px solid #eab38b; }
+.account-form input, .account-form select { width: 100%; min-width: 0; padding: 14px; border: 1px solid #d6dfec; border-radius: 8px; background: #f8faff; font: inherit; color: inherit; }
+.account-form input:focus, .account-form select:focus { outline: 2px solid #eab38b; }
 .account-form .store-button { margin-top: 16px; }
 .account-error { padding: 16px 20px; margin-bottom: 24px; background: #fff0e4; color: #a84613; border-radius: 10px; }
 @media (max-width: 1000px) {

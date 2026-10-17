@@ -4,6 +4,25 @@ import jakarta.validation.constraints.*;
 
 // Nhận dữ liệu từ form và kiểm tra trước khi lưu.
 public class ThanhToanForm {
+    @Positive(message="Phiếu giảm giá không hợp lệ.")
+    private Integer idPhieuGiamGia;
+    @DecimalMin(value="0",message="Tổng thanh toán không hợp lệ.")
+    private java.math.BigDecimal tongTienDuKien;
+    public Integer getIdPhieuGiamGia(){return idPhieuGiamGia;}
+    public void setIdPhieuGiamGia(Integer value){idPhieuGiamGia=value;}
+    public java.math.BigDecimal getTongTienDuKien(){return tongTienDuKien;}
+    public void setTongTienDuKien(java.math.BigDecimal value){tongTienDuKien=value;}
+    @Positive(message="Địa chỉ đã chọn không hợp lệ.")
+    private Integer idDiaChi;
+    public Integer getIdDiaChi(){return idDiaChi;}
+    public void setIdDiaChi(Integer idDiaChi){this.idDiaChi=idDiaChi;}
+    @Pattern(regexp = "COD|QR", message = "Vui lòng chọn phương thức thanh toán hợp lệ.")
+    @NotBlank(message = "Vui lòng chọn phương thức thanh toán.")
+    private String phuongThuc = "COD";
+
+    public String getPhuongThuc() { return phuongThuc; }
+    public void setPhuongThuc(String phuongThuc) { this.phuongThuc = phuongThuc; }
+
     @NotBlank(message = "Vui lòng nhập tên người nhận.")
     @Size(max = 100, message = "Tên người nhận tối đa 100 ký tự.")
     private String ten;

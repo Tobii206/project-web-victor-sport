@@ -41,7 +41,10 @@ public class PhanQuyenInterceptor implements HandlerInterceptor {
             duocTruyCap = chiXem ? nguoiDung.isXemSanPham() : nguoiDung.isSuaSanPham();
             if (duongDan.equals("/quan-ly/san-pham/them")) duocTruyCap = nguoiDung.isSuaSanPham();
         }
-        else if (thuocMuc(duongDan, "/quan-ly/hoa-don")) duocTruyCap = chiXem ? nguoiDung.isXemHoaDon() : nguoiDung.isSuaHoaDon();
+        else if (thuocMuc(duongDan, "/quan-ly/hoa-don")) {
+            duocTruyCap = nguoiDung.isQuanLy() || (chiXem ? nguoiDung.isXemHoaDon() : nguoiDung.isSuaHoaDon());
+            if (duongDan.endsWith("/xac-nhan-thanh-toan") || duongDan.endsWith("/huy")) duocTruyCap = nguoiDung.isQuanLy();
+        }
         else if (thuocMuc(duongDan, "/quan-ly/khach-hang")) {
             duocTruyCap = nguoiDung.isQuanLy() || (chiXem && nguoiDung.isXemKhachHang());
             if (duongDan.equals("/quan-ly/khach-hang/them")) duocTruyCap = nguoiDung.isQuanLy();

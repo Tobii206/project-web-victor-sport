@@ -29,7 +29,7 @@
                     <span class="account-role"><c:choose><c:when test="${laNhanVien}">Nhân viên</c:when><c:otherwise>Khách hàng</c:otherwise></c:choose></span>
                     <p class="subtle"><c:out value="${thongTin.ma_tai_khoan}"/></p>
                     <c:if test="${laNhanVien}"><a class="store-button" href="${sessionScope.nguoiDungDangNhap.trangLamViec}">Vào trang làm việc</a></c:if>
-                    <c:if test="${not laNhanVien}"><a class="store-button" href="/#san-pham">Khám phá sản phẩm</a></c:if>
+                    <c:if test="${not laNhanVien}"><a class="store-button" href="/don-hang">Đơn hàng của tôi</a><a class="account-back" href="/#san-pham">Tiếp tục mua sắm</a></c:if>
                     <form method="post" action="/tai-khoan/dang-xuat"><button class="account-logout" type="submit">Đăng xuất</button></form>
                 </aside>
                 <section class="account-card">
@@ -63,6 +63,9 @@
             <section class="account-card"><p>Vui lòng đăng nhập để xem thông tin tài khoản.</p><a class="store-button" href="/login?quayLai=tai-khoan">Đăng nhập</a></section>
         </c:otherwise>
     </c:choose>
+    <c:if test="${not laNhanVien and not empty sessionScope.khachHangOnlineDangNhap}">
+        <p><a class="store-button" href="/tai-khoan/dia-chi">Địa chỉ của tôi</a></p>
+    </c:if>
 </main>
 <footer class="store-footer"><div class="store-container footer-content"><a class="store-logo" href="/" aria-label="Trang chủ VictorSport"><img src="/images/logo-victorsport.png" alt="VictorSport" width="210" height="67"></a><a href="/#san-pham">Khám phá sản phẩm</a><small>© VictorSport</small></div></footer>
 </body>

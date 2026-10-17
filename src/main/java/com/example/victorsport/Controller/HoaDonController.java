@@ -7,6 +7,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Map;
@@ -45,6 +49,38 @@ public class HoaDonController {
         model.addAttribute("activeMenu", "hoa-don");
         model.addAttribute("hoaDon", hoaDon);
         model.addAttribute("danhSachSanPham", hoaDonService.laySanPhamTrongHoaDon(id));
+        model.addAttribute("lichSu", hoaDonService.layLichSu(id));
         return "NhanVien/chi-tiet-hoa-don";
+    }
+
+    @PostMapping("/quan-ly/hoa-don/{id}/huy")
+    public String huyHoaDon(@PathVariable int id,@RequestParam(defaultValue="chi-tiet") String quayLai,
+                            HttpSession session,Model model,RedirectAttributes thongBao) {
+        var user = DangNhapController.layNguoiDungDangNhap(session,model);
+        if (user == null) return "redirect:/login";
+        if (!user.isQuanLy()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        try {
+            hoaDonService.huyHoaDon(id,user.getId());
+            thongBao.addFlashAttribute("success","Đã hủy hóa đơn và hoàn lại tồn kho.");
+        } catch (IllegalArgumentException e) { thongBao.addFlashAttribute("error",e.getMessage()); }
+        catch (DataAccessException e) { thongBao.addFlashAttribute("error","Chưa hủy được hóa đơn. Vui lòng thử lại."); }
+        if ("danh-sach".equals(quayLai)) return "redirect:/quan-ly/hoa-don";
+        return "redirect:/quan-ly/hoa-don/" + id;
+    }
+
+    @PostMapping("/quan-ly/hoa-don/{id}/xac-nhan-thanh-toan")
+    public String xacNhanThanhToan(@PathVariable int id,
+                                  @RequestParam(defaultValue="chi-tiet") String quayLai,
+                                  HttpSession session,Model model,RedirectAttributes thongBao) {
+        var user = DangNhapController.layNguoiDungDangNhap(session,model);
+        if (user == null) return "redirect:/login";
+        if (!user.isQuanLy()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        try {
+            hoaDonService.xacNhanThanhToan(id,user.getId());
+            thongBao.addFlashAttribute("success","Đã xác nhận thanh toán. Đơn hàng đang vận chuyển.");
+        } catch (IllegalArgumentException e) { thongBao.addFlashAttribute("error",e.getMessage()); }
+        catch (DataAccessException e) { thongBao.addFlashAttribute("error","Chưa xác nhận được thanh toán. Vui lòng thử lại."); }
+        if ("danh-sach".equals(quayLai)) return "redirect:/quan-ly/hoa-don";
+        return "redirect:/quan-ly/hoa-don/" + id;
     }
 }

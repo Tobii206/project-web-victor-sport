@@ -6,6 +6,8 @@
     </button>
     <div class="account-dropdown" id="cacMucTaiKhoan" inert>
         <a href="/tai-khoan">Thông tin chi tiết</a>
+        <c:if test="${not empty sessionScope.khachHangOnlineDangNhap}"><a href="/don-hang">Đơn hàng của tôi</a></c:if>
+        <c:if test="${not empty sessionScope.khachHangOnlineDangNhap}"><a href="/tai-khoan/dia-chi">Địa chỉ của tôi</a></c:if>
         <c:choose>
             <c:when test="${sessionScope.nguoiDungDangNhap.quanLy}">
                 <a href="/quan-ly/san-pham">Vào trang quản lý</a>

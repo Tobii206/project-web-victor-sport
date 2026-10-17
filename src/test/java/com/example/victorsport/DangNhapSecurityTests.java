@@ -41,7 +41,7 @@ class DangNhapSecurityTests {
             when(nv.dangNhap("nv@gmail.com", "123456")).thenReturn(DangNhapService.KetQuaDangNhap.thanhCong(
                     PhanQuyenTests.taoNguoiDung("Nhân viên", "ORDER_WRITE")));
             mvc.perform(post("/login").param("taiKhoan", "nv@gmail.com").param("matKhau", "123456"))
-                    .andExpect(redirectedUrl("/"));
+                    .andExpect(redirectedUrl("/pos"));
             verify(nv).dangNhap("nv@gmail.com", "123456");
 
             TaiKhoanService kh = context.getBean(TaiKhoanService.class);

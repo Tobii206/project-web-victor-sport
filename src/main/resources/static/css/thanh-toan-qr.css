@@ -1,0 +1,4 @@
+.qr-card { max-width: 620px; margin: 0 auto; text-align: center; }
+.qr-card h1 { font-size: 28px; }
+.qr-card p { line-height: 1.7; }
+.qr-image { display: block; width: 100%; max-width: 360px; height: auto; margin: 24px auto; }

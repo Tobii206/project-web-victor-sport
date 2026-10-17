@@ -43,8 +43,8 @@ public class DangNhapController {
         if ("tai-khoan".equals(quayLai)) {
             model.addAttribute("quayLai", "tai-khoan");
         }
-        if (phienDangNhap.getAttribute(KHOA_NGUOI_DUNG_DANG_NHAP) instanceof NguoiDungDangNhap) {
-            return "redirect:/";
+        if (phienDangNhap.getAttribute(KHOA_NGUOI_DUNG_DANG_NHAP) instanceof NguoiDungDangNhap nguoiDung) {
+            return trangSauDangNhap(nguoiDung);
         }
         if (phienDangNhap.getAttribute("khachHangOnlineDangNhap") instanceof Integer) {
             return "redirect:/";
@@ -58,8 +58,10 @@ public class DangNhapController {
                            HttpServletRequest request,
                            RedirectAttributes thuocTinhChuyenHuong) {
         HttpSession phienDangNhap = request.getSession();
-        if (phienDangNhap.getAttribute(KHOA_NGUOI_DUNG_DANG_NHAP) != null
-                || phienDangNhap.getAttribute("khachHangOnlineDangNhap") != null) {
+        if (phienDangNhap.getAttribute(KHOA_NGUOI_DUNG_DANG_NHAP) instanceof NguoiDungDangNhap nguoiDung) {
+            return trangSauDangNhap(nguoiDung);
+        }
+        if (phienDangNhap.getAttribute("khachHangOnlineDangNhap") != null) {
             return "redirect:/";
         }
         try {
@@ -72,7 +74,7 @@ public class DangNhapController {
                 request.changeSessionId();
                 phienDangNhap.removeAttribute("khachHangOnlineDangNhap");
                 phienDangNhap.setAttribute(KHOA_NGUOI_DUNG_DANG_NHAP, ketQua.getNguoiDung());
-                return "redirect:/";
+                return trangSauDangNhap(ketQua.getNguoiDung());
             }
             Integer id = taiKhoanService.dangNhapKhachHang(taiKhoan, matKhau);
             var gioDaLuu=sanPhamOnlineService.layGioDaLuu(id);
@@ -95,6 +97,11 @@ public class DangNhapController {
     public String dangXuat(HttpSession phienDangNhap) {
         phienDangNhap.invalidate();
         return "redirect:/login";
+    }
+
+    private String trangSauDangNhap(NguoiDungDangNhap nguoiDung) {
+        if (nguoiDung.isQuanLy()) return "redirect:/quan-ly/san-pham";
+        return "redirect:/pos";
     }
 
     private void chongLuuCacheTrangDangNhap(HttpServletResponse phanHoi) {

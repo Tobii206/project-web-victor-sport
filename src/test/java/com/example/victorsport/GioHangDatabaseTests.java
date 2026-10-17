@@ -26,7 +26,7 @@ class GioHangDatabaseTests {
         assertEquals(Map.of(9,2),session.getAttribute("gioHangOnline"));assertNull(session.getAttribute("muaNgayOnline"));
     }
     @Test void themVaSuaGhiDungKhachDaDangNhap() throws Exception {
-        var sp=mock(SanPhamOnlineService.class);var mvc=MockMvcBuilders.standaloneSetup(new SanPhamOnlineController(sp)).build();
+        var sp=mock(SanPhamOnlineService.class);var mvc=MockMvcBuilders.standaloneSetup(new SanPhamOnlineController(sp, mock(com.example.victorsport.Service.DiaChiKhachHangService.class))).build();
         when(sp.layPhienBanTheoId(9)).thenReturn(Map.of("id_san_pham",1));
         when(sp.themVaoGioDaLuu(7,9,2)).thenReturn(Map.of(9,2));
         when(sp.suaGioDaLuu(7,9,0)).thenReturn(Map.of());var s=khach(7);
@@ -40,7 +40,7 @@ class GioHangDatabaseTests {
         var sp=mock(SanPhamOnlineService.class);var s=khach(7);s.setAttribute("gioHangOnline",Map.of(99,5));
         var gio=new LinkedHashMap<>(Map.of(9,2));when(sp.layGioDaLuu(7)).thenReturn(gio);
         when(sp.datHang(gio,7,"Khách","0325327602","Cầu Giấy",false)).thenThrow(new IllegalArgumentException("Hết hàng"));
-        var mvc=MockMvcBuilders.standaloneSetup(new SanPhamOnlineController(sp)).build();
+        var mvc=MockMvcBuilders.standaloneSetup(new SanPhamOnlineController(sp, mock(com.example.victorsport.Service.DiaChiKhachHangService.class))).build();
         mvc.perform(post("/thanh-toan").session(s).param("ten","Khách").param("sdt","0325327602").param("diaChi","Cầu Giấy"))
                 .andExpect(flash().attribute("error","Hết hàng"));
         assertEquals(Map.of(9,2),s.getAttribute("gioHangOnline"));
@@ -53,7 +53,7 @@ class GioHangDatabaseTests {
         var sp=mock(SanPhamOnlineService.class);var s=khach(7);
         s.setAttribute("gioHangOnline",Map.of(9,2));s.setAttribute("muaNgayOnline",new LinkedHashMap<>(Map.of(20,1)));
         when(sp.datHang(Map.of(20,1),7,"Khách","0325327602","Cầu Giấy",true)).thenReturn(10);
-        MockMvcBuilders.standaloneSetup(new SanPhamOnlineController(sp)).build()
+        MockMvcBuilders.standaloneSetup(new SanPhamOnlineController(sp, mock(com.example.victorsport.Service.DiaChiKhachHangService.class))).build()
                 .perform(post("/thanh-toan").session(s).param("loai","mua").param("ten","Khách").param("sdt","0325327602").param("diaChi","Cầu Giấy"));
         assertEquals(Map.of(9,2),s.getAttribute("gioHangOnline"));verify(sp,never()).layGioDaLuu(anyInt());
     }

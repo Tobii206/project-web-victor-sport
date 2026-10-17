@@ -113,6 +113,6 @@ class SanPhamOnlineTests {
     }
 
     private MockMvc trang(SanPhamOnlineService service) {
-        return MockMvcBuilders.standaloneSetup(new SanPhamOnlineController(service)).build();
+        return MockMvcBuilders.standaloneSetup(new SanPhamOnlineController(service, mock(com.example.victorsport.Service.DiaChiKhachHangService.class))).build();
     }
 }
