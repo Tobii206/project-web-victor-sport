@@ -7,9 +7,9 @@
     </div>
     <nav class="menu-list" aria-label="Menu quản lý">
         <c:if test="${currentUser.quanLy}">
-        <span class="menu-item" aria-disabled="true" title="Chưa triển khai">
+        <a class="menu-item ${activeMenu == 'thong-ke' ? 'active' : ''}" href="/quan-ly/thong-ke" aria-current="${activeMenu == 'thong-ke' ? 'page' : 'false'}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v18h17M8 17v-5M13 17V8M18 17V5"/></svg><span>Thống kê</span>
-        </span>
+        </a>
         </c:if>
         <p class="menu-caption">BÁN HÀNG</p>
         <c:if test="${currentUser.banHangTaiQuay}"><a class="menu-item ${activeMenu == 'ban-hang' ? 'active' : ''}" href="/pos" aria-current="${activeMenu == 'ban-hang' ? 'page' : 'false'}">
@@ -28,9 +28,9 @@
         </a>
         </c:if>
         <c:if test="${currentUser.quanLy}">
-        <span class="menu-item" aria-disabled="true" title="Chưa triển khai">
+        <a class="menu-item ${activeMenu == 'van-chuyen' ? 'active' : ''}" href="/quan-ly/van-chuyen" aria-current="${activeMenu == 'van-chuyen' ? 'page' : 'false'}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v12H3zM14 10h4l3 4v4h-7M14 14h7"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg><span>Quản lý vận chuyển</span>
-        </span>
+        </a>
         <p class="menu-caption">ƯU ĐÃI</p>
         <a class="menu-item ${activeMenu == 'dot-giam-gia' ? 'active' : ''}" href="/quan-ly/dot-giam-gia" aria-current="${activeMenu == 'dot-giam-gia' ? 'page' : 'false'}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8l10 10-8 8L3 11z"/><circle cx="7.5" cy="7.5" r="1"/><path d="m11 10 5 5"/></svg><span>Quản lý đợt giảm giá</span>

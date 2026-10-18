@@ -50,7 +50,8 @@ public class PhanQuyenInterceptor implements HandlerInterceptor {
             if (duongDan.equals("/quan-ly/khach-hang/them")) duocTruyCap = nguoiDung.isQuanLy();
         }
         else if (thuocMuc(duongDan, "/quan-ly/dot-giam-gia") || thuocMuc(duongDan, "/quan-ly/phieu-giam-gia")
-                || thuocMuc(duongDan, "/quan-ly/nhan-vien") || thuocMuc(duongDan, "/quan-ly/gio-hang")) duocTruyCap = nguoiDung.isQuanLy();
+                || thuocMuc(duongDan, "/quan-ly/nhan-vien") || thuocMuc(duongDan, "/quan-ly/gio-hang")
+                || thuocMuc(duongDan, "/quan-ly/thong-ke") || thuocMuc(duongDan, "/quan-ly/van-chuyen")) duocTruyCap = nguoiDung.isQuanLy();
         if (duocTruyCap) return true;
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setHeader("Cache-Control", "no-store");

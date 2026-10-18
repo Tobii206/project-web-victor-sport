@@ -1,0 +1,49 @@
+.overview-page { display: grid; gap: 24px; }
+.overview-intro { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 8px 0; }
+.overview-intro h2 { margin: 6px 0 10px; font-size: 28px; letter-spacing: -.5px; }
+.overview-intro p { margin: 0; line-height: 1.65; }
+.overview-eyebrow { font-size: 11px; letter-spacing: 1.8px; font-weight: 700; color: #a84b12; margin: 0 0 8px; }
+.overview-filter { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)) auto; align-items: end; gap: 16px; padding: 22px; }
+.overview-filter .field,.shipping-fee-form .field { margin: 0; }
+.overview-cards { display: grid; grid-template-columns: 1.5fr repeat(3,1fr); gap: 18px; }
+.overview-card { background: white; border: 1px solid #e2e9f3; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.overview-card span { color: #536780; font-size: 14px; }
+.overview-card strong { font-size: clamp(22px,2vw,32px); line-height: 1.25; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.overview-card small { font-size: 12px; color: #718299; }
+.overview-card.featured { background: #142b50; color: white; border-color: #142b50; }
+.overview-card.featured span,.overview-card.featured small { color: #ccd9eb; }
+.overview-pill { display: inline-flex; padding: 8px 14px; background: #f0f4fb; border-radius: 30px; color: #405b7d; font-size: 12px; white-space: nowrap; }
+.overview-page .panel-header p { margin: 7px 0 0; font-size: 13px; }
+.overview-table { overflow-x: auto; }
+.overview-table .table { min-width: 550px; }
+.money { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.overview-table a { color: #193b65; text-decoration: none; font-weight: 600; }
+.overview-rank { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: #eef3fc; font-weight: 700; }
+.overview-empty { padding: 32px 16px !important; text-align: center; color: #64748b; }
+.overview-note { color: #687b92; font-size: 12px; line-height: 1.7; margin: 18px 0 0; }
+.revenue-chart { display: flex; height: 255px; gap: 12px; overflow-x: auto; padding: 12px 0; border-bottom: 1px solid #e6ecf5; }
+.revenue-day { flex: 1 0 30px; min-width: 30px; text-align: center; }
+.revenue-track { height: 205px; position: relative; border-bottom: 1px solid #e6ecf5; }
+.revenue-track span { display: block; position: absolute; bottom: 0; width: 70%; max-width: 48px; left: 50%; transform: translateX(-50%); border-radius: 6px 6px 0 0; background: #ffb078; }
+.revenue-day:hover .revenue-track span { background: #da7d3d; }
+.revenue-day small { display: block; font-size: 10px; color: #64748b; margin-top: 8px; }
+.overview-details { margin-top: 20px; }
+.overview-details summary { color: #193b65; cursor: pointer; font-size: 13px; padding: 8px 0; }
+.overview-pagination { display: flex; gap: 16px; align-items: center; justify-content: center; margin-top: 20px; font-size: 13px; }
+.shipping-search { grid-column: span 2; }
+.shipping-table { min-width: 950px !important; }
+.shipping-table .shipping-address { min-width: 220px; max-width: 320px; line-height: 1.7; }
+.shipping-state { display: inline-flex; white-space: nowrap; border-radius: 24px; padding: 7px 12px; background: #fff3e3; color: #915a1b; font-size: 12px; font-weight: 600; }
+.shipping-state.state-4 { background: #eaf0ff; color: #345ba0; }
+.shipping-state.state-5 { background: #e5f5ed; color: #237350; }
+.shipping-state.state-6 { background: #fff0f0; color: #aa3d47; }
+.shipping-setup { padding: 22px; margin-top: 20px; border: 1px dashed #d7dfec; border-radius: 14px; background: #f8faff; line-height: 1.7; }
+.shipping-setup p { margin: 8px 0 0; font-size: 14px; }
+.shipping-fee-form { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 18px; margin-top: 24px; }
+.shipping-fee-action { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.shipping-fee-result { border-radius: 12px; background: #e8f6ee; color: #216245; padding: 20px; margin-top: 20px; font-size: 16px; line-height: 1.6; }
+.shipping-fee-result.error { background: #fff0eb; color: #a33d24; }
+.shipping-fee-result[hidden] { display: none; }
+@media(max-width:1200px) { .overview-cards { grid-template-columns: repeat(2,minmax(0,1fr)); } .overview-filter { grid-template-columns: repeat(2,minmax(0,1fr)); } .shipping-search { grid-column: span 1; } }
+@media(max-width:720px) { .overview-intro { align-items: start; flex-direction: column; } .overview-filter,.shipping-fee-form { grid-template-columns: 1fr; } .overview-card { padding: 18px; } .overview-page { gap: 18px; } .overview-page .panel-header { flex-wrap: wrap; gap: 12px; } }
+@media(prefers-reduced-motion:reduce) { .overview-page * { scroll-behavior: auto; } }
