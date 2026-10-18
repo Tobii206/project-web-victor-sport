@@ -5,14 +5,14 @@
 <fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html>
 <html lang="vi"><head>
-    <link rel="icon" type="image/svg+xml" href="/images/favicon-victorsport.svg?v=1"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="/logo/favicon-victorsport.svg?v=1"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><c:out value="${sanPham.ten_san_pham}" default="Chi tiết sản phẩm"/> — VictorSport</title>
-<link rel="stylesheet" href="/css/trang-chu.css?v=gia-giam-1"></head>
+<link rel="stylesheet" href="/css/trang-chu.css?v=gia-giam-1"><link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head>
 <body><%@ include file="/WEB-INF/views/KhachHang/dau-trang-online.jsp" %>
 <main class="store-container online-container">
     <p class="online-breadcrumb"><a href="/">Trang chủ</a> / <a href="/#san-pham">Sản phẩm</a> / <c:out value="${sanPham.ten_san_pham}"/></p>
-    <c:if test="${not empty error}"><div class="account-error" role="alert"><c:out value="${error}"/></div></c:if>
-    <c:if test="${not empty success}"><div class="online-success" role="status"><c:out value="${success}"/> <a href="/gio-hang">Xem giỏ hàng →</a></div></c:if>
+    <c:if test="${not empty error}"><div class="account-error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
+    <c:if test="${not empty success}"><div class="online-success" role="status" data-vs-flash="success"><c:out value="${success}"/> <a href="/gio-hang">Xem giỏ hàng →</a></div></c:if>
     <c:if test="${not empty sanPham}">
     <div class="online-detail">
         <section class="online-gallery account-card">
@@ -149,4 +149,4 @@
     </div>
     <img src="/images/huong-dan-chon-size.png" alt="Bảng quy đổi size Việt Nam, size US, size UK và chiều dài bàn chân theo centimet">
 </dialog>
-<script src="/js/san-pham-online.js?v=gia-giam-1"></script></body></html>
+<script src="/js/san-pham-online.js?v=20261018-live"></script></body></html>

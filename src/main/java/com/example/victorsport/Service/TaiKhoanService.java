@@ -19,6 +19,15 @@ public class TaiKhoanService {
 
     public synchronized void moKhoaSauDoiMatKhau(String taiKhoan) {
         if(taiKhoan!=null) soLanSai.remove(taiKhoan.trim().toLowerCase(java.util.Locale.ROOT));
+        if(taiKhoan!=null) for(var kh:jdbcTemplate.queryForList("SELECT id FROM khach_hang WHERE LOWER(ten_tai_khoan)=?",taiKhoan.trim().toLowerCase(java.util.Locale.ROOT)))
+            new BaoMatTaiKhoanService(jdbcTemplate).moKhoa(((Number)kh.get("id")).intValue(),false);
+    }
+
+    public synchronized void moKhoaBangEmail(String email) {
+        if(email==null) return;
+        soLanSai.remove(email.trim().toLowerCase(java.util.Locale.ROOT));
+        for(var kh:jdbcTemplate.queryForList("SELECT ten_tai_khoan FROM khach_hang WHERE LOWER(email)=?",email.trim().toLowerCase(java.util.Locale.ROOT)))
+            moKhoaSauDoiMatKhau(kh.get("ten_tai_khoan").toString());
     }
 
     public synchronized Integer dangNhapKhachHang(String taiKhoan, String matKhau) {
@@ -48,6 +57,9 @@ public class TaiKhoanService {
         }
         if (!danhSach.isEmpty()) {
             Map<String, Object> khachHang = danhSach.get(0);
+            var baoMat=new BaoMatTaiKhoanService(jdbcTemplate);
+            int idKh=((Number)khachHang.get("id")).intValue();
+            if(baoMat.biKhoa(idKh,false)) throw new IllegalArgumentException("Tài khoản đã bị khóa. Vui lòng liên hệ cửa hàng.");
             // Tên tài khoản và email cùng dùng một bộ đếm số lần nhập sai.
             taiKhoan=khachHang.getOrDefault("ten_tai_khoan",taiKhoan).toString().trim().toLowerCase(java.util.Locale.ROOT);
             soLan=soLanSai.getOrDefault(taiKhoan,0);
@@ -63,11 +75,13 @@ public class TaiKhoanService {
                 }
             }
             if (dungMatKhau) {
+                baoMat.dangNhapDung(idKh,false);
                 soLanSai.remove(taiKhoan);
                 return ((Number) khachHang.get("id")).intValue();
             }
         }
         soLan++;
+        if(!danhSach.isEmpty()) soLan=Math.max(soLan,new BaoMatTaiKhoanService(jdbcTemplate).ghiSai(((Number)danhSach.get(0).get("id")).intValue(),false));
         soLanSai.put(taiKhoan, soLan);
         if (soLan >= 5) {
             throw new IllegalArgumentException("Bạn đã nhập sai 5 lần. Tài khoản bị khóa, vui lòng liên hệ cửa hàng.");

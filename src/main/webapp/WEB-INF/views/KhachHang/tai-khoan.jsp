@@ -4,22 +4,23 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <link rel="icon" type="image/svg+xml" href="/images/favicon-victorsport.svg?v=1">
+    <link rel="icon" type="image/svg+xml" href="/logo/favicon-victorsport.svg?v=1">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thông tin tài khoản — VictorSport</title>
     <link rel="stylesheet" href="/css/trang-chu.css?v=muot-1">
-</head>
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head>
 <body class="store-page">
 <header class="store-header">
-    <a class="store-logo" href="/" aria-label="Trang chủ VictorSport"><img src="/images/logo-victorsport-trong-suot.png" alt="VictorSport" width="210" height="67"></a>
+    <a class="store-logo" href="/" aria-label="Trang chủ VictorSport"><img src="/logo/logo-nobackgroud.png" alt="VictorSport" width="210" height="67"></a>
     <nav aria-label="Điều hướng chính"><a href="/">Trang chủ</a><a href="/#san-pham">Sản phẩm</a><a href="/#thuong-hieu">Thương hiệu</a><a href="/#gioi-thieu">Về VictorSport</a></nav>
     <%@ include file="/WEB-INF/views/KhachHang/icon-thanh-menu.jsp" %>
 </header>
 <main class="account-container store-container">
+<c:if test="${not empty success}"><p role="status" data-vs-flash="success"><c:out value="${success}"/></p></c:if>
     <a class="account-back" href="/">← Về trang chủ</a>
     <div class="account-heading"><p class="eyebrow">TÀI KHOẢN VICTORSPORT</p><h1>Thông tin tài khoản</h1><p>Đồng hành cùng bạn trong mỗi trải nghiệm tại VictorSport.</p></div>
-    <c:if test="${not empty error}"><div class="account-error" role="alert"><c:out value="${error}"/></div></c:if>
+    <c:if test="${not empty error}"><div class="account-error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
     <c:choose>
         <c:when test="${not empty thongTin}">
             <div class="account-layout">
@@ -34,6 +35,7 @@
                 </aside>
                 <section class="account-card">
                     <h2>Thông tin cá nhân</h2>
+                    <c:if test="${not laNhanVien}"><p><a href="/tai-khoan/chinh-sua">Chỉnh sửa thông tin</a> · <a href="/tai-khoan/doi-mat-khau">Đổi mật khẩu</a></p></c:if>
                     <p class="subtle">Thông tin đang được lưu trong tài khoản của bạn.</p>
                     <dl class="account-info">
                         <div><dt>Họ và tên</dt><dd><c:out value="${thongTin.ho_ten}"/></dd></div>
@@ -67,6 +69,6 @@
         <p><a class="store-button" href="/tai-khoan/dia-chi">Địa chỉ của tôi</a></p>
     </c:if>
 </main>
-<footer class="store-footer"><div class="store-container footer-content"><a class="store-logo" href="/" aria-label="Trang chủ VictorSport"><img src="/images/logo-victorsport.png" alt="VictorSport" width="210" height="67"></a><a href="/#san-pham">Khám phá sản phẩm</a><small>© VictorSport</small></div></footer>
+<footer class="store-footer"><div class="store-container footer-content"><a class="store-logo" href="/" aria-label="Trang chủ VictorSport"><img src="/logo/logo.png" alt="VictorSport" width="210" height="67"></a><a href="/#san-pham">Khám phá sản phẩm</a><small>© VictorSport</small></div></footer>
 </body>
 </html>

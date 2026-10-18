@@ -4,12 +4,12 @@
 <fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html><html lang="vi"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${currentUser.suaSanPham ? 'Quản lý sản phẩm' : 'Xem tồn kho'} — VictorSport</title>
-<link rel="icon" href="/images/favicon-victorsport.svg"><link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=admin-20261014">
-</head><body><div class="app-shell"><jsp:include page="/WEB-INF/views/Admin/menu.jsp"/><div class="main-area">
+<link rel="icon" href="/logo/favicon-victorsport.svg"><link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=admin-20261014">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/views/Admin/menu.jsp"/><div class="main-area">
 <%@ include file="/WEB-INF/views/Admin/dau-trang-san-pham.jsp" %>
 <main class="content-layout"><section class="panel"><div class="panel-header"><h2>Danh sách sản phẩm</h2><c:if test="${currentUser.suaSanPham}"><a class="button" href="/quan-ly/san-pham/them">+ Thêm sản phẩm</a></c:if></div><div class="panel-body">
-<c:if test="${not empty error}"><div class="alert error" role="alert"><c:out value="${error}"/></div></c:if>
-<c:if test="${not empty success}"><div class="alert success" role="status"><c:out value="${success}"/></div></c:if>
+<c:if test="${not empty error}"><div class="alert error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
+<c:if test="${not empty success}"><div class="alert success" role="status" data-vs-flash="success"><c:out value="${success}"/></div></c:if>
 <form method="get" class="product-admin-filters">
     <div class="field"><label for="tuKhoa">Tên hoặc mã sản phẩm</label><input class="input" id="tuKhoa" name="tuKhoa" value="<c:out value='${loc.tuKhoa}'/>" placeholder="Tìm sản phẩm..."></div>
     <c:forEach items="${danhMuc}" var="dm"><c:if test="${dm.truong == 'id_thuong_hieu' or dm.truong == 'id_chat_lieu' or dm.truong == 'id_vi_tri_thi_dau'}">
@@ -26,7 +26,7 @@
 <td><strong><c:out value="${sp.ten_san_pham}"/></strong><div class="muted"><c:out value="${sp.ma_san_pham}"/> · ${sp.so_mau} mẫu</div></td><td><c:out value="${sp.ten_thuong_hieu}"/></td>
 <td><c:choose><c:when test="${not empty sp.gia}"><fmt:formatNumber value="${sp.gia}" maxFractionDigits="0"/> đ</c:when><c:otherwise>Chưa có giá</c:otherwise></c:choose></td><td>${sp.ton_kho}</td>
 <td><span class="product-admin-tag ${sp.trang_thai_kinh_doanh ? '' : 'off'}">${sp.trang_thai_kinh_doanh ? 'Đang bán' : 'Ngừng bán'}</span></td>
-<td><div class="product-admin-actions"><a class="button secondary" href="/quan-ly/san-pham/${sp.id}">${currentUser.suaSanPham ? 'Chi tiết / Sửa' : 'Xem tồn kho'}</a><c:if test="${currentUser.suaSanPham}"><form method="post" action="/quan-ly/san-pham/${sp.id}/xoa" onsubmit="return confirm('Xóa sản phẩm khỏi danh sách bán? Dữ liệu hóa đơn vẫn được giữ lại.');"><button class="button danger">Xóa</button></form></c:if></div></td>
+<td><div class="product-admin-actions"><a class="button secondary" href="/quan-ly/san-pham/${sp.id}">${currentUser.suaSanPham ? 'Chi tiết / Sửa' : 'Xem tồn kho'}</a><c:if test="${currentUser.suaSanPham}"><form method="post" action="/quan-ly/san-pham/${sp.id}/xoa" data-vs-confirm="Bạn muốn xóa sản phẩm khỏi danh sách bán? Dữ liệu hóa đơn vẫn được giữ lại." data-vs-title="Xóa sản phẩm" data-vs-button="Xóa sản phẩm" data-vs-tone="danger"><button class="button danger">Xóa</button></form></c:if></div></td>
 </tr></c:forEach>
 <c:if test="${empty sanPham}"><tr><td colspan="7">Không có sản phẩm phù hợp.</td></tr></c:if>
 </tbody></table></div></div></section></main></div></div></body></html>

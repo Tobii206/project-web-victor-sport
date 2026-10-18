@@ -16,7 +16,7 @@ public class NhanVienForm {
     @Size(max = 100, message = "Email tối đa 100 ký tự.")
     private String email;
 
-    @Size(min = 6, max = 255, message = "Mật khẩu phải có ít nhất 6 ký tự và tối đa 255 ký tự.")
+    @Size(min = 6, max = 72, message = "Mật khẩu phải có ít nhất 6 ký tự và tối đa 72 ký tự.")
     @Pattern(regexp = ".*\\S.*", message = "Mật khẩu không được chỉ chứa khoảng trắng.")
     private String mat_khau;
 

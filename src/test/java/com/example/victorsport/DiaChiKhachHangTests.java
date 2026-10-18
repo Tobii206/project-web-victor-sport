@@ -84,7 +84,7 @@ class DiaChiKhachHangTests {
         MockMvcBuilders.standaloneSetup(new SanPhamOnlineController(online,dc)).build()
                 .perform(post("/thanh-toan").session(khach()).param("idDiaChi","10").param("ten","Long")
                         .param("sdt","0325327602").param("diaChi","Địa chỉ giả"))
-                .andExpect(redirectedUrl("/gio-hang")).andExpect(flash().attributeExists("success"));
+                .andExpect(redirectedUrl("/don-hang/20")).andExpect(flash().attributeExists("success"));
         verify(online).datHang(anyMap(),eq(7),eq("Long"),eq("0325327602"),eq("Số 1, Phường Cầu Giấy, Thành phố Hà Nội"),eq(false));
     }
 

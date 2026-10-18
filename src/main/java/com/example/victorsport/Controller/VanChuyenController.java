@@ -20,6 +20,9 @@ import java.util.Map;
 public class VanChuyenController {
     private final VanChuyenService service;
     private final GhnService ghn;
+    @org.springframework.beans.factory.annotation.Autowired
+    private com.example.victorsport.Service.GiaoHangGhnService giaoHang;
+
     public VanChuyenController(VanChuyenService service,GhnService ghn) { this.service=service; this.ghn=ghn; }
 
     private boolean quanLy(HttpSession session,Model model) {
@@ -36,6 +39,8 @@ public class VanChuyenController {
         model.addAttribute("activeMenu","van-chuyen"); model.addAttribute("tieuDeQuanLy","Quản lý vận chuyển");
         model.addAttribute("tuKhoa",tuKhoa); model.addAttribute("trangThai",trangThai);
         model.addAttribute("ghnSanSang",ghn.sanSang());
+        if(session.getAttribute("csrfVanChuyen")==null) session.setAttribute("csrfVanChuyen",java.util.UUID.randomUUID().toString());
+        model.addAttribute("csrfVanChuyen",session.getAttribute("csrfVanChuyen"));
         try { model.addAllAttributes(service.danhSach(tuKhoa,trangThai,trang)); }
         catch(IllegalArgumentException e) { model.addAttribute("error",e.getMessage()); }
         catch(DataAccessException e) { model.addAttribute("error","Chưa tải được danh sách vận chuyển. Vui lòng thử lại."); }
@@ -68,6 +73,19 @@ public class VanChuyenController {
         try { return traLoi(HttpStatus.OK,Map.of("phi",ghn.tinhPhi(form))); }
         catch(IllegalArgumentException e) { return traLoi(HttpStatus.BAD_REQUEST,Map.of("error",e.getMessage())); }
         catch(IllegalStateException e) { return traLoi(HttpStatus.SERVICE_UNAVAILABLE,Map.of("error",e.getMessage())); }
+    }
+    @PostMapping("/{id}/ghn/{thaoTac:tao|dong-bo}")
+    public String xuLyGhn(@PathVariable int id,@PathVariable String thaoTac,@RequestParam(required=false) String csrfVanChuyen,
+                          HttpSession session,Model model,org.springframework.web.servlet.mvc.support.RedirectAttributes f) {
+        if(!quanLy(session,model)) return "redirect:/login";
+        if(csrfVanChuyen==null || !csrfVanChuyen.equals(session.getAttribute("csrfVanChuyen")))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        try {
+            if("tao".equals(thaoTac)) f.addFlashAttribute("success","Đã tạo vận đơn GHN thử nghiệm: "+giaoHang.taoVanDon(id));
+            else {giaoHang.dongBo(id);f.addFlashAttribute("success","Đã cập nhật trạng thái từ GHN.");}
+        }catch(IllegalArgumentException | IllegalStateException e){f.addFlashAttribute("error",e.getMessage());}
+        catch(DataAccessException e){f.addFlashAttribute("error","Chưa lưu được thông tin vận đơn. Vui lòng thử lại; hệ thống giữ nguyên mã đơn shop để tránh tạo trùng.");}
+        return "redirect:/quan-ly/van-chuyen";
     }
     private ResponseEntity<?> traLoi(HttpStatus status,Object body) {
         return ResponseEntity.status(status).cacheControl(CacheControl.noStore()).body(body);

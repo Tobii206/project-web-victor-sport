@@ -3,12 +3,12 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Đơn hàng của tôi — VictorSport</title><link rel="icon" href="/images/favicon-victorsport.svg">
-<link rel="stylesheet" href="/css/trang-chu.css?v=gia-giam-1"><link rel="stylesheet" href="/css/don-hang.css?v=2"></head>
+<title>Đơn hàng của tôi — VictorSport</title><link rel="icon" href="/logo/favicon-victorsport.svg">
+<link rel="stylesheet" href="/css/trang-chu.css?v=gia-giam-1"><link rel="stylesheet" href="/css/don-hang.css?v=2"><link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head>
 <body class="store-page"><%@ include file="/WEB-INF/views/KhachHang/dau-trang-online.jsp" %>
 <main class="store-container online-container">
-<c:if test="${not empty error}"><div class="account-error" role="alert"><c:out value="${error}"/></div></c:if>
-<c:if test="${not empty success}"><div class="online-success" role="status"><c:out value="${success}"/></div></c:if>
+<c:if test="${not empty error}"><div class="account-error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
+<c:if test="${not empty success}"><div class="online-success" role="status" data-vs-flash="success"><c:out value="${success}"/></div></c:if>
 <div class="don-hang-heading"><div><p class="eyebrow">VICTORSPORT</p><h1>Đơn hàng của tôi</h1><p class="subtle">Theo dõi đơn hàng và xác nhận khi bạn đã nhận được hàng.</p></div><a class="account-back" href="/#san-pham">Tiếp tục mua sắm →</a></div>
 <c:forEach items="${donHang}" var="don">
 <section class="account-card don-hang-card">
@@ -16,9 +16,9 @@
 <span class="don-hang-status ${don.trang_thai_hien_tai == 5 ? 'da-nhan' : ''} ${don.trang_thai_hien_tai == 6 ? 'da-huy' : ''}"><c:out value="${don.ten_trang_thai}"/></span></div>
 <div class="don-hang-row"><p class="online-price"><fmt:formatNumber value="${don.tong_tien_sau_giam}" maxFractionDigits="0"/> đ</p>
 <div class="don-hang-actions"><a class="store-button online-buy-now" href="/don-hang/${don.id}">Xem chi tiết</a>
-<c:if test="${don.trang_thai_hien_tai == 1}"><form method="post" action="/don-hang/${don.id}/huy" onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này?');">
+<c:if test="${don.trang_thai_hien_tai == 1}"><form method="post" action="/don-hang/${don.id}/huy" data-vs-confirm="Bạn muốn hủy đơn hàng này? Sản phẩm đã chọn trong đơn sẽ được hoàn lại tồn kho." data-vs-title="Hủy đơn hàng" data-vs-button="Hủy đơn hàng" data-vs-tone="danger">
 <input type="hidden" name="quayLai" value="danh-sach"><button class="store-button don-hang-cancel" type="submit">Hủy đơn</button></form></c:if>
-<c:if test="${don.trang_thai_hien_tai == 4}"><form method="post" action="/don-hang/${don.id}/da-nhan-hang" onsubmit="return confirm('Bạn xác nhận đã nhận được hàng?');">
+<c:if test="${don.trang_thai_hien_tai == 4}"><form method="post" action="/don-hang/${don.id}/da-nhan-hang" data-vs-confirm="Hãy kiểm tra hàng trước khi xác nhận. Sau khi xác nhận, đơn hàng được đánh dấu đã nhận và khóa trạng thái." data-vs-title="Xác nhận đã nhận hàng" data-vs-button="Đã nhận hàng" data-vs-tone="normal">
 <input type="hidden" name="quayLai" value="danh-sach"><button class="store-button" type="submit">Đã nhận được hàng</button></form></c:if>
 </div></div></section>
 </c:forEach>

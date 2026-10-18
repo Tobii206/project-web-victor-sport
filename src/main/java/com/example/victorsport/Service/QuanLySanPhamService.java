@@ -162,6 +162,8 @@ public class QuanLySanPhamService {
         khoaSanPham(sanPham);
         if (jdbc.queryForObject("SELECT COUNT(*) FROM chi_tiet_san_pham WHERE id=? AND id_san_pham=? AND ISNULL(xoa_mem,0)=0",Integer.class,mau,sanPham)==0)
             throw new IllegalArgumentException("Không tìm thấy mẫu giày để thêm ảnh.");
+        if (jdbc.queryForObject("SELECT COUNT(*) FROM anh_chi_tiet_san_pham WHERE id_chi_tiet_san_pham=? AND duong_dan_anh=? AND ISNULL(xoa_mem,0)=0",Integer.class,mau,duongDan)>0)
+            return;
         int coAnh = jdbc.queryForObject("SELECT COUNT(*) FROM anh_chi_tiet_san_pham WHERE id_chi_tiet_san_pham=? AND la_anh_dai_dien=1 AND ISNULL(xoa_mem,0)=0",Integer.class,mau);
         jdbc.update("INSERT INTO anh_chi_tiet_san_pham (id_chi_tiet_san_pham,duong_dan_anh,la_anh_dai_dien) VALUES (?,?,?)",mau,duongDan,coAnh==0?1:0);
     }

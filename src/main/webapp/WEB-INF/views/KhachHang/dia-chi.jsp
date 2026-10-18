@@ -3,17 +3,17 @@
 <!DOCTYPE html><html lang="vi"><head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Địa chỉ của tôi — VictorSport</title>
-    <link rel="icon" href="/images/favicon-victorsport.svg">
+    <link rel="icon" href="/logo/favicon-victorsport.svg">
     <link rel="stylesheet" href="/css/trang-chu.css?v=gia-giam-1">
     <link rel="stylesheet" href="/css/dia-chi-khach-hang.css">
-</head><body>
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head><body>
 <%@ include file="/WEB-INF/views/KhachHang/dau-trang-online.jsp" %>
 <main class="store-container online-container">
     <a href="/tai-khoan">← Về tài khoản</a>
     <h1>Địa chỉ của tôi</h1>
     <p class="subtle">Lưu địa chỉ nhà, công ty để chọn nhanh khi mua hàng.</p>
-    <c:if test="${not empty success}"><div class="online-success" role="status"><c:out value="${success}"/></div></c:if>
-    <c:if test="${not empty error}"><div class="account-error" role="alert"><c:out value="${error}"/></div></c:if>
+    <c:if test="${not empty success}"><div class="online-success" role="status" data-vs-flash="success"><c:out value="${success}"/></div></c:if>
+    <c:if test="${not empty error}"><div class="account-error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
     <div class="address-layout">
         <section class="address-list" aria-label="Địa chỉ đã lưu">
             <c:forEach items="${diaChiDaLuu}" var="dc">
@@ -23,7 +23,7 @@
                     <div class="address-actions">
                         <a href="/tai-khoan/dia-chi?sua=${dc.id}#formDiaChi">Sửa</a>
                         <c:if test="${not dc.mac_dinh}"><form method="post" action="/tai-khoan/dia-chi/${dc.id}/mac-dinh"><button type="submit">Đặt mặc định</button></form></c:if>
-                        <form method="post" action="/tai-khoan/dia-chi/${dc.id}/xoa" onsubmit="return confirm('Xóa địa chỉ đã lưu này?')"><button type="submit" class="address-delete">Xóa</button></form>
+                        <form method="post" action="/tai-khoan/dia-chi/${dc.id}/xoa" data-vs-confirm="Bạn muốn xóa địa chỉ nhận hàng đã lưu này?" data-vs-title="Xóa địa chỉ" data-vs-button="Xóa địa chỉ" data-vs-tone="danger"><button type="submit" class="address-delete">Xóa</button></form>
                     </div>
                 </article>
             </c:forEach>
@@ -49,5 +49,5 @@
         </section>
     </div>
 </main>
-<script src="/js/chon-dia-chi.js?v=sap-nhap-2025"></script>
+<script src="/js/chon-dia-chi.js?v=20261018-muot"></script>
 </body></html>

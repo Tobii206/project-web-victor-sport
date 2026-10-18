@@ -1,3 +1,4 @@
+window.VictorKhoiTaoSanPham = function () {
 var anhChinh = document.getElementById('anhChinh');
 var huongDanSize = document.getElementById('huongDanSize');
 var moHuongDanSize = document.getElementById('moHuongDanSize');
@@ -25,6 +26,7 @@ function hienThiMau() {
     giaGoc.textContent = Number(mau.dataset.giaGoc).toLocaleString('vi-VN') + ' đ';
     document.getElementById('tonKho').textContent = 'Còn ' + mau.dataset.ton + ' sản phẩm';
     soLuong.max = mau.dataset.ton;
+    if (Number(mau.dataset.ton) > 0 && Number(soLuong.value) < 1) soLuong.value = 1;
     if (Number(soLuong.value) > Number(mau.dataset.ton)) { soLuong.value = mau.dataset.ton; }
     anhChinh.onerror = function () { this.onerror = null; this.src = '/images/giay-mac-dinh.svg'; };
     anhChinh.src = mau.dataset.anh;
@@ -61,3 +63,6 @@ for (var k = 0; k < cacNutThongTin.length; k++) {
         document.getElementById(this.dataset.noiDung).hidden = false;
     };
 }
+
+};
+window.VictorKhoiTaoSanPham();

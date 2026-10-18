@@ -1,3 +1,4 @@
+window.VictorKhoiTaoDiaChi = function () {
 // Địa chỉ 2 cấp sau sáp nhập: https://provinces.open-api.vn/api/v2/
 var chonTinh = document.getElementById('thanhPho');
 var quanCu = document.getElementById('quan');
@@ -52,3 +53,6 @@ if (chonTinh && chonXa) {
             document.getElementById('loiDiaChi').hidden = false;
         });
 }
+
+};
+window.VictorKhoiTaoDiaChi();

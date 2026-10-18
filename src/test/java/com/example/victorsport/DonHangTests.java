@@ -172,6 +172,7 @@ class DonHangTests {
 
     @Test void daThanhToanDuKhongTaoGiaoDichTrung() {
         var jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForList(contains("SELECT TOP 1 pt.nha_cung_cap"),eq(10))).thenReturn(List.of(Map.of("nha_cung_cap","VietQR")));
         when(jdbc.queryForList(contains("JOIN quyen_han"),eq(2))).thenReturn(List.of(Map.of("id",2)));
         when(jdbc.queryForList(contains("WITH (UPDLOCK,HOLDLOCK)"),eq(10)))
                 .thenReturn(List.of(Map.of("trang_thai_hien_tai",1,"tong_tien_sau_giam",new BigDecimal("100000"))));

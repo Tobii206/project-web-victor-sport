@@ -2,12 +2,12 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <link rel="icon" type="image/svg+xml" href="/images/favicon-victorsport.svg?v=1">
+    <link rel="icon" type="image/svg+xml" href="/logo/favicon-victorsport.svg?v=1">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${tenChucNang} - Victor Sport</title>
     <link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014">
-</head>
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head>
 <body>
 <div class="app-shell">
     <jsp:include page="/WEB-INF/views/Admin/menu.jsp"/>

@@ -43,19 +43,22 @@ public class DangNhapService {
         if (soLanDangNhapSai.containsKey(emailChuanHoa)) {
             soLanSai = soLanDangNhapSai.get(emailChuanHoa);
         }
-        if (soLanSai >= SO_LAN_SAI_TOI_DA) {
-            return KetQuaDangNhap.thatBai("Tài khoản đã bị khóa do đăng nhập sai 5 lần. Vui lòng liên hệ quản lý.");
-        }
-
+        var taiKhoan=jdbcTemplate.queryForList("SELECT id FROM nhan_vien WHERE LOWER(email)=? AND trang_thai=1 AND ISNULL(xoa_mem,0)=0",emailChuanHoa);
+        Integer idNv=taiKhoan.isEmpty()?null:((Number)taiKhoan.get(0).get("id")).intValue();
+        if(idNv==null && soLanSai>=5) return KetQuaDangNhap.thatBai("Tài khoản đã bị khóa do đăng nhập sai 5 lần. Vui lòng liên hệ quản lý.");
+        var baoMat=new BaoMatTaiKhoanService(jdbcTemplate);
+        if(idNv!=null && baoMat.biKhoa(idNv,true)) return KetQuaDangNhap.thatBai("Tài khoản đã bị khóa do đăng nhập sai 5 lần. Vui lòng liên hệ quản lý.");
         NguoiDungDangNhap nguoiDung = timNhanVienTheoEmailVaMatKhau(emailChuanHoa, matKhau);
         if (nguoiDung != null) {
             nguoiDung = new PhanQuyenService(jdbcTemplate).layQuyen(nguoiDung.getId());
             if (nguoiDung == null) return KetQuaDangNhap.thatBai("Tài khoản hoặc quyền không còn hoạt động.");
+            if(idNv!=null) baoMat.dangNhapDung(idNv,true);
             soLanDangNhapSai.remove(emailChuanHoa);
             return KetQuaDangNhap.thanhCong(nguoiDung);
         }
 
         soLanSai++;
+        if(idNv!=null) soLanSai=baoMat.ghiSai(idNv,true);
         soLanDangNhapSai.put(emailChuanHoa, soLanSai);
         if (soLanSai >= SO_LAN_SAI_TOI_DA) {
             return KetQuaDangNhap.thatBai("Bạn đã nhập sai 5 lần. Tài khoản tạm khóa, vui lòng liên hệ quản lý.");
@@ -66,25 +69,21 @@ public class DangNhapService {
 
     private NguoiDungDangNhap timNhanVienTheoEmailVaMatKhau(String email, String matKhau) {
         String cauLenhSql = """
-                SELECT TOP 1 nv.id, nv.email, nv.ten_nhan_vien, qh.ten_quyen_han
+                SELECT TOP 1 nv.id, nv.email, nv.ten_nhan_vien, nv.mat_khau, qh.ten_quyen_han
                 FROM nhan_vien nv
                 JOIN quyen_han qh ON qh.id = nv.id_quyen_han
                 WHERE LOWER(nv.email) = ?
-                  AND nv.mat_khau = ?
                   AND ISNULL(nv.trang_thai, 1) = 1
                   AND ISNULL(nv.xoa_mem, 0) = 0
                   AND ISNULL(qh.trang_thai, 1) = 1 AND ISNULL(qh.xoa_mem, 0) = 0
                 """;
-        List<NguoiDungDangNhap> danhSach = jdbcTemplate.query(cauLenhSql, (ketQua, soDong) -> new NguoiDungDangNhap(
-                ketQua.getInt("id"),
-                ketQua.getString("email"),
-                ketQua.getString("ten_nhan_vien"),
-                ketQua.getString("ten_quyen_han")
-        ), email, matKhau);
+        var danhSach = jdbcTemplate.queryForList(cauLenhSql,email);
         if (danhSach.isEmpty()) {
             return null;
         }
-        return danhSach.get(0);
+        var nv=danhSach.get(0);
+        if(!TuPhucVuTaiKhoanService.dungMatKhau(matKhau,(String)nv.get("mat_khau"))) return null;
+        return new NguoiDungDangNhap(((Number)nv.get("id")).intValue(),nv.get("email").toString(),nv.get("ten_nhan_vien").toString(),nv.get("ten_quyen_han").toString());
     }
 
     public static class KetQuaDangNhap {

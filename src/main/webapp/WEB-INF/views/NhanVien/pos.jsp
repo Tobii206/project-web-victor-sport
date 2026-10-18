@@ -5,12 +5,13 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <link rel="icon" type="image/svg+xml" href="/images/favicon-victorsport.svg?v=1">
+    <link rel="icon" type="image/svg+xml" href="/logo/favicon-victorsport.svg?v=1">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bán hàng tại quầy - Victor Sport</title>
     <link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014">
-</head>
+    <link rel="stylesheet" href="/css/pos-gio-hang.css?v=1">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head>
 <body>
 <div class="app-shell">
     <jsp:include page="/WEB-INF/views/Admin/menu.jsp"/>
@@ -77,10 +78,11 @@
             </div>
             <div class="panel-body">
                 <c:if test="${not empty error}">
-                    <div class="alert error">${error}</div>
+                    <div class="alert error" data-vs-flash="error">${error}</div>
                 </c:if>
                 <c:if test="${not empty success}">
-                    <div class="alert success">${success}</div>
+                    <div class="alert success" data-vs-flash="success">${success}</div>
+                    <c:if test="${not empty hoaDonVuaTao}"><a class="button secondary" href="/quan-ly/hoa-don/${hoaDonVuaTao}">Xem / In hóa đơn / Lưu PDF</a></c:if>
                 </c:if>
 
                 <form class="search-row" method="get" action="/pos">
@@ -132,38 +134,38 @@
             </div>
         </section>
 
-        <aside class="panel">
-            <div class="panel-header">
-                <h2>Giỏ bán hàng <c:if test="${not empty donChoDangChon}">- <c:out value="${donChoDangChon.ma_hoa_don}"/></c:if></h2>
+        <aside class="panel pos-cart-panel">
+            <div class="panel-header pos-cart-header">
+                <div class="pos-cart-heading"><span class="pos-cart-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7h14l1 14H4L5 7ZM9 8V6a3 3 0 0 1 6 0v2"/></svg></span><div><h2>Giỏ bán hàng</h2><p class="pos-cart-count">${fn:length(cart.danhSachSanPham)} mẫu<c:if test="${not empty donChoDangChon}"> · <c:out value="${donChoDangChon.ma_hoa_don}"/></c:if></p></div></div>
                 <form method="post" action="/pos/cart/clear">
                     <button class="button secondary" type="submit">Làm mới</button>
                 </form>
             </div>
             <div class="panel-body">
-                <div class="cart-list">
+                <div class="cart-list" aria-label="Sản phẩm trong giỏ bán hàng">
                     <c:forEach items="${cart.danhSachSanPham}" var="item">
-                        <div class="cart-line">
-                            <div>
-                                <div class="cart-line-title">${item.tenSanPham}</div>
-                                <div class="muted">${item.tenMauSac}, ${item.tenKichThuoc} - tồn ${item.soLuongTon}</div>
-                            </div>
-                            <div class="cart-actions">
-                                <form method="post" action="/pos/cart/update">
-                                    <input type="hidden" name="detailId" value="${item.idChiTietSanPham}">
-                                    <input class="input qty-input" type="number" name="quantity" min="0" max="${item.soLuongTon}" value="${item.soLuongMua}">
-                                    <button class="button secondary" type="submit">Cập nhật</button>
-                                </form>
-                                <div class="money"><fmt:formatNumber value="${item.thanhTien}" type="number" groupingUsed="true"/> đ</div>
+                        <article class="cart-line" data-mau="${item.idChiTietSanPham}">
+                            <div class="pos-cart-item-top">
+                                <div class="pos-cart-item-info"><h3 class="cart-line-title"><c:out value="${item.tenSanPham}"/></h3><p class="pos-cart-code"><c:out value="${item.maSanPham}"/></p></div>
                                 <form method="post" action="/pos/cart/remove">
                                     <input type="hidden" name="detailId" value="${item.idChiTietSanPham}">
-                                    <button class="button danger" type="submit">Xóa</button>
+                                    <button class="pos-cart-remove" type="submit" title="Xóa sản phẩm" aria-label="Xóa <c:out value='${item.tenSanPham}'/>"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6"/></svg></button>
                                 </form>
                             </div>
-                        </div>
+                            <div class="pos-cart-meta"><span><c:out value="${item.tenMauSac}"/></span><span><c:out value="${item.tenKichThuoc}"/></span><small>Còn ${item.soLuongTon}</small></div>
+                            <div class="pos-cart-unit">Đơn giá <span><fmt:formatNumber value="${item.donGia}" maxFractionDigits="0" groupingUsed="true"/> đ</span></div>
+                            <div class="pos-cart-item-bottom">
+                                <form class="pos-cart-quantity" method="post" action="/pos/cart/update">
+                                    <input type="hidden" name="detailId" value="${item.idChiTietSanPham}">
+                                    <label class="pos-cart-sr-only" for="soLuongMau${item.idChiTietSanPham}">Số lượng <c:out value="${item.tenSanPham}"/></label>
+                                    <input id="soLuongMau${item.idChiTietSanPham}" class="input qty-input" type="number" name="quantity" min="0" max="${item.soLuongTon}" step="1" value="${item.soLuongMua}" required>
+                                    <button class="pos-cart-save" type="submit" title="Cập nhật số lượng">Lưu</button>
+                                </form>
+                                <div class="pos-cart-line-total"><span>Thành tiền</span><strong><fmt:formatNumber value="${item.thanhTien}" maxFractionDigits="0" groupingUsed="true"/> đ</strong></div>
+                            </div>
+                        </article>
                     </c:forEach>
-                    <c:if test="${cart.rong}">
-                        <div class="muted">Chưa có sản phẩm trong giỏ.</div>
-                    </c:if>
+                    <c:if test="${cart.rong}"><div class="pos-cart-empty"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14l1 14H4L5 7ZM9 8V6a3 3 0 0 1 6 0v2M9 13h6"/></svg><strong>Giỏ bán hàng đang trống</strong><p>Chọn sản phẩm bên trái để bắt đầu.</p></div></c:if>
                 </div>
 
                 <div class="summary">
@@ -172,12 +174,12 @@
                         <strong><fmt:formatNumber value="${summary.tamTinh}" type="number" groupingUsed="true"/> đ</strong>
                     </div>
                     <div class="summary-row">
-                        <span>Ưu đãi</span>
+                        <span>Giảm giá</span>
                         <strong><fmt:formatNumber value="${summary.tienGiam}" type="number" groupingUsed="true"/> đ</strong>
                     </div>
-                    <div class="muted">${summary.tenUuDai}</div>
+                    <div class="pos-cart-discount-note"><c:out value="${summary.tenUuDai}"/></div>
                     <div class="summary-row total">
-                        <span>Thanh toán</span>
+                        <span>Cần thanh toán</span>
                         <span><fmt:formatNumber value="${summary.tongThanhToan}" type="number" groupingUsed="true"/> đ</span>
                     </div>
                 </div>
@@ -185,7 +187,7 @@
                 <form class="checkout-grid" method="post" action="/pos/phieu-giam-gia/chon">
                     <div class="field">
                         <label for="discountCouponId">Phiếu giảm giá</label>
-                        <select class="select" id="discountCouponId" name="discountCouponId" onchange="this.form.submit()">
+                        <select class="select" id="discountCouponId" name="discountCouponId" onchange="this.form.requestSubmit()">
                             <option value="">
                                 <c:choose>
                                     <c:when test="${empty selectedDiscountCouponId and not empty summary.idPhieuGiamGia}">
@@ -205,10 +207,10 @@
                     </div>
                 </form>
 
-                <form class="checkout-grid" method="post" action="/pos/khach-hang/chon">
+                <form class="checkout-grid pos-cart-customer" method="post" action="/pos/khach-hang/chon">
                     <div class="field">
                         <label for="customerId">Khách quen</label>
-                        <select class="select" id="customerId" name="customerId" onchange="this.form.submit()">
+                        <select class="select" id="customerId" name="customerId" onchange="this.form.requestSubmit()">
                             <option value="">Khách vãng lai</option>
                             <c:if test="${not empty khachHangDangChon}">
                                 <option value="${khachHangDangChon.id}" selected><c:out value="${khachHangDangChon.maKhachHang}"/> - <c:out value="${khachHangDangChon.tenKhachHang}"/></option>
@@ -220,7 +222,7 @@
                             </c:forEach>
                         </select>
                     </div>
-                    <button class="button secondary" type="button" onclick="document.getElementById('themKhachHang').showModal()">Thêm khách hàng mới</button>
+                    <button class="button secondary" type="button" onclick="document.getElementById('themKhachHang').showModal()">+ Thêm khách</button>
                 </form>
                 <form class="checkout-grid" method="post" action="/pos/checkout" data-xac-nhan-thanh-toan data-tong-tien="${summary.tongThanhToan}">
                     <input type="hidden" name="customerId" value="${khachHangDangChon.id}">
@@ -233,15 +235,14 @@
                             </c:forEach>
                         </select>
                     </div>
-                    <div class="field">
-                        <label for="note">Ghi chú</label>
-                        <textarea class="textarea" id="note" name="note"><c:out value="${donChoDangChon.ghi_chu}"/></textarea>
-                    </div>
+                    <details class="pos-cart-note" ${not empty donChoDangChon.ghi_chu ? 'open' : ''}><summary>Ghi chú đơn hàng</summary><label class="pos-cart-sr-only" for="note">Ghi chú đơn hàng</label><textarea class="textarea" id="note" name="note" rows="2"><c:out value="${donChoDangChon.ghi_chu}"/></textarea></details>
+                    <div class="pos-cart-checkout-actions">
                     <button class="button secondary full" type="submit" name="hanhDong" value="luu-don-cho"
                             <c:if test="${donChoDaMat}">disabled</c:if>>
                         <c:choose><c:when test="${not empty donChoDangChon}">Lưu đơn chờ</c:when><c:otherwise>Tạo đơn chờ</c:otherwise></c:choose>
                     </button>
-                    <button class="button full" type="submit" name="hanhDong" value="thanh-toan" <c:if test="${cart.rong or donChoDaMat}">disabled</c:if>>Thanh toán và tạo hóa đơn</button>
+                    <button class="button full" type="submit" name="hanhDong" value="thanh-toan" <c:if test="${cart.rong or donChoDaMat}">disabled</c:if>>Thanh toán <span aria-hidden="true">→</span></button>
+                    </div>
                 </form>
             </div>
         </aside>

@@ -2,12 +2,12 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title><c:out value="${tenChucNang}"/> — VictorSport</title><link rel="icon" href="/images/favicon-victorsport.svg">
+<title><c:out value="${tenChucNang}"/> — VictorSport</title><link rel="icon" href="/logo/favicon-victorsport.svg">
 <link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=admin-20261014">
-</head><body><div class="app-shell"><jsp:include page="/WEB-INF/views/Admin/menu.jsp"/><div class="main-area">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/views/Admin/menu.jsp"/><div class="main-area">
 <%@ include file="/WEB-INF/views/Admin/dau-trang-uu-dai.jsp" %><main class="content-layout">
-<section class="panel"><div class="panel-header"><h2>Thông tin đợt giảm giá <span class="muted"><c:out value="${maUuDai}"/></span></h2><a class="button secondary" href="/quan-ly/dot-giam-gia">Về danh sách</a></div><div class="panel-body"><c:if test="${not empty error}"><div class="alert error" role="alert"><c:out value="${error}"/></div></c:if>
-<c:if test="${not empty success}"><div class="alert success" role="status"><c:out value="${success}"/></div></c:if>
+<section class="panel"><div class="panel-header"><h2>Thông tin đợt giảm giá <span class="muted"><c:out value="${maUuDai}"/></span></h2><a class="button secondary" href="/quan-ly/dot-giam-gia">Về danh sách</a></div><div class="panel-body"><c:if test="${not empty error}"><div class="alert error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
+<c:if test="${not empty success}"><div class="alert success" role="status" data-vs-flash="success"><c:out value="${success}"/></div></c:if>
 <form method="post" action="${duongDanLuu}" class="product-admin-form">
 <div class="field"><label for="ten_dot_giam_gia">Tên đợt giảm giá *</label><input class="input" id="ten_dot_giam_gia" name="ten_dot_giam_gia" type="text" value='<c:out value="${uuDai.ten_dot_giam_gia}"/>' required  maxlength="255"></div>
 <div class="field"><label for="loai_giam_gia">Loại giảm giá *</label><select class="select" id="loai_giam_gia" name="loai_giam_gia"><option value="0" ${not uuDai.loai_giam_gia ? 'selected' : ''}>Phần trăm (%)</option><option value="1" ${uuDai.loai_giam_gia ? 'selected' : ''}>Số tiền (đ)</option></select></div>
@@ -32,6 +32,6 @@
 <c:forEach items="${mauDaChon}" var="m"><tr><td><c:out value="${m.ten_san_pham}"/><div class="muted"><c:out value="${m.ma_chi_tiet_san_pham}"/></div></td><td>Size <c:out value="${m.ten_kich_thuoc}"/> · <c:out value="${m.ten_mau_sac}"/> · <c:out value="${m.ten_form_chan}"/></td>
 <td><fmt:formatNumber value="${uuDai.gia_tri_giam_gia}" maxFractionDigits="2"/> ${uuDai.loai_giam_gia ? 'đ' : '%'}</td>
 <td><c:choose><c:when test="${empty uuDai.so_tien_giam_toi_da or uuDai.so_tien_giam_toi_da == 0}">Không giới hạn</c:when><c:otherwise><fmt:formatNumber value="${uuDai.so_tien_giam_toi_da}" maxFractionDigits="2"/> đ</c:otherwise></c:choose></td><td><c:out value="${m.ghi_chu}"/></td>
-<td><form method="post" action="/quan-ly/dot-giam-gia/${idUuDai}/mau/${m.id}/bo" onsubmit="return confirm('Bỏ mẫu khỏi đợt giảm giá?');"><button class="button danger">Bỏ áp dụng</button></form></td></tr></c:forEach>
+<td><form method="post" action="/quan-ly/dot-giam-gia/${idUuDai}/mau/${m.id}/bo" data-vs-confirm="Mẫu giày này sẽ không còn được áp dụng ưu đãi của đợt giảm giá này." data-vs-title="Bỏ áp dụng giảm giá" data-vs-button="Bỏ áp dụng" data-vs-tone="danger"><button class="button danger">Bỏ áp dụng</button></form></td></tr></c:forEach>
 <c:if test="${empty mauDaChon}"><tr><td colspan="6">Chưa có mẫu giày áp dụng.</td></tr></c:if></tbody></table></div></div></section></c:if>
 </main></div></div></body></html>

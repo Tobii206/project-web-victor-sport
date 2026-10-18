@@ -1,3 +1,4 @@
+window.VictorKhoiTaoDiaChiThanhToan = function () {
 var diaChiDaLuu = document.getElementById('diaChiDaLuu');
 var oDiaChiNhan = document.getElementById('diaChi');
 if (diaChiDaLuu && oDiaChiNhan) {
@@ -8,3 +9,6 @@ if (diaChiDaLuu && oDiaChiNhan) {
         if (!this.value) oDiaChiNhan.focus();
     };
 }
+
+};
+window.VictorKhoiTaoDiaChiThanhToan();

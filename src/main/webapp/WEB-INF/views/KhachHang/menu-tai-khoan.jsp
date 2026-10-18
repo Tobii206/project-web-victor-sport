@@ -5,6 +5,7 @@
         <img src="/images/nguoi-dung.svg" alt="" width="24" height="24">
     </button>
     <div class="account-dropdown" id="cacMucTaiKhoan" inert>
+        <a href="/tra-cuu-don-hang">Tra cứu đơn khách vãng lai</a>
         <a href="/tai-khoan">Thông tin chi tiết</a>
         <c:if test="${not empty sessionScope.khachHangOnlineDangNhap}"><a href="/don-hang">Đơn hàng của tôi</a></c:if>
         <c:if test="${not empty sessionScope.khachHangOnlineDangNhap}"><a href="/tai-khoan/dia-chi">Địa chỉ của tôi</a></c:if>
@@ -22,7 +23,7 @@
                     <button type="submit">Đăng xuất</button>
                 </form>
             </c:when>
-            <c:otherwise><a href="/login">Đăng nhập</a></c:otherwise>
+            <c:otherwise><a href="/login">Đăng nhập</a><a href="/dang-ky">Tạo tài khoản</a></c:otherwise>
         </c:choose>
     </div>
 </div>

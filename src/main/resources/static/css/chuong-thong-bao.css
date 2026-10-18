@@ -1,0 +1,23 @@
+.vs-bell { position: relative; flex-shrink: 0; color: #142b52; font-family: inherit; }
+.vs-bell .vs-bell-button { position: relative; display: grid; place-items: center; width: 42px; height: 42px; padding: 0; border: 1px solid #e2e8f2; border-radius: 50%; background: #f3f6fb; color: #142b52; cursor: pointer; }
+.vs-bell .vs-bell-button:hover, .vs-bell-button[aria-expanded="true"] { background: #fff0e2; border-color: #ffb477; }
+.vs-bell button:focus-visible, .vs-bell a:focus-visible { outline: 2px solid #e59050; outline-offset: 3px; }
+.vs-bell .vs-bell-count { position: absolute; top: -5px; right: -6px; min-width: 19px; height: 19px; padding: 0 4px; display: grid; place-items: center; border: 2px solid white; border-radius: 12px; background: #d64736; color: white; font-size: 10px; font-weight: 700; }
+.vs-bell .vs-bell-panel { position: absolute; right: 0; top: calc(100% + 12px); z-index: 1500; width: min(380px, calc(100vw - 28px)); border: 1px solid #e2e8f2; border-radius: 16px; background: white; box-shadow: 0 18px 55px #142b5229; overflow: hidden; text-align: left; }
+.vs-bell .vs-bell-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px; border-bottom: 1px solid #edf0f6; }
+.vs-bell .vs-bell-heading h2 { margin: 0; font-size: 17px; color: #142b52; }
+.vs-bell .vs-bell-read-all, .vs-bell .vs-bell-retry { font: inherit; font-size: 12px; padding: 5px; border: 0; background: none; color: #b65920; cursor: pointer; }
+.vs-bell .vs-bell-read-all:disabled { color: #98a5b6; cursor: default; }
+.vs-bell .vs-bell-list { max-height: 390px; overflow-y: auto; overscroll-behavior: contain; }
+.vs-bell .vs-bell-item { display: grid; gap: 5px; position: relative; padding: 15px 28px 15px 18px; border-bottom: 1px solid #edf0f6; background: white; text-decoration: none; color: #142b52; white-space: normal; }
+.vs-bell .vs-bell-item.unread { background: #f1f6ff; }
+.vs-bell .vs-bell-item.unread::after { content: ''; position: absolute; top: 21px; right: 14px; width: 7px; height: 7px; border-radius: 50%; background: #e58a45; }
+.vs-bell .vs-bell-item:hover { background: #fff4e9; }
+.vs-bell .vs-bell-item strong { font-size: 13px; line-height: 1.5; }
+.vs-bell .vs-bell-item p { margin: 0; font-size: 12px; color: #61718a; line-height: 1.6; overflow-wrap: anywhere; }
+.vs-bell .vs-bell-item time { color: #8593a7; font-size: 11px; }
+.vs-bell .vs-bell-status { margin: 0; padding: 22px 18px; font-size: 13px; color: #6b7b91; line-height: 1.6; }
+.vs-bell .vs-bell-retry { margin: 0 14px 14px; }
+.vs-bell .vs-bell-footer { margin: 0; padding: 12px 18px; font-size: 10px; color: #8995a7; background: #fafbfd; }
+.vs-bell [hidden] { display: none !important; }
+@media(max-width: 600px) { .vs-bell .vs-bell-panel { position: fixed; top: 82px; right: 14px; } .vs-bell .vs-bell-list { max-height: 55vh; } }

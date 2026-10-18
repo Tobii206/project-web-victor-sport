@@ -9,19 +9,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VictorSport — Cửa hàng giày thể thao</title>
-    <link rel="icon" type="image/svg+xml" href="/images/favicon-victorsport.svg?v=1">
+    <link rel="icon" type="image/svg+xml" href="/logo/favicon-victorsport.svg?v=1">
     <link rel="stylesheet" href="/css/trang-chu.css?v=gia-giam-1">
-</head>
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head>
 <body class="store-page">
 <header class="store-header">
-    <a class="store-logo" href="/" aria-label="Trang chủ VictorSport"><img src="/images/logo-victorsport-trong-suot.png" alt="VictorSport" width="210" height="67"></a>
+    <a class="store-logo" href="/" aria-label="Trang chủ VictorSport"><img src="/logo/logo-nobackgroud.png" alt="VictorSport" width="210" height="67"></a>
     <nav aria-label="Điều hướng chính">
-        <a href="/" class="active">Trang chủ</a><a href="#san-pham">Sản phẩm</a><a href="#nhu-cau">Nhu cầu sử dụng</a><a href="#lien-he">Liên hệ</a>
+        <a href="#trang-chu" class="active">Trang chủ</a><a href="#san-pham">Sản phẩm</a><a href="#nhu-cau">Nhu cầu sử dụng</a><a href="#lien-he">Liên hệ</a>
     </nav>
     <%@ include file="/WEB-INF/views/KhachHang/icon-thanh-menu.jsp" %>
 </header>
 <main>
-    <section class="shop-hero store-container">
+    <section id="trang-chu" class="shop-hero store-container">
         <div class="shop-hero-copy">
             <p class="eyebrow">CỬA HÀNG GIÀY THỂ THAO VICTORSPORT</p>
             <h1>Chọn đôi giày.<br><span>Bắt đầu hành trình.</span></h1>
@@ -104,7 +104,7 @@
 
     <section id="lien-he" class="store-container shop-contact"><div><p class="eyebrow">GẶP VICTORSPORT</p><h2>Thử giày trực tiếp tại cửa hàng</h2><p>Địa chỉ: Cầu Giấy</p></div><a class="store-button" href="tel:0325327602">Liên hệ: 0325327602</a></section>
 </main>
-<footer class="store-footer"><div class="store-container footer-content"><div><a class="store-logo" href="/"><img src="/images/logo-victorsport.png" alt="VictorSport" width="210" height="67"></a><p>Đồng hành cùng mỗi bước chân.</p><p>Cầu Giấy · <a href="tel:0325327602">0325327602</a></p></div><div><a href="#san-pham">Sản phẩm</a><a href="#nhu-cau">Nhu cầu sử dụng</a><a href="/tai-khoan">Tài khoản</a></div><small>© VictorSport</small></div></footer>
+<footer class="store-footer"><div class="store-container footer-content"><div><a class="store-logo" href="/"><img src="/logo/logo.png" alt="VictorSport" width="210" height="67"></a><p>Đồng hành cùng mỗi bước chân.</p><p>Cầu Giấy · <a href="tel:0325327602">0325327602</a></p></div><div><a href="#san-pham">Sản phẩm</a><a href="#nhu-cau">Nhu cầu sử dụng</a><a href="/tai-khoan">Tài khoản</a></div><small>© VictorSport</small></div></footer>
 <script src="/js/san-pham-noi-bat.js?v=1"></script>
 </body>
 </html>

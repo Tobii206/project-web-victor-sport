@@ -69,6 +69,14 @@ public class QuanLyNhanVienController {
         flash.addFlashAttribute("nhanVien",form);
         return "redirect:/quan-ly/nhan-vien/"+(id==null?"them":id);
     }
+    @PostMapping("/{id}/mo-khoa")
+    public String moKhoa(@PathVariable int id,HttpSession session,Model model,RedirectAttributes flash) {
+        if(quanLy(session,model)==null) return "redirect:/login";
+        try {service.moKhoa(id);flash.addFlashAttribute("success","Đã mở khóa đăng nhập nhân viên.");}
+        catch(IllegalArgumentException e){flash.addFlashAttribute("error",e.getMessage());}
+        catch(DataAccessException e){flash.addFlashAttribute("error","Chưa mở khóa được tài khoản.");}
+        return "redirect:/quan-ly/nhan-vien";
+    }
     @PostMapping("/{id}/nghi-viec")
     public String nghiViec(@PathVariable int id,HttpSession session,Model model,RedirectAttributes flash) {
         var user=quanLy(session,model);if(user==null) return "redirect:/login";

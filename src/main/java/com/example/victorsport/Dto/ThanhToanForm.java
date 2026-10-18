@@ -4,6 +4,13 @@ import jakarta.validation.constraints.*;
 
 // Nhận dữ liệu từ form và kiểm tra trước khi lưu.
 public class ThanhToanForm {
+    @Positive(message="Tỉnh GHN không hợp lệ.") private Integer tinhGhn;
+    @Positive(message="Phường/xã GHN không hợp lệ.") private Integer xaGhn;
+    public Integer getTinhGhn(){return tinhGhn;}
+    public void setTinhGhn(Integer v){tinhGhn=v;}
+    public Integer getXaGhn(){return xaGhn;}
+    public void setXaGhn(Integer v){xaGhn=v;}
+
     @Positive(message="Phiếu giảm giá không hợp lệ.")
     private Integer idPhieuGiamGia;
     @DecimalMin(value="0",message="Tổng thanh toán không hợp lệ.")

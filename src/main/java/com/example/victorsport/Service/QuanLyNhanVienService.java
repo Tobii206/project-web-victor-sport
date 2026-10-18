@@ -11,6 +11,11 @@ public class QuanLyNhanVienService {
     private final JdbcTemplate jdbc;
     public QuanLyNhanVienService(JdbcTemplate jdbc) { this.jdbc = jdbc; }
 
+    public void moKhoa(int id) {
+        lay(id);
+        new BaoMatTaiKhoanService(jdbc).moKhoa(id,true);
+    }
+
     public List<Map<String, Object>> cacQuyen() {
         return jdbc.queryForList("SELECT id, ten_quyen_han FROM quyen_han WHERE ISNULL(xoa_mem,0)=0 AND ISNULL(trang_thai,1)=1 ORDER BY id");
     }
@@ -18,7 +23,8 @@ public class QuanLyNhanVienService {
     public List<Map<String, Object>> tim(Map<String, String> loc) {
         String sql = """
                 SELECT nv.id, nv.ma_nhan_vien, nv.ten_nhan_vien, nv.email, nv.so_dien_thoai,
-                       nv.trang_thai, nv.anh_nhan_vien, q.ten_quyen_han
+                       nv.trang_thai, nv.anh_nhan_vien, q.ten_quyen_han,
+                       CAST(CASE WHEN EXISTS (SELECT 1 FROM bao_mat_tai_khoan b WHERE b.id_nhan_vien=nv.id AND b.bi_khoa=1) THEN 1 ELSE 0 END AS BIT) AS bi_khoa
                 FROM nhan_vien nv JOIN quyen_han q ON q.id=nv.id_quyen_han
                 WHERE ISNULL(nv.xoa_mem,0)=0
                 """;
@@ -55,8 +61,8 @@ public class QuanLyNhanVienService {
         String sdt = chuoi(data,"so_dien_thoai",10,false);
         if (!sdt.isEmpty() && !sdt.matches("0[0-9]{9}")) throw new IllegalArgumentException("Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0.");
         String matKhau = data.getOrDefault("mat_khau", "");
-        if ((id == null || !matKhau.isEmpty()) && (matKhau.isBlank() || matKhau.length()<6 || matKhau.length()>255))
-            throw new IllegalArgumentException("Mật khẩu phải có từ 6 đến 255 ký tự.");
+        if ((id == null || !matKhau.isEmpty()) && (matKhau.isBlank() || matKhau.length()<6 || matKhau.getBytes(java.nio.charset.StandardCharsets.UTF_8).length>72))
+            throw new IllegalArgumentException("Mật khẩu phải có ít nhất 6 ký tự và không quá 72 byte.");
         LocalDate ngaySinh = null;
         String ngay = data.getOrDefault("ngay_sinh", "").trim();
         if (!ngay.isEmpty()) {
@@ -90,14 +96,14 @@ public class QuanLyNhanVienService {
                     INSERT INTO nhan_vien (ten_nhan_vien,email,so_dien_thoai,id_quyen_han,mat_khau,ngay_sinh,
                         thanh_pho,quan,phuong,dia_chi_cu_the,ghi_chu,trang_thai,nguoi_tao)
                     OUTPUT INSERTED.id VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
-                    """,Integer.class,ten,email,sdt,idQuyen,matKhau,ngaySinh,thanhPho,quan,phuong,diaChi,ghiChu,dangLam,nguoiSua);
+                    """,Integer.class,ten,email,sdt,idQuyen,new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode(matKhau),ngaySinh,thanhPho,quan,phuong,diaChi,ghiChu,dangLam,nguoiSua);
         }
         jdbc.update("""
                 UPDATE nhan_vien SET ten_nhan_vien=?,email=?,so_dien_thoai=?,id_quyen_han=?,
                     ngay_sinh=?,thanh_pho=?,quan=?,phuong=?,dia_chi_cu_the=?,ghi_chu=?,trang_thai=?,
                     ngay_cap_nhat=SYSDATETIME(),nguoi_cap_nhat=? WHERE id=? AND ISNULL(xoa_mem,0)=0
                 """,ten,email,sdt,idQuyen,ngaySinh,thanhPho,quan,phuong,diaChi,ghiChu,dangLam,nguoiSua,id);
-        if (!matKhau.isEmpty()) jdbc.update("UPDATE nhan_vien SET mat_khau=? WHERE id=?",matKhau,id);
+        if (!matKhau.isEmpty()) jdbc.update("UPDATE nhan_vien SET mat_khau=? WHERE id=?",new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode(matKhau),id);
         return id;
     }
 

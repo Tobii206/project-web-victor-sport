@@ -1,8 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ include file="/WEB-INF/views/thong-bao.jsp" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <aside class="side-menu" id="menuAdmin">
     <div class="side-brand">
-        <a href="/" aria-label="Trang chủ VictorSport"><img class="side-brand-logo" src="/images/logo-victorsport.png" alt="VictorSport" width="202" height="64"></a>
+        <a href="/" aria-label="Trang chủ VictorSport"><img class="side-brand-logo" src="/logo/logo.png" alt="VictorSport" width="202" height="64"></a>
         <div class="side-brand-subtitle"><span class="side-status-dot"></span> Khu vực quản lý</div>
     </div>
     <nav class="menu-list" aria-label="Menu quản lý">

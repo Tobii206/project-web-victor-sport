@@ -244,6 +244,7 @@ public class BanHangTaiQuayController {
             phienDangNhap.removeAttribute(KHOA_DON_CHO);
             phienDangNhap.removeAttribute(KHOA_KHACH_HANG);
             thuocTinhChuyenHuong.addFlashAttribute("success", "Thanh toán thành công. Mã hóa đơn nội bộ: #" + idHoaDon);
+            thuocTinhChuyenHuong.addFlashAttribute("hoaDonVuaTao",idHoaDon);
         } catch (IllegalArgumentException loi) {
             thuocTinhChuyenHuong.addFlashAttribute("error", loi.getMessage());
         }

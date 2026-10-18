@@ -37,10 +37,11 @@ public class VanChuyenService {
         var donHang = jdbc.queryForList("""
                 SELECT id,ma_hoa_don,ten_khach_hang,so_dien_thoai_khach_hang,dia_chi_khach_hang,
                   ngay_tao,phi_van_chuyen,tong_tien_sau_giam,trang_thai_hien_tai,
+                  vd.id_hoa_don AS ghn_id_hoa_don,vd.ma_van_don,vd.trang_thai AS ghn_trang_thai,vd.phi_thuc_te,
                   CASE trang_thai_hien_tai WHEN 1 THEN N'Chờ xác nhận' WHEN 2 THEN N'Đã xác nhận đơn'
                     WHEN 3 THEN N'Đang chuẩn bị hàng' WHEN 4 THEN N'Đang vận chuyển'
                     WHEN 5 THEN N'Đã nhận hàng' WHEN 6 THEN N'Đã hủy' END AS ten_trang_thai
-                FROM hoa_don
+                FROM hoa_don LEFT JOIN van_don_ghn vd ON vd.id_hoa_don=hoa_don.id
                 """ + loc + " ORDER BY ngay_tao DESC,id DESC OFFSET ? ROWS FETCH NEXT 20 ROWS ONLY", thamSo.toArray());
         return Map.of("tongQuan",tongQuan,"donHang",donHang,"trang",trangHienTai,"soTrang",soTrang);
     }

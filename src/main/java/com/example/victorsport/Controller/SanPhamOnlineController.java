@@ -113,11 +113,19 @@ public class SanPhamOnlineController {
         response.setHeader("Cache-Control","no-store");
         model.addAttribute("loai", "mua".equals(loai) ? "mua" : "gio");
         hienThiGio(session, khoaGio(loai), model);
+        model.addAttribute("dungGhn",service.dungGhn());
+        if(session.getAttribute("csrfGhn")==null) session.setAttribute("csrfGhn",java.util.UUID.randomUUID().toString());
+        model.addAttribute("csrfGhn",session.getAttribute("csrfGhn"));
+        var baoGia=session.getAttribute("baoGiaGhn_"+khoaGio(loai)) instanceof com.example.victorsport.Dto.BaoGiaGhn q?q:null;
+        if(baoGia!=null && service.dungGhn()) model.addAttribute("baoGiaGhn",baoGia);
         if(model.getAttribute("tongGoc") instanceof java.math.BigDecimal tongGoc) {
+            var phiGoc=service.dungGhn()?(baoGia==null?java.math.BigDecimal.ZERO:baoGia.phi()):service.phiGiaoHang();
+            var phi=phiGoc;
+            model.addAttribute("phiGiaoHangGoc",phiGoc);
             boolean coDot=model.getAttribute("giamTheoDot") instanceof java.math.BigDecimal giam && giam.signum()>0;
             model.addAttribute("coDotGiamGia",coDot);
             try {
-                var cacPhieu=service.layPhieuKhaDung(tongGoc,coDot);
+                var cacPhieu=service.dungGhn()?service.layPhieuKhaDung(tongGoc,coDot,phiGoc,baoGia==null?null:baoGia.tenTinh()):service.layPhieuKhaDung(tongGoc,coDot);
                 model.addAttribute("phieuKhaDung",cacPhieu);
                 if(!model.containsAttribute("idPhieuDaChon"))
                     model.addAttribute("idPhieuDaChon",service.chonPhieuTotNhat(cacPhieu));
@@ -126,11 +134,21 @@ public class SanPhamOnlineController {
                         var giamPhieu=(java.math.BigDecimal)phieu.get("tien_giam");
                         var giamDot=(java.math.BigDecimal)model.getAttribute("giamTheoDot");
                         model.addAttribute("tongTien",tongGoc.subtract(giamPhieu.max(giamDot)));
+                        phi=phi.subtract((java.math.BigDecimal)phieu.getOrDefault("giam_phi_van_chuyen",java.math.BigDecimal.ZERO));
                         break;
                     }
                 }
             }
             catch(DataAccessException e){model.addAttribute("loiPhieu","Chưa tải được phiếu giảm giá. Vui lòng tải lại trang.");}
+            model.addAttribute("phiGiaoHang",phi);
+            if(model.getAttribute("tongTien") instanceof java.math.BigDecimal tong)
+                model.addAttribute("tongTien",tong.add(phi));
+        }
+        if(baoGia!=null && service.dungGhn()) {
+            if(!model.containsAttribute("ten")) model.addAttribute("ten",baoGia.ten());
+            if(!model.containsAttribute("sdt")) model.addAttribute("sdt",baoGia.sdt());
+            if(!model.containsAttribute("diaChi")) model.addAttribute("diaChi",baoGia.diaChiChiTiet());
+            if(!model.containsAttribute("phuongThucDaChon")) model.addAttribute("phuongThucDaChon",baoGia.phuongThuc());
         }
         Integer kh=(Integer)session.getAttribute("khachHangOnlineDangNhap");
         if(kh!=null) {
@@ -141,13 +159,44 @@ public class SanPhamOnlineController {
                 var ds=diaChiService.danhSach(kh);
                 model.addAttribute("diaChiDaLuu",ds);
                 if(!model.containsAttribute("diaChi") && !ds.isEmpty()) {
-                    model.addAttribute("diaChi",ds.get(0).get("dia_chi_day_du"));
+                    model.addAttribute("diaChi",ds.get(0).get(service.dungGhn()?"dia_chi_cu_the":"dia_chi_day_du"));
                     model.addAttribute("idDiaChiDaChon",ds.get(0).get("id"));
                 }
             } catch(IllegalArgumentException e){model.addAttribute("error",e.getMessage());}
             catch(DataAccessException e){model.addAttribute("error","Chưa tải được địa chỉ đã lưu. Bạn có thể nhập địa chỉ nhận hàng.");}
         }
         return "KhachHang/thanh-toan-online";
+    }
+
+    @PostMapping("/thanh-toan/ghn/bao-gia")
+    public String baoGia(@RequestParam(defaultValue="gio") String loai,@Valid @ModelAttribute ThanhToanForm form,
+                         BindingResult loiForm,@RequestParam(required=false) String csrfGhn,HttpSession session,RedirectAttributes tb) {
+        if(csrfGhn==null || !csrfGhn.equals(session.getAttribute("csrfGhn")))
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN);
+        synchronized(session) {
+            session.removeAttribute("baoGiaGhn_"+khoaGio(loai));
+            String diaChi=form.getDiaChi();
+            try {
+                KiemTraForm.kiemTra(loiForm);
+                long now=System.currentTimeMillis();
+                if(session.getAttribute("lanBaoGiaGhn") instanceof Long lan && now-lan<3000)
+                    throw new IllegalArgumentException("Vui lòng đợi vài giây trước khi lấy lại phí.");
+                session.setAttribute("lanBaoGiaGhn",now);
+                Integer kh=(Integer)session.getAttribute("khachHangOnlineDangNhap");
+                if(form.getIdDiaChi()!=null) {
+                    if(kh==null) throw new IllegalArgumentException("Vui lòng đăng nhập để dùng địa chỉ đã lưu.");
+                    diaChi=diaChiService.chiTiet(kh,form.getIdDiaChi()).get(service.dungGhn()?"dia_chi_cu_the":"dia_chi_day_du").toString();
+                }
+                if(form.getTinhGhn()==null || form.getXaGhn()==null) throw new IllegalArgumentException("Vui lòng chọn tỉnh/thành và phường/xã giao hàng.");
+                var q=service.baoGiaGhn(layGio(session,khoaGio(loai)),form.getTen(),form.getSdt(),diaChi,form.getPhuongThuc(),form.getTinhGhn(),form.getXaGhn());
+                session.setAttribute("baoGiaGhn_"+khoaGio(loai),q);
+                tb.addFlashAttribute("success","Đã cập nhật phí GHN. Kiểm tra địa chỉ và tổng tiền trước khi đặt hàng.");
+            }catch(IllegalArgumentException | IllegalStateException e){tb.addFlashAttribute("error",e.getMessage());}
+            catch(DataAccessException e){tb.addFlashAttribute("error","Chưa lấy được phí giao hàng. Vui lòng thử lại.");}
+            tb.addFlashAttribute("ten",form.getTen());tb.addFlashAttribute("sdt",form.getSdt());tb.addFlashAttribute("diaChi",diaChi);
+            tb.addFlashAttribute("idDiaChiDaChon",form.getIdDiaChi());tb.addFlashAttribute("phuongThucDaChon",form.getPhuongThuc());
+            return "redirect:/thanh-toan?loai="+("mua".equals(loai)?"mua":"gio");
+        }
     }
 
     @PostMapping("/thanh-toan")
@@ -163,21 +212,32 @@ public class SanPhamOnlineController {
                 Integer kh = (Integer) session.getAttribute("khachHangOnlineDangNhap");
                 if(form.getIdDiaChi()!=null) {
                     if(kh==null) throw new IllegalArgumentException("Vui lòng đăng nhập để sử dụng địa chỉ đã lưu.");
-                    diaChi=diaChiService.chiTiet(kh,form.getIdDiaChi()).get("dia_chi_day_du").toString();
+                    diaChi=diaChiService.chiTiet(kh,form.getIdDiaChi()).get(service.dungGhn()?"dia_chi_cu_the":"dia_chi_day_du").toString();
                 }
                 Integer id;
-                if(form.getIdPhieuGiamGia()!=null)
+                if(service.dungGhn()) {
+                    var baoGia=session.getAttribute("baoGiaGhn_"+khoaGio(loai)) instanceof com.example.victorsport.Dto.BaoGiaGhn q?q:null;
+                    if(baoGia==null || !java.util.Objects.equals(form.getTinhGhn(),baoGia.tinh()) || !java.util.Objects.equals(form.getXaGhn(),baoGia.xa()))
+                        throw new IllegalArgumentException("Vui lòng lấy lại phí GHN cho địa chỉ đã chọn.");
+                    if(!diaChi.trim().equals(baoGia.diaChiChiTiet()))
+                        throw new IllegalArgumentException("Địa chỉ chi tiết đã thay đổi. Vui lòng lấy lại phí GHN.");
+                    diaChi=baoGia.diaChi();
+                    id=service.datHang(gio,kh,ten,sdt,diaChi,"mua".equals(loai),form.getPhuongThuc(),form.getIdPhieuGiamGia(),form.getTongTienDuKien(),baoGia);
+                    session.removeAttribute("baoGiaGhn_"+khoaGio(loai));
+                }
+                else if(form.getIdPhieuGiamGia()!=null || form.getTongTienDuKien()!=null)
                     id=service.datHang(gio,kh,ten,sdt,diaChi,"mua".equals(loai),form.getPhuongThuc(),form.getIdPhieuGiamGia(),form.getTongTienDuKien());
                 else if ("QR".equals(form.getPhuongThuc()))
                     id = service.datHang(gio, kh, ten, sdt, diaChi,"mua".equals(loai),"QR");
                 else id = service.datHang(gio, kh, ten, sdt, diaChi,"mua".equals(loai));
                 gio.clear();
+                if(kh==null) session.setAttribute("donVangLai_"+id,true);
                 if ("QR".equals(form.getPhuongThuc())) {
                     if (kh == null) session.setAttribute("donQr_" + id, true);
                     return "redirect:/thanh-toan/qr/" + id;
                 }
                 tb.addFlashAttribute("success", "Đặt hàng thành công. Mã hóa đơn: HD" + String.format("%05d", id) + ". Thanh toán khi nhận hàng.");
-                return "redirect:/gio-hang";
+                return kh==null?"redirect:/don-vang-lai/"+id:"redirect:/don-hang/"+id;
             } catch (IllegalArgumentException loi) { tb.addFlashAttribute("error", loi.getMessage()); }
             catch (DataAccessException loi) { tb.addFlashAttribute("error", "Chưa đặt được hàng. Vui lòng thử lại sau."); }
             tb.addFlashAttribute("ten", ten); tb.addFlashAttribute("sdt", sdt); tb.addFlashAttribute("diaChi", diaChi);

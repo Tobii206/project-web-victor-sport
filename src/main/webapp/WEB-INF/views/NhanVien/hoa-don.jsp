@@ -4,12 +4,12 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <link rel="icon" type="image/svg+xml" href="/images/favicon-victorsport.svg?v=1">
+    <link rel="icon" type="image/svg+xml" href="/logo/favicon-victorsport.svg?v=1">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý hóa đơn - Victor Sport</title>
     <link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014">
-</head>
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head>
 <body>
 <div class="app-shell">
     <jsp:include page="/WEB-INF/views/Admin/menu.jsp"/>
@@ -38,10 +38,10 @@
                 </div>
                 <div class="panel-body">
                     <c:if test="${not empty error}">
-                        <div class="alert error"><c:out value="${error}"/></div>
+                        <div class="alert error" data-vs-flash="error"><c:out value="${error}"/></div>
                     </c:if>
                     <c:if test="${not empty success}">
-                        <div class="alert success"><c:out value="${success}"/></div>
+                        <div class="alert success" data-vs-flash="success"><c:out value="${success}"/></div>
                     </c:if>
                     <form class="search-row" method="get" action="/quan-ly/hoa-don">
                         <input class="input" name="tuKhoa" value="<c:out value='${tuKhoa}'/>"
@@ -77,7 +77,12 @@
                                     <td><c:out value="${hd.ten_trang_thai}"/></td>
                                     <td><div class="invoice-actions">
                                         <a class="button secondary" href="/quan-ly/hoa-don/${hd.id}">Xem chi tiết</a>
-                                        <c:if test="${currentUser.quanLy and (hd.loai_don == 1 or hd.loai_don == 2) and hd.trang_thai_hien_tai >= 1 and hd.trang_thai_hien_tai <= 3}">
+<c:if test="${currentUser.quanLy and (hd.loai_don == 1 or hd.loai_don == 2) and hd.phuong_thuc == 'COD' and hd.trang_thai_hien_tai == 1}">
+<form method="post" action="/quan-ly/hoa-don/${hd.id}/xac-nhan-don-cod" data-xac-nhan-thanh-toan data-tieu-de="Xác nhận đơn COD" data-nhan-xac-nhan="Xác nhận đơn" data-tong-tien="${hd.tong_tien_sau_giam}" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đang vận chuyển" data-noi-dung="Xác nhận giao đơn COD. Chưa ghi nhận thu tiền."><input type="hidden" name="quayLai" value="danh-sach"><button class="button">Xác nhận đơn COD</button></form></c:if>
+<c:if test="${currentUser.quanLy and (hd.loai_don == 1 or hd.loai_don == 2) and hd.phuong_thuc == 'COD' and not hd.da_thanh_toan and (hd.trang_thai_hien_tai == 4 or hd.trang_thai_hien_tai == 5)}">
+<form method="post" action="/quan-ly/hoa-don/${hd.id}/thu-tien-cod" data-xac-nhan-thanh-toan data-tieu-de="Xác nhận đã thu tiền COD" data-tong-tien="${hd.tong_tien_sau_giam}" data-noi-dung="Chỉ xác nhận sau khi đã nhận và đối soát đủ tiền COD."><input type="hidden" name="quayLai" value="danh-sach"><button class="button">Đã thu tiền COD</button></form></c:if>
+
+                                        <c:if test="${currentUser.quanLy and (hd.loai_don == 1 or hd.loai_don == 2) and hd.phuong_thuc != 'COD' and hd.trang_thai_hien_tai >= 1 and hd.trang_thai_hien_tai <= 3}">
                                             <form method="post" action="/quan-ly/hoa-don/${hd.id}/xac-nhan-thanh-toan" data-xac-nhan-thanh-toan data-ma-hoa-don="<c:out value='${hd.ma_hoa_don}'/>" data-tong-tien="${hd.tong_tien_sau_giam}" data-nhan-phuong-thuc="Trạng thái" data-tieu-de="Xác nhận thanh toán" data-phuong-thuc="Đang vận chuyển" data-noi-dung="Sau khi xác nhận, đơn hàng sẽ chuyển sang trạng thái Đang vận chuyển.">
                                                 <input type="hidden" name="quayLai" value="danh-sach"><button class="button" type="submit">Xác nhận thanh toán</button>
                                             </form>

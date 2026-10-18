@@ -111,7 +111,7 @@ public class QuanLySanPhamController {
         return "redirect:/quan-ly/san-pham/"+id+"#mau-giay";
     }
     @PostMapping("/{id}/anh/them")
-    public String themAnh(@PathVariable int id,@RequestParam int idMau,@RequestParam MultipartFile tepAnh,HttpSession session,Model model,RedirectAttributes flash) {
+    public synchronized String themAnh(@PathVariable int id,@RequestParam int idMau,@RequestParam MultipartFile tepAnh,HttpSession session,Model model,RedirectAttributes flash) {
         if(nguoiDung(session,model)==null)return "redirect:/login";
         flash.addFlashAttribute("mauAnhDangChon",idMau);
         Path tep=null;
@@ -123,15 +123,41 @@ public class QuanLySanPhamController {
             java.awt.image.BufferedImage anh;
             try(var luong=tepAnh.getInputStream()) {anh=ImageIO.read(luong);}
             if(anh==null)throw new IllegalArgumentException("Tệp không phải ảnh JPG hoặc PNG hợp lệ.");
-            String ten=UUID.randomUUID()+".png";
-            Path thuMuc=Path.of("uploads","products").toAbsolutePath();Files.createDirectories(thuMuc);tep=thuMuc.resolve(ten);
-            ImageIO.write(anh,"png",tep.toFile());
-            service.themAnh(id,idMau,"/uploads/products/"+ten);flash.addFlashAttribute("success","Đã thêm ảnh cho mẫu giày.");
+            Path thuMuc=Path.of("image").toAbsolutePath();Files.createDirectories(thuMuc);
+            Path anhDaCo=timAnhDaCo(thuMuc,anh);
+            if(anhDaCo==null) {
+                tep=thuMuc.resolve(UUID.randomUUID()+".png");
+                ImageIO.write(anh,"png",tep.toFile());
+                anhDaCo=tep;
+            }
+            service.themAnh(id,idMau,"/image/"+anhDaCo.getFileName());
+            flash.addFlashAttribute("success",tep==null?"Đã dùng lại ảnh có sẵn cho mẫu giày.":"Đã thêm ảnh cho mẫu giày.");
         } catch(IllegalArgumentException | IOException | DataAccessException e) {
             if(tep!=null)try {Files.deleteIfExists(tep);} catch(IOException boQua) { }
             flash.addFlashAttribute("error",e instanceof IllegalArgumentException?e.getMessage():"Không lưu được ảnh. Vui lòng thử lại.");
         }
         return "redirect:/quan-ly/san-pham/"+id+"#anh-san-pham";
+    }
+    private Path timAnhDaCo(Path thuMuc,java.awt.image.BufferedImage anh) throws IOException {
+        try(var cacTep=Files.list(thuMuc)) {
+            for(Path tep:cacTep.toList()) {
+                String ten=tep.getFileName().toString().toLowerCase(Locale.ROOT);
+                if(!Files.isRegularFile(tep,LinkOption.NOFOLLOW_LINKS) ||
+                        !(ten.endsWith(".png") || ten.endsWith(".jpg") || ten.endsWith(".jpeg"))) continue;
+                java.awt.image.BufferedImage anhCu;
+                try {anhCu=ImageIO.read(tep.toFile());} catch(IOException loiAnhCu) {continue;}
+                if(anhCu==null || anhCu.getWidth()!=anh.getWidth() || anhCu.getHeight()!=anh.getHeight()) continue;
+                boolean giongNhau=true;
+                for(int y=0;y<anh.getHeight();y++) {
+                    if(!Arrays.equals(anh.getRGB(0,y,anh.getWidth(),1,null,0,anh.getWidth()),
+                            anhCu.getRGB(0,y,anhCu.getWidth(),1,null,0,anhCu.getWidth()))) {
+                        giongNhau=false;break;
+                    }
+                }
+                if(giongNhau)return tep;
+            }
+        }
+        return null;
     }
     @PostMapping("/{id}/anh/{anh}/{thaoTac}")
     public String suaAnh(@PathVariable int id,@PathVariable int anh,@PathVariable String thaoTac,@RequestParam(required=false) Integer idMau,HttpSession session,Model model,RedirectAttributes flash) {

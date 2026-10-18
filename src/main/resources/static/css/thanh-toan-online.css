@@ -52,3 +52,5 @@
 .checkout-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
 @media(max-width: 950px) { .checkout-layout { grid-template-columns: 1fr; } .checkout-summary { position: static; } }
 @media(max-width: 550px) { .checkout-heading h1 { font-size: 26px; } .checkout-brand { display: none; } .checkout-layout .account-card { padding: 22px; } .checkout-contact { grid-template-columns: 1fr; } .checkout-grand-total strong { font-size: 23px; } }
+
+.checkout-form #taiLaiDiaChiGhn[hidden] { display: none; }

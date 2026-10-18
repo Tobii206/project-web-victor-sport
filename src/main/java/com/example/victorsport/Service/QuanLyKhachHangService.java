@@ -14,7 +14,8 @@ public class QuanLyKhachHangService {
 
     public List<Map<String,Object>> tim(Map<String,String> loc) {
         String sql="""
-                SELECT id,ma_khach_hang,ten_khach_hang,ten_tai_khoan,email,so_dien_thoai,gioi_tinh,trang_thai
+                SELECT id,ma_khach_hang,ten_khach_hang,ten_tai_khoan,email,so_dien_thoai,gioi_tinh,trang_thai,
+                    CAST(CASE WHEN EXISTS (SELECT 1 FROM bao_mat_tai_khoan b WHERE b.id_khach_hang=khach_hang.id AND b.bi_khoa=1) THEN 1 ELSE 0 END AS BIT) AS bi_khoa
                 FROM khach_hang WHERE ISNULL(xoa_mem,0)=0
                 """;
         List<Object> thamSo=new ArrayList<>();

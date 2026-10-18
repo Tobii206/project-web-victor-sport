@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="/images/favicon-victorsport.svg?v=1">
+    <link rel="icon" type="image/svg+xml" href="/logo/favicon-victorsport.svg?v=1">
     <link rel="stylesheet" href="/css/trang-chu.css?v=muot-1">
     <title>Không có quyền truy cập — VictorSport</title>
-</head>
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head>
 <body>
 <%@ include file="/WEB-INF/views/KhachHang/dau-trang-online.jsp" %>
 <main class="store-container account-container">

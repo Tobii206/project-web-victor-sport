@@ -1,18 +1,20 @@
-var chonMauAnh = document.getElementById('mauAnh');
-var cacAnhMau = document.querySelectorAll('.product-admin-image[data-mau]');
-var thongBaoKhongAnh = document.getElementById('khongCoAnhMau');
-
-function hienAnhMauDangChon() {
-    var soAnh = 0;
-    for (var i = 0; i < cacAnhMau.length; i++) {
-        var dungMau = cacAnhMau[i].dataset.mau === chonMauAnh.value;
-        cacAnhMau[i].hidden = !dungMau;
-        if (dungMau) { soAnh++; }
+(function () {
+    function hienAnhMauDangChon() {
+        var chon = document.getElementById('mauAnh');
+        var thongBao = document.getElementById('khongCoAnhMau');
+        if (!chon || !thongBao) return;
+        var soAnh = 0;
+        document.querySelectorAll('#anh-san-pham .product-admin-image[data-mau]').forEach(function (anh) {
+            var dungMau = anh.dataset.mau === chon.value;
+            anh.hidden = !dungMau;
+            if (dungMau) soAnh++;
+        });
+        thongBao.textContent = 'Chưa có ảnh cho mẫu giày này.';
+        thongBao.hidden = soAnh > 0;
     }
-    thongBaoKhongAnh.hidden = soAnh > 0;
-}
-
-if (chonMauAnh) {
-    chonMauAnh.onchange = hienAnhMauDangChon;
+    document.addEventListener('change', function (e) {
+        if (e.target.id === 'mauAnh') hienAnhMauDangChon();
+    });
+    document.addEventListener('vs:du-lieu-da-cap-nhat', hienAnhMauDangChon);
     hienAnhMauDangChon();
-}
+})();

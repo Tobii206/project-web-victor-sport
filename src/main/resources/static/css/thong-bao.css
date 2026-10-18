@@ -1,0 +1,30 @@
+.vs-notice { box-sizing:border-box; position:fixed; inset:0; width:min(460px,calc(100% - 32px)); max-height:calc(100dvh - 32px); margin:auto; padding:32px; overflow:auto; border:1px solid #e4eaf3; border-radius:22px; background:#fff; color:#142b52; font-family:"Segoe UI",Arial,sans-serif; box-shadow:0 24px 80px #0d203c3d; }
+.vs-notice::backdrop { background:#10223e80; backdrop-filter:blur(4px); }
+.vs-notice[open] { animation:vs-notice-in .18s ease-out; }
+.vs-notice *, .vs-notice *::before, .vs-notice *::after { box-sizing:border-box; }
+.vs-notice .vs-notice-close { position:absolute; top:14px; right:14px; display:grid; place-items:center; width:36px; height:36px; padding:0; border:0; border-radius:50%; background:#f2f5fa; color:#67788e; font:26px/1 "Segoe UI",Arial,sans-serif; cursor:pointer; }
+.vs-notice-icon { display:grid; place-items:center; width:56px; height:56px; margin-bottom:22px; border-radius:17px; color:#b65a18; background:#fff0e4; }
+.vs-notice-icon svg { width:28px; height:28px; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; }
+.vs-notice[data-tone="danger"] .vs-notice-icon { background:#fff0ef; color:#c43c3c; }
+.vs-notice .vs-notice-brand { margin:0 0 8px; color:#a65319; font-size:11px; font-weight:700; letter-spacing:1.8px; }
+.vs-notice h2 { margin:0; padding-right:8px; font-size:25px; line-height:1.3; font-weight:700; letter-spacing:-.5px; }
+.vs-notice .vs-notice-message { margin:14px 0 0; color:#66758b; font-size:15px; line-height:1.75; overflow-wrap:anywhere; white-space:pre-line; }
+.vs-notice-actions { display:flex; justify-content:flex-end; gap:12px; margin-top:28px; }
+.vs-notice .vs-notice-actions button { min-height:46px; padding:12px 18px; border:1px solid #dce4ef; border-radius:12px; font:600 14px/1.4 "Segoe UI",Arial,sans-serif; cursor:pointer; transition:background .15s ease,box-shadow .15s ease; }
+.vs-notice .vs-notice-cancel { flex:1; color:#42536d; background:#fff; }
+.vs-notice .vs-notice-accept { flex:1.6; color:#fff; background:#142b52; border-color:#142b52 !important; }
+.vs-notice[data-tone="danger"] .vs-notice-accept { background:#c43c3c; border-color:#c43c3c !important; }
+.vs-notice .vs-notice-cancel:hover, .vs-notice .vs-notice-close:hover { background:#eaf0f7; }
+.vs-notice .vs-notice-accept:hover { background:#234572; }
+.vs-notice[data-tone="danger"] .vs-notice-accept:hover { background:#aa3030; }
+.vs-notice button:focus-visible { outline:3px solid #ffb47c; outline-offset:3px; }
+.vs-notice button[hidden] { display:none; }
+@keyframes vs-notice-in { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@media(max-width:480px) { .vs-notice { padding:26px 22px; border-radius:18px; } .vs-notice h2 { font-size:22px; } .vs-notice .vs-notice-actions button { padding:12px 10px; } }
+@media(prefers-reduced-motion:reduce) { .vs-notice[open] { animation:none; } .vs-notice .vs-notice-actions button { transition:none; } }
+@media print { .vs-notice { display:none !important; } }
+
+.vs-notice[data-tone="success"] .vs-notice-icon { background:#eaf7ef; color:#278253; }
+
+.vs-live-status { position: fixed; bottom: 18px; left: 18px; z-index: 1600; margin: 0; max-width: min(440px,calc(100vw - 36px)); padding: 12px 16px; border: 1px solid #f2d5b8; border-radius: 10px; background: #fff6ed; color: #8c4d21; font-size: 13px; box-shadow: 0 8px 28px #142b5212; }
+.vs-live-status[hidden] { display: none; }

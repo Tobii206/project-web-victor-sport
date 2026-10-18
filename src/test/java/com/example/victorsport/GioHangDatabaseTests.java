@@ -46,7 +46,7 @@ class GioHangDatabaseTests {
         assertEquals(Map.of(9,2),s.getAttribute("gioHangOnline"));
         doReturn(10).when(sp).datHang(gio,7,"Khách","0325327602","Cầu Giấy",false);
         mvc.perform(post("/thanh-toan").session(s).param("ten","Khách").param("sdt","0325327602").param("diaChi","Cầu Giấy"))
-                .andExpect(redirectedUrl("/gio-hang"));
+                .andExpect(redirectedUrl("/don-hang/10"));
         assertTrue(gio.isEmpty());
     }
     @Test void muaNgayKhongGhiHoacXoaGioDaLuu() throws Exception {

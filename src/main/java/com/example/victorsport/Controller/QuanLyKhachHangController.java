@@ -28,6 +28,14 @@ public class QuanLyKhachHangController {
         if(user!=null && !(user.isQuanLy()||(!ghi&&user.isXemKhachHang()))) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         model.addAttribute("activeMenu","khach-hang");return user;
     }
+    @PostMapping("/{id}/mo-khoa")
+    public String moKhoa(@PathVariable int id,HttpSession session,Model model,RedirectAttributes flash) {
+        if(nguoiDung(session,model,true)==null) return "redirect:/login";
+        try {var kh=service.lay(id);taiKhoanService.moKhoaSauDoiMatKhau(kh.get("ten_tai_khoan").toString());flash.addFlashAttribute("success","Đã mở khóa đăng nhập khách hàng.");}
+        catch(IllegalArgumentException e){flash.addFlashAttribute("error",e.getMessage());}
+        catch(DataAccessException e){flash.addFlashAttribute("error","Chưa mở khóa được tài khoản.");}
+        return "redirect:/quan-ly/khach-hang";
+    }
     @GetMapping
     public String danhSach(@RequestParam Map<String,String> loc,HttpSession session,Model model) {
         if(nguoiDung(session,model,false)==null) return "redirect:/login";

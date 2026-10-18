@@ -13,6 +13,6 @@ if (sessionStorage.getItem("gioKhachDaXoa") === "1") {
         })
         .catch(function () {
             document.documentElement.style.visibility = "";
-            alert("Chưa xóa được giỏ hàng tạm. Vui lòng tải lại trang.");
+            VictorThongBao.thongBao("Chưa xóa được giỏ hàng tạm. Vui lòng tải lại trang.", "Chưa cập nhật được giỏ hàng");
         });
 }

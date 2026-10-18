@@ -26,6 +26,7 @@ class PhieuGiamGiaOnlineTests {
 
     @Test void chonSanVaGiuLuaChonKhongDungPhieuKhiDatHangLoi() throws Exception {
         var service=mock(SanPhamOnlineService.class);
+        when(service.phiGiaoHang()).thenReturn(BigDecimal.ZERO);
         var goc=new BigDecimal("1000000");var giam=new BigDecimal("100000");
         var cacPhieu=List.<Map<String,Object>>of(Map.of("id",3,"tien_giam",giam));
         when(service.tongTienGoc(anyList())).thenReturn(goc);
@@ -78,7 +79,7 @@ class PhieuGiamGiaOnlineTests {
         MockMvcBuilders.standaloneSetup(new SanPhamOnlineController(service,mock(DiaChiKhachHangService.class))).build()
                 .perform(post("/thanh-toan").session(session).param("ten","Long").param("sdt","0325327602").param("diaChi","Hà Nội")
                         .param("idPhieuGiamGia","3").param("tongTienDuKien","900000.00"))
-                .andExpect(redirectedUrl("/gio-hang")).andExpect(flash().attributeExists("success"));
+                .andExpect(redirectedUrl("/don-vang-lai/20")).andExpect(flash().attributeExists("success"));
         verify(service).datHang(anyMap(),isNull(),eq("Long"),eq("0325327602"),eq("Hà Nội"),eq(false),eq("COD"),eq(3),eq(new BigDecimal("900000.00")));
     }
 

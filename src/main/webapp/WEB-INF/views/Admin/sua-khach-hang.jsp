@@ -2,12 +2,12 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html><html lang="vi"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Thông tin khách hàng — VictorSport</title>
-<link rel="icon" href="/images/favicon-victorsport.svg"><link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=admin-20261014">
-</head><body><div class="app-shell"><jsp:include page="/WEB-INF/views/Admin/menu.jsp"/><div class="main-area">
+<link rel="icon" href="/logo/favicon-victorsport.svg"><link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=admin-20261014">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/views/Admin/menu.jsp"/><div class="main-area">
 <%@ include file="/WEB-INF/views/Admin/dau-trang-khach-hang.jsp" %>
 <main class="content-layout"><section class="panel">
 <div class="panel-header"><h2>${empty idKhachHang ? 'Thêm khách hàng' : 'Thông tin khách hàng'} <c:out value="${maKhachHang}"/></h2><a class="button secondary" href="/quan-ly/khach-hang">Về danh sách</a></div><div class="panel-body">
-<c:if test="${not empty error}"><div class="alert error" role="alert"><c:out value="${error}"/></div></c:if>
+<c:if test="${not empty error}"><div class="alert error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
 <c:set var="duongDanLuu" value="/quan-ly/khach-hang/luu"/><c:if test="${not empty idKhachHang}"><c:set var="duongDanLuu" value="/quan-ly/khach-hang/${idKhachHang}/luu"/></c:if>
 <form method="post" action="${duongDanLuu}" autocomplete="off">
 <fieldset class="product-admin-form" style="border:0;padding:0;margin:0;min-width:0" ${not currentUser.quanLy ? 'disabled' : ''}>
@@ -27,4 +27,4 @@
     <p id="loiDiaChi" class="muted product-admin-wide" role="alert" hidden>Chưa tải được danh mục địa chỉ. Vui lòng tải lại trang; địa chỉ đã lưu vẫn được giữ.</p>
     <div class="field product-admin-wide"><label for="diaChi">Địa chỉ chi tiết</label><input class="input" id="diaChi" name="dia_chi_cu_the" maxlength="255" value="<c:out value='${khachHang.dia_chi_cu_the}'/>"></div>
     <c:if test="${currentUser.quanLy}"><div class="product-admin-actions product-admin-wide"><button class="button">${empty idKhachHang ? 'Thêm khách hàng' : 'Lưu thay đổi'}</button><a class="button secondary" href="/quan-ly/khach-hang">Hủy</a></div></c:if>
-</fieldset></form></div></section></main></div></div><script src="/js/chon-dia-chi.js?v=3"></script></body></html>
+</fieldset></form></div></section></main></div></div><script src="/js/chon-dia-chi.js?v=20261018-muot"></script></body></html>

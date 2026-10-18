@@ -1,0 +1,19 @@
+.invoice-print-brand {display:none;}
+@media print {
+     .invoice-print-brand {display:flex!important;justify-content:space-between;align-items:center;gap:20px;break-inside:avoid;padding:10px 0 20px;border-bottom:1px solid #bbb;}
+    .invoice-print-brand .invoice-print-logo {display:block!important;width:210px!important;height:auto!important;max-height:70px;object-fit:contain;}
+    .invoice-print-brand > span {text-align:right;font-size:10pt;}
+    @page { size:A4; margin:15mm; }
+    body { background:white!important;font-size:11pt!important;color:#111!important; }
+    .side-menu,.topbar,.invoice-actions,.invoice-toolbar form,.panel-header>a,.invoice-detail>.alert,.account-back,.store-header,button,script {display:none!important;}
+    .app-shell,.main-area,.invoice-detail,.content-layout {display:block!important;width:auto!important;min-width:0!important;margin:0!important;padding:0!important;}
+    .panel {box-shadow:none!important;border:0!important;overflow:visible!important;}
+    .panel-body,.panel-header{padding:10px 0!important;}
+    .invoice-info {display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important;}
+    .invoice-info-card {padding:10px!important;break-inside:avoid;}
+    table {width:100%!important;min-width:0!important;font-size:10pt!important;}
+    th,td {padding:10px 6px!important;overflow-wrap:anywhere;}
+    tr {break-inside:avoid;} thead {display:table-header-group;}
+    .invoice-table {overflow:visible!important;}
+    a {color:inherit!important;text-decoration:none!important;}
+}

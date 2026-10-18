@@ -32,3 +32,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# SMTP local only
+/application-mail-local.properties
+
+/application-ghn-local.properties

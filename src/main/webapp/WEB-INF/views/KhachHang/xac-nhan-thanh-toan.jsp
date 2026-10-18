@@ -15,4 +15,4 @@
         <button type="button" id="dongYXacNhan">${currentUser.quanLy and activeMenu == 'hoa-don' ? 'Xác nhận thanh toán' : 'Xác nhận thanh toán'}</button>
     </div>
 </dialog>
-<script src="/js/xac-nhan-thanh-toan.js?v=20261015-7"></script>
+<script src="/js/xac-nhan-thanh-toan.js?v=20261018-live"></script>
