@@ -75,7 +75,7 @@ public class BanHangTaiQuayController {
         model.addAttribute("selectedDiscountCouponId", layIdPhieuGiamGia(phienDangNhap));
         model.addAttribute("cart", gioHang);
         model.addAttribute("summary", banHangTaiQuayService.tinhTongKet(gioHang, layIdPhieuGiamGia(phienDangNhap)));
-        return "NhanVien/pos";
+        return "admin/pos/show";
     }
 
     @PostMapping("/pos/khach-hang/chon")

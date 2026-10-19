@@ -79,7 +79,7 @@ class QuanLySanPhamTests {
         var s=new MockHttpSession();s.setAttribute(DangNhapController.KHOA_NGUOI_DUNG_DANG_NHAP,new NguoiDungDangNhap(1,"admin@example.com","Quản lý","Quản trị viên"));return s;
     }
     private MockMvc mvc(QuanLySanPhamService service) {
-        var view=new InternalResourceViewResolver("/WEB-INF/views/",".jsp");
+        var view=new InternalResourceViewResolver("/WEB-INF/view/",".jsp");
         return MockMvcBuilders.standaloneSetup(new QuanLySanPhamController(service)).setViewResolvers(view).build();
     }
     @Test void chuaDangNhapKhongDuocGhi() throws Exception {

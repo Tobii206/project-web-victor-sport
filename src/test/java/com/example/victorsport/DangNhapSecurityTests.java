@@ -35,7 +35,7 @@ class DangNhapSecurityTests {
                 assertFalse(filter.getClass().getSimpleName().equals("UsernamePasswordAuthenticationFilter"));
             }
             MockMvc mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(boLoc).build();
-            mvc.perform(get("/login")).andExpect(status().isOk()).andExpect(view().name("KhachHang/login"));
+            mvc.perform(get("/login")).andExpect(status().isOk()).andExpect(view().name("client/auth/login"));
             DangNhapService nv = context.getBean(DangNhapService.class);
             when(nv.laTaiKhoanNhanVien("nv@gmail.com")).thenReturn(true);
             when(nv.dangNhap("nv@gmail.com", "123456")).thenReturn(DangNhapService.KetQuaDangNhap.thanhCong(
@@ -62,7 +62,7 @@ class DangNhapSecurityTests {
             return new DangNhapController(nv, kh, mock(com.example.victorsport.Service.SanPhamOnlineService.class));
         }
         @Bean InternalResourceViewResolver viewResolver() {
-            return new InternalResourceViewResolver("/WEB-INF/views/", ".jsp");
+            return new InternalResourceViewResolver("/WEB-INF/view/", ".jsp");
         }
     }
 }

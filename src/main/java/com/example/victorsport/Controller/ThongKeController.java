@@ -37,6 +37,6 @@ public class ThongKeController {
         } catch(DateTimeParseException e) { model.addAttribute("error","Vui lòng chọn ngày hợp lệ."); }
         catch(IllegalArgumentException e) { model.addAttribute("error",e.getMessage()); }
         catch(DataAccessException e) { model.addAttribute("error","Chưa tải được thống kê. Vui lòng thử lại."); }
-        return "Admin/thong-ke";
+        return "admin/dashboard/statistics";
     }
 }

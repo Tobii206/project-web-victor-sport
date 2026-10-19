@@ -32,7 +32,7 @@ public class HoaDonController {
         model.addAttribute("activeMenu", "hoa-don");
         model.addAttribute("tuKhoa", tuKhoa);
         model.addAttribute("danhSachHoaDon", hoaDonService.layDanhSachHoaDon(tuKhoa));
-        return "NhanVien/hoa-don";
+        return "admin/order/show";
     }
 
     @GetMapping("/quan-ly/hoa-don/{id}")
@@ -50,7 +50,7 @@ public class HoaDonController {
         model.addAttribute("hoaDon", hoaDon);
         model.addAttribute("danhSachSanPham", hoaDonService.laySanPhamTrongHoaDon(id));
         model.addAttribute("lichSu", hoaDonService.layLichSu(id));
-        return "NhanVien/chi-tiet-hoa-don";
+        return "admin/order/detail";
     }
 
     @PostMapping("/quan-ly/hoa-don/{id}/huy")

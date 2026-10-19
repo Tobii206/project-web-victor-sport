@@ -23,7 +23,7 @@ class QuanLyKhachHangTests {
     }
     private MockMvc mvc(QuanLyKhachHangService service) {
         return MockMvcBuilders.standaloneSetup(new QuanLyKhachHangController(service,mock(TaiKhoanService.class)))
-                .setViewResolvers(new InternalResourceViewResolver("/WEB-INF/views/",".jsp")).build();
+                .setViewResolvers(new InternalResourceViewResolver("/WEB-INF/view/",".jsp")).build();
     }
     @Test void chuaDangNhapKhongDuocGhi() throws Exception {
         var service=mock(QuanLyKhachHangService.class);
@@ -31,7 +31,7 @@ class QuanLyKhachHangTests {
     }
     @Test void nhanVienChiDuocXem() throws Exception {
         var service=mock(QuanLyKhachHangService.class);var mvc=mvc(service);var session=session("Nhân viên");
-        mvc.perform(get("/quan-ly/khach-hang").session(session)).andExpect(view().name("Admin/quan-ly-khach-hang"));
+        mvc.perform(get("/quan-ly/khach-hang").session(session)).andExpect(view().name("admin/customer/show"));
         mvc.perform(get("/quan-ly/khach-hang/them").session(session)).andExpect(status().isForbidden());
         mvc.perform(post("/quan-ly/khach-hang/3/luu").session(session)).andExpect(status().isForbidden());
         mvc.perform(post("/quan-ly/khach-hang/3/ngung-hoat-dong").session(session)).andExpect(status().isForbidden());

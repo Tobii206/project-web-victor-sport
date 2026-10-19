@@ -26,7 +26,7 @@ public class TuPhucVuTaiKhoanController {
         if(session.getAttribute("csrfTaiKhoan")==null) session.setAttribute("csrfTaiKhoan",UUID.randomUUID().toString());
         model.addAttribute("csrfTaiKhoan",session.getAttribute("csrfTaiKhoan"));
         model.addAttribute("cheDo",cheDo);model.addAttribute("tieuDe",tieuDe);
-        return "KhachHang/tu-phuc-vu-tai-khoan";
+        return "client/auth/account-form";
     }
     private void kiemTraToken(HttpSession session,String token) {
         if(token==null || !token.equals(session.getAttribute("csrfTaiKhoan"))) throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Vui lòng tải lại trang.");

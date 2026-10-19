@@ -29,7 +29,7 @@ public class DiaChiKhachHangController {
             if(sua!=null) model.addAttribute("diaChiSua",service.chiTiet(kh,sua));
         } catch(IllegalArgumentException e){model.addAttribute("error",e.getMessage());}
         catch(DataAccessException e){model.addAttribute("error","Chưa tải được địa chỉ. Vui lòng thử lại.");}
-        return "KhachHang/dia-chi";
+        return "client/account/address";
     }
 
     @PostMapping("/luu")

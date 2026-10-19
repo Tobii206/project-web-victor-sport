@@ -42,7 +42,7 @@ public class QuanLyDotGiamGiaController {
         model.addAttribute("tuKhoa", tuKhoa); model.addAttribute("trangThai", trangThai);
         try { model.addAttribute("danhSach", service.tim(tuKhoa, trangThai)); }
         catch (DataAccessException e) { model.addAttribute("error", "Chưa tải được danh sách. Vui lòng thử lại."); }
-        return "Admin/quan-ly-dot-giam-gia";
+        return "admin/promotion/show";
     }
 
     @GetMapping("/them")
@@ -52,7 +52,7 @@ public class QuanLyDotGiamGiaController {
         if (!model.containsAttribute("uuDai")) model.addAttribute("uuDai", Map.of("trang_thai", true));
         try { model.addAttribute("cacMucUuTien", service.cacMucUuTien()); }
         catch (DataAccessException e) { model.addAttribute("error", "Chưa tải được mức ưu tiên. Vui lòng thử lại."); }
-        return "Admin/sua-dot-giam-gia";
+        return "admin/promotion/update";
     }
 
     @GetMapping("/{id}")
@@ -67,7 +67,7 @@ public class QuanLyDotGiamGiaController {
             model.addAttribute("maUuDai", data.get("ma_dot_giam_gia"));
             model.addAttribute("cacMau", service.cacMau());
             model.addAttribute("mauDaChon", service.mauDaChon(id));
-            return "Admin/sua-dot-giam-gia";
+            return "admin/promotion/update";
         } catch (IllegalArgumentException e) { flash.addFlashAttribute("error", e.getMessage()); }
         catch (DataAccessException e) { flash.addFlashAttribute("error", "Chưa tải được chi tiết. Vui lòng thử lại."); }
         return "redirect:/quan-ly/dot-giam-gia";

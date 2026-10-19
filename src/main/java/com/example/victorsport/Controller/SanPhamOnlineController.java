@@ -39,7 +39,7 @@ public class SanPhamOnlineController {
             try { model.addAttribute("sanPhamCungLoai", service.laySanPhamCungLoai(id)); }
             catch (DataAccessException loi) { model.addAttribute("loiGoiY", "Chưa tải được sản phẩm gợi ý. Vui lòng thử lại sau."); }
         }
-        return "KhachHang/san-pham-online";
+        return "client/product/detail";
     }
 
     @PostMapping("/san-pham/{id}/chon")
@@ -72,7 +72,7 @@ public class SanPhamOnlineController {
     @GetMapping("/gio-hang")
     public String gioHang(HttpSession session, Model model) {
         hienThiGio(session,"gioHangOnline", model);
-        return "KhachHang/gio-hang-online";
+        return "client/cart/show";
     }
 
     @PostMapping("/gio-hang/sua")
@@ -165,7 +165,7 @@ public class SanPhamOnlineController {
             } catch(IllegalArgumentException e){model.addAttribute("error",e.getMessage());}
             catch(DataAccessException e){model.addAttribute("error","Chưa tải được địa chỉ đã lưu. Bạn có thể nhập địa chỉ nhận hàng.");}
         }
-        return "KhachHang/thanh-toan-online";
+        return "client/cart/checkout";
     }
 
     @PostMapping("/thanh-toan/ghn/bao-gia")
@@ -257,7 +257,7 @@ public class SanPhamOnlineController {
         if (thanhToan == null || thanhToan.isEmpty()) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND);
         model.addAttribute("thanhToan",thanhToan);
         model.addAttribute("idHoaDon",id);
-        return "KhachHang/thanh-toan-qr";
+        return "client/cart/qr";
     }
 
     private void hienThiGio(HttpSession session,String khoa, Model model) {

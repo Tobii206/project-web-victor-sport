@@ -38,10 +38,10 @@ class TrangChuTests {
         MockMvc mvc = taoTrang(service);
 
         mvc.perform(get("/").param("tuKhoa", "Nike").param("thuongHieu", "1").param("sapXep", "gia-tang"))
-                .andExpect(status().isOk()).andExpect(view().name("KhachHang/trang-chu"))
+                .andExpect(status().isOk()).andExpect(view().name("client/homepage/show"))
                 .andExpect(model().attributeExists("sanPham", "thuongHieu"));
         verify(service).timSanPham("Nike", 1, null, null, null, null, null, false, "gia-tang");
-        mvc.perform(get("/login")).andExpect(status().isOk()).andExpect(view().name("KhachHang/login"));
+        mvc.perform(get("/login")).andExpect(status().isOk()).andExpect(view().name("client/auth/login"));
     }
 
     @Test
@@ -49,7 +49,7 @@ class TrangChuTests {
         TrangChuService service = mock(TrangChuService.class);
         when(service.layThuongHieu()).thenThrow(new DataAccessResourceFailureException("Không kết nối được"));
         taoTrang(service).perform(get("/"))
-                .andExpect(status().isOk()).andExpect(view().name("KhachHang/trang-chu"))
+                .andExpect(status().isOk()).andExpect(view().name("client/homepage/show"))
                 .andExpect(model().attributeExists("loiDuLieu"))
                 .andExpect(model().attribute("sanPham", List.of()));
         verify(service, never()).timSanPham(anyString(), nullable(Integer.class), nullable(Integer.class), nullable(Integer.class), nullable(Integer.class), nullable(Integer.class), nullable(Integer.class), anyBoolean(), anyString());
@@ -57,7 +57,7 @@ class TrangChuTests {
 
     private MockMvc taoTrang(TrangChuService service) {
         InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
-        viewResolver.setPrefix("/WEB-INF/views/");
+        viewResolver.setPrefix("/WEB-INF/view/");
         viewResolver.setSuffix(".jsp");
         return MockMvcBuilders.standaloneSetup(new TrangChuController(service),
                 new DangNhapController(mock(DangNhapService.class), mock(com.example.victorsport.Service.TaiKhoanService.class), mock(com.example.victorsport.Service.SanPhamOnlineService.class)))

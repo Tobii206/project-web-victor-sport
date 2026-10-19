@@ -167,7 +167,7 @@ class TaiKhoanTests {
 
     private MockMvc taoTrang(TaiKhoanService service) {
         InternalResourceViewResolver resolver = new InternalResourceViewResolver();
-        resolver.setPrefix("/WEB-INF/views/");
+        resolver.setPrefix("/WEB-INF/view/");
         resolver.setSuffix(".jsp");
         return MockMvcBuilders.standaloneSetup(new TaiKhoanController(service),
                 new DangNhapController(mock(com.example.victorsport.Service.DangNhapService.class), service, mock(com.example.victorsport.Service.SanPhamOnlineService.class)))

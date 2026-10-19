@@ -42,7 +42,7 @@ public class TaiKhoanController {
             model.addAttribute("error", "Chưa tải được thông tin tài khoản. Vui lòng thử lại sau.");
             model.addAttribute("loiKetNoi", true);
         }
-        return "KhachHang/tai-khoan";
+        return "client/account/show";
     }
 
     @PostMapping("/tai-khoan/dang-xuat")

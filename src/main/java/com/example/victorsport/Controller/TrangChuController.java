@@ -47,6 +47,6 @@ public class TrangChuController {
             model.addAttribute("boLoc", Collections.emptyMap());
             model.addAttribute("loiDuLieu", "Chưa tải được sản phẩm. Vui lòng thử lại sau.");
         }
-        return "KhachHang/trang-chu";
+        return "client/homepage/show";
     }
 }

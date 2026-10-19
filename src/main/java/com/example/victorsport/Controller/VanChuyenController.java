@@ -44,7 +44,7 @@ public class VanChuyenController {
         try { model.addAllAttributes(service.danhSach(tuKhoa,trangThai,trang)); }
         catch(IllegalArgumentException e) { model.addAttribute("error",e.getMessage()); }
         catch(DataAccessException e) { model.addAttribute("error","Chưa tải được danh sách vận chuyển. Vui lòng thử lại."); }
-        return "Admin/van-chuyen";
+        return "admin/shipping/show";
     }
 
     @GetMapping("/ghn/dia-chi")

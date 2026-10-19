@@ -23,7 +23,7 @@ class QuanLyNhanVienTests {
     }
     private MockMvc mvc(QuanLyNhanVienService service) {
         return MockMvcBuilders.standaloneSetup(new QuanLyNhanVienController(service))
-                .setViewResolvers(new InternalResourceViewResolver("/WEB-INF/views/",".jsp")).build();
+                .setViewResolvers(new InternalResourceViewResolver("/WEB-INF/view/",".jsp")).build();
     }
     @Test void chuaDangNhapKhongDuocGhi() throws Exception {
         var service=mock(QuanLyNhanVienService.class);

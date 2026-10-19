@@ -37,7 +37,7 @@ public class QuanLyPhieuGiamGiaController {
         model.addAttribute("tuKhoa", tuKhoa); model.addAttribute("trangThai", trangThai);
         try { model.addAttribute("danhSach", service.tim(tuKhoa, trangThai)); }
         catch (DataAccessException e) { model.addAttribute("error", "Chưa tải được danh sách. Vui lòng thử lại."); }
-        return "Admin/quan-ly-phieu-giam-gia";
+        return "admin/voucher/show";
     }
 
     @GetMapping("/them")
@@ -45,7 +45,7 @@ public class QuanLyPhieuGiamGiaController {
         if (quanLy(session, model) == null) return "redirect:/login";
         model.addAttribute("duongDanLuu", "/quan-ly/phieu-giam-gia/luu");
         if (!model.containsAttribute("uuDai")) model.addAttribute("uuDai", Map.of("trang_thai", true, "so_luong_su_dung", 0));
-        return "Admin/sua-phieu-giam-gia";
+        return "admin/voucher/update";
     }
 
     @GetMapping("/{id}")
@@ -58,7 +58,7 @@ public class QuanLyPhieuGiamGiaController {
             model.addAttribute("duongDanLuu", "/quan-ly/phieu-giam-gia/" + id + "/luu");
             model.addAttribute("maUuDai", data.get("ma_phieu_giam_gia"));
             
-            return "Admin/sua-phieu-giam-gia";
+            return "admin/voucher/update";
         } catch (IllegalArgumentException e) { flash.addFlashAttribute("error", e.getMessage()); }
         catch (DataAccessException e) { flash.addFlashAttribute("error", "Chưa tải được chi tiết. Vui lòng thử lại."); }
         return "redirect:/quan-ly/phieu-giam-gia";

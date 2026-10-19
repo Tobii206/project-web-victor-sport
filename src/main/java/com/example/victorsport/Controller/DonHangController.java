@@ -31,7 +31,7 @@ public class DonHangController {
         try { model.addAttribute("donHang",service.layDonCuaKhach(khach)); }
         catch (IllegalArgumentException e) { model.addAttribute("error",e.getMessage()); }
         catch (DataAccessException e) { model.addAttribute("error","Chưa tải được đơn hàng. Vui lòng thử lại."); }
-        return "KhachHang/don-hang";
+        return "client/order/show";
     }
 
     @GetMapping("/{id}")
@@ -45,7 +45,7 @@ public class DonHangController {
             model.addAttribute("don",don);
             model.addAttribute("sanPham",service.laySanPhamTrongHoaDon(id));
             model.addAttribute("lichSu",service.layLichSu(id));
-            return "KhachHang/chi-tiet-don-hang";
+            return "client/order/detail";
         } catch (IllegalArgumentException e) { flash.addFlashAttribute("error",e.getMessage()); }
         catch (DataAccessException e) { flash.addFlashAttribute("error","Chưa tải được chi tiết đơn hàng. Vui lòng thử lại."); }
         return "redirect:/don-hang";

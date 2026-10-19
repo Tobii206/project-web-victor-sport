@@ -144,9 +144,9 @@ class DonHangTests {
         var service = mock(HoaDonService.class);var s = khach();
         when(service.layDonCuaKhach(10,7)).thenReturn(Map.of("id",10));
         var mvc = MockMvcBuilders.standaloneSetup(new DonHangController(service)).build();
-        mvc.perform(get("/don-hang").session(s)).andExpect(view().name("KhachHang/don-hang"))
+        mvc.perform(get("/don-hang").session(s)).andExpect(view().name("client/order/show"))
                 .andExpect(header().string("Cache-Control","no-store"));
-        mvc.perform(get("/don-hang/10").session(s)).andExpect(view().name("KhachHang/chi-tiet-don-hang"));
+        mvc.perform(get("/don-hang/10").session(s)).andExpect(view().name("client/order/detail"));
         verify(service).layDonCuaKhach(7);verify(service).layDonCuaKhach(10,7);
     }
 

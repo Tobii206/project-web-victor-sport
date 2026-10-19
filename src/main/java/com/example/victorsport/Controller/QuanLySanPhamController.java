@@ -42,14 +42,14 @@ public class QuanLySanPhamController {
         try {model.addAttribute("danhMuc",service.danhMuc());model.addAttribute("sanPham",service.tim(loc));}
         catch(IllegalArgumentException e) {model.addAttribute("error",e.getMessage());model.addAttribute("sanPham",List.of());}
         catch(DataAccessException e) {model.addAttribute("error","Chưa tải được sản phẩm. Vui lòng thử lại.");model.addAttribute("sanPham",List.of());}
-        return "Admin/quan-ly-san-pham";
+        return "admin/product/show";
     }
     @GetMapping("/them")
     public String them(HttpSession session,Model model) {
         if (nguoiDung(session,model)==null) return "redirect:/login";
         model.addAttribute("danhMuc",service.danhMuc());
         if (!model.containsAttribute("sanPham")) model.addAttribute("sanPham",Map.of("trang_thai_kinh_doanh",true));
-        return "Admin/sua-san-pham";
+        return "admin/product/update";
     }
     @GetMapping("/{id}")
     public String chiTiet(@PathVariable int id,@RequestParam(required=false) Integer mau,HttpSession session,Model model,RedirectAttributes flash) {
@@ -71,7 +71,7 @@ public class QuanLySanPhamController {
                 }
                 model.addAttribute("mauForm",mauForm);
             }
-            return "Admin/sua-san-pham";
+            return "admin/product/update";
         } catch(IllegalArgumentException e) {flash.addFlashAttribute("error",e.getMessage());return "redirect:/quan-ly/san-pham";}
     }
     @PostMapping({"/luu","/{id}/luu"})

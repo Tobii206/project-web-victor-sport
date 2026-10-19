@@ -42,13 +42,13 @@ public class QuanLyKhachHangController {
         model.addAttribute("loc",loc);
         try {model.addAttribute("khachHang",service.tim(loc));}
         catch(DataAccessException e) {model.addAttribute("error","Chưa tải được khách hàng. Vui lòng thử lại.");model.addAttribute("khachHang",List.of());}
-        return "Admin/quan-ly-khach-hang";
+        return "admin/customer/show";
     }
     @GetMapping("/them")
     public String them(HttpSession session,Model model) {
         if(nguoiDung(session,model,true)==null) return "redirect:/login";
         if(!model.containsAttribute("khachHang")) model.addAttribute("khachHang",Map.of("trang_thai",true));
-        return "Admin/sua-khach-hang";
+        return "admin/customer/update";
     }
     @GetMapping("/{id}")
     public String sua(@PathVariable int id,HttpSession session,Model model,RedirectAttributes flash) {
@@ -57,7 +57,7 @@ public class QuanLyKhachHangController {
             var kh=service.lay(id);
             if(!model.containsAttribute("khachHang")) model.addAttribute("khachHang",kh);
             model.addAttribute("idKhachHang",id);model.addAttribute("maKhachHang",kh.get("ma_khach_hang"));
-            return "Admin/sua-khach-hang";
+            return "admin/customer/update";
         } catch(IllegalArgumentException e) {flash.addFlashAttribute("error",e.getMessage());return "redirect:/quan-ly/khach-hang";}
     }
     @PostMapping({"/luu","/{id}/luu"})

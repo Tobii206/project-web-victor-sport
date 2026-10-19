@@ -16,7 +16,7 @@ public class DonVangLaiController {
     public DonVangLaiController(HoaDonService service) {this.service=service;}
     public static boolean dungPhien(HttpSession s,int id) {return Boolean.TRUE.equals(s.getAttribute("donVangLai_"+id)) || Boolean.TRUE.equals(s.getAttribute("donQr_"+id));}
     @GetMapping("/tra-cuu-don-hang")
-    public String traCuu(HttpServletResponse r) {r.setHeader("Cache-Control","no-store");return "KhachHang/tra-cuu-don-hang";}
+    public String traCuu(HttpServletResponse r) {r.setHeader("Cache-Control","no-store");return "client/order/lookup";}
     @PostMapping("/tra-cuu-don-hang")
     public String traCuu(@RequestParam String ma,@RequestParam String sdt,HttpSession s,RedirectAttributes f) {
         long now=System.currentTimeMillis();long moc=s.getAttribute("traCuuTu") instanceof Long t?t:0;
@@ -39,7 +39,7 @@ public class DonVangLaiController {
         if(don==null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         m.addAttribute("don",don);m.addAttribute("khachVangLai",true);
         m.addAttribute("sanPham",service.laySanPhamTrongHoaDon(id));m.addAttribute("lichSu",service.layLichSu(id));
-        return "KhachHang/chi-tiet-don-hang";
+        return "client/order/detail";
     }
     @PostMapping("/don-vang-lai/{id}/{thaoTac:huy|da-nhan-hang}")
     public String xuLy(@PathVariable int id,@PathVariable String thaoTac,HttpSession s,RedirectAttributes f) {

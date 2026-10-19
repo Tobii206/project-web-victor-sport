@@ -51,7 +51,7 @@ class ThanhToanQrTests {
         var session=new MockHttpSession();session.setAttribute("khachHangOnlineDangNhap",7);
         when(service.layThanhToanQr(10,7,false)).thenReturn(Map.of("ma_hoa_don","HD00010"));
         mvc.perform(get("/thanh-toan/qr/10").session(session)).andExpect(status().isOk())
-                .andExpect(view().name("KhachHang/thanh-toan-qr"))
+                .andExpect(view().name("client/cart/qr"))
                 .andExpect(header().string("Cache-Control","no-store"));
     }
 
