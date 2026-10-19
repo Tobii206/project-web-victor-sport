@@ -23,7 +23,7 @@ class QuanLyUuDaiTests {
 
     @Test void nhanVienVaKhachKhongDuocQuanLyUuDai() throws Exception {
         var phieu = mock(QuanLyPhieuGiamGiaService.class); var dot = mock(QuanLyDotGiamGiaService.class);
-        var mvc = MockMvcBuilders.standaloneSetup(new QuanLyPhieuGiamGiaController(phieu),new QuanLyDotGiamGiaController(dot)).build();
+        var mvc = MockMvcBuilders.standaloneSetup(new QuanLyPhieuGiamGiaController(phieu),new QuanLyDotGiamGiaController(dot,mock(EmailDotGiamGiaService.class))).build();
         for (String duongDan : new String[]{"/quan-ly/phieu-giam-gia", "/quan-ly/dot-giam-gia"}) {
             mvc.perform(get(duongDan)).andExpect(redirectedUrl("/login"));
             mvc.perform(post(duongDan+"/luu").session(session("Nhân viên"))).andExpect(status().isForbidden());
@@ -34,7 +34,7 @@ class QuanLyUuDaiTests {
 
     @Test void duLieuSaiKhongDuocGhiVaGiuLaiForm() throws Exception {
         var phieu = mock(QuanLyPhieuGiamGiaService.class); var dot = mock(QuanLyDotGiamGiaService.class);
-        var mvc = MockMvcBuilders.standaloneSetup(new QuanLyPhieuGiamGiaController(phieu),new QuanLyDotGiamGiaController(dot)).build();
+        var mvc = MockMvcBuilders.standaloneSetup(new QuanLyPhieuGiamGiaController(phieu),new QuanLyDotGiamGiaController(dot,mock(EmailDotGiamGiaService.class))).build();
         mvc.perform(post("/quan-ly/phieu-giam-gia/luu").session(session("Quản trị viên"))
                 .param("ten_phieu_giam_gia","Phiếu mới").param("so_luong_su_dung","-1"))
                 .andExpect(redirectedUrl("/quan-ly/phieu-giam-gia/them")).andExpect(flash().attributeExists("error","uuDai"));

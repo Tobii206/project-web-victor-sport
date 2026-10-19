@@ -5,6 +5,7 @@ import com.example.victorsport.Dto.NguoiDungDangNhap;
 import com.example.victorsport.Dto.SanPhamGiamGiaForm;
 import com.example.victorsport.Service.QuanLyDotGiamGiaService;
 import com.example.victorsport.Service.KiemTraForm;
+import com.example.victorsport.Service.EmailDotGiamGiaService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
@@ -21,7 +22,10 @@ import java.util.*;
 @RequestMapping("/quan-ly/dot-giam-gia")
 public class QuanLyDotGiamGiaController {
     private final QuanLyDotGiamGiaService service;
-    public QuanLyDotGiamGiaController(QuanLyDotGiamGiaService service) { this.service = service; }
+    private final EmailDotGiamGiaService email;
+    public QuanLyDotGiamGiaController(QuanLyDotGiamGiaService service, EmailDotGiamGiaService email) {
+        this.service = service;this.email = email;
+    }
 
     private NguoiDungDangNhap quanLy(HttpSession session, Model model) {
         var user = DangNhapController.layNguoiDungDangNhap(session, model);
@@ -76,9 +80,16 @@ public class QuanLyDotGiamGiaController {
         if (quanLy(session, model) == null) return "redirect:/login";
         try {
             KiemTraForm.kiemTra(loiForm);
-            int ketQua = service.luu(id, form);
-            flash.addFlashAttribute("success", "Đã lưu đợt giảm giá.");
-            return "redirect:/quan-ly/dot-giam-gia/" + ketQua;
+            var ketQua = service.luuVaKiemTraThongBao(id, form);
+            String thongBao = "Đã lưu đợt giảm giá.";
+            if (ketQua.guiEmail()) {
+                boolean daXepLich = id == null ? email.thongBaoDotMoi(ketQua.id()) : email.thongBaoBatLai(ketQua.id());
+                thongBao += daXepLich
+                    ? " Hệ thống đang gửi email thông báo đến khách hàng đã đăng ký."
+                    : " Chưa gửi được thông báo email. Vui lòng kiểm tra cấu hình gửi mail hoặc hàng đợi gửi.";
+            }
+            flash.addFlashAttribute("success", thongBao);
+            return "redirect:/quan-ly/dot-giam-gia/" + ketQua.id();
         } catch (IllegalArgumentException e) { flash.addFlashAttribute("error", e.getMessage()); }
         catch (DataAccessException e) { flash.addFlashAttribute("error", "Không lưu được đợt giảm giá. Vui lòng thử lại."); }
         Map<String,Object> nhap = new LinkedHashMap<>(data);

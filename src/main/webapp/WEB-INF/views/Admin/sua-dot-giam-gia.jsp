@@ -20,6 +20,8 @@
 </select><c:if test="${empty cacMucUuTien}"><small class="muted">Chưa có mức ưu tiên trong dữ liệu.</small></c:if></div>
 <div class="field"><label for="trang_thai">Trạng thái</label><select class="select" id="trang_thai" name="trang_thai"><option value="1" ${uuDai.trang_thai ? 'selected' : ''}>Cho phép áp dụng</option><option value="0" ${not uuDai.trang_thai ? 'selected' : ''}>Ngừng áp dụng</option></select></div>
 <div class="product-admin-wide muted">Giảm theo phần trăm tối đa 100%. Ưu đãi được áp dụng từ ngày bắt đầu đến hết ngày kết thúc.</div>
+<c:if test="${empty idUuDai}"><div class="product-admin-wide muted">Tạo đợt mới ở trạng thái “Cho phép áp dụng” sẽ gửi email thông báo đến các khách hàng có tài khoản đang hoạt động. Email được gửi riêng cho từng khách.</div></c:if>
+<c:if test="${not empty idUuDai}"><div class="product-admin-wide muted">Bật lại đợt đã ngừng trong thời gian áp dụng sẽ gửi email thông báo đến khách hàng. Lưu khi đợt đang bật không gửi lại email.</div></c:if>
 <div class="product-admin-actions product-admin-wide"><button class="button">Lưu đợt giảm giá</button></div></form></div></section>
 <c:if test="${not empty idUuDai}"><section class="panel" id="mau-giam-gia"><div class="panel-header"><h2>Mẫu giày áp dụng</h2></div><div class="panel-body">
 <form method="post" action="/quan-ly/dot-giam-gia/${idUuDai}/mau/luu" class="product-admin-form">

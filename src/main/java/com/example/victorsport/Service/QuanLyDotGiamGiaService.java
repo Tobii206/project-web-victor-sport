@@ -5,6 +5,8 @@ import com.example.victorsport.Dto.SanPhamGiamGiaForm;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 @Service
@@ -36,18 +38,34 @@ public class QuanLyDotGiamGiaService {
 
     @Transactional
     public int luu(Integer id, DotGiamGiaForm f) {
+        return luuVaKiemTraThongBao(id, f).id();
+    }
+
+    public record KetQuaLuu(int id, boolean guiEmail) {}
+
+    @Transactional
+    public KetQuaLuu luuVaKiemTraThongBao(Integer id, DotGiamGiaForm f) {
         KiemTraUuDai.kiemTra(f.getLoai_giam_gia(), f.getGia_tri_giam_gia(), f.getNgay_bat_dau(), f.getNgay_ket_thuc());
-        if (id == null) return jdbc.queryForObject("""
+        LocalDate homNay = LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        boolean choPhep = Integer.valueOf(1).equals(f.getTrang_thai());
+        if (id == null) {
+            int moi = jdbc.queryForObject("""
                 INSERT INTO dot_giam_gia (ten_dot_giam_gia,loai_giam_gia,gia_tri_giam_gia,ngay_bat_dau,ngay_ket_thuc,muc_uu_tien,trang_thai,so_tien_giam_toi_da)
                 OUTPUT INSERTED.id VALUES (?,?,?,?,?,?,?,?)
                 """, Integer.class, f.getTen_dot_giam_gia(), f.getLoai_giam_gia(), f.getGia_tri_giam_gia(),
                     f.getNgay_bat_dau(), f.getNgay_ket_thuc(), f.getMuc_uu_tien(), f.getTrang_thai(), f.getSo_tien_giam_toi_da());
-        khoa(id);
+            return new KetQuaLuu(moi, choPhep && !f.getNgay_ket_thuc().isBefore(homNay));
+        }
+        // Đọc trạng thái cũ và cập nhật trong cùng khóa để hai lần lưu không gửi trùng.
+        Object trangThaiCu = khoa(id).get("trang_thai");
+        boolean daBat = Boolean.TRUE.equals(trangThaiCu) || trangThaiCu instanceof Number n && n.intValue() == 1;
         jdbc.update("""
                 UPDATE dot_giam_gia SET ten_dot_giam_gia=?,loai_giam_gia=?,gia_tri_giam_gia=?,ngay_bat_dau=?,ngay_ket_thuc=?,muc_uu_tien=?,trang_thai=?,so_tien_giam_toi_da=? WHERE id=?
                 """, f.getTen_dot_giam_gia(), f.getLoai_giam_gia(), f.getGia_tri_giam_gia(),
                     f.getNgay_bat_dau(), f.getNgay_ket_thuc(), f.getMuc_uu_tien(), f.getTrang_thai(), f.getSo_tien_giam_toi_da(), id);
-        return id;
+        boolean batLaiTrongThoiGian = !daBat && choPhep && !homNay.isBefore(f.getNgay_bat_dau())
+                && !homNay.isAfter(f.getNgay_ket_thuc());
+        return new KetQuaLuu(id, batLaiTrongThoiGian);
     }
 
     private Map<String,Object> khoa(int id) {
