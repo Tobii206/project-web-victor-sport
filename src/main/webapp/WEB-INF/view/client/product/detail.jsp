@@ -17,13 +17,6 @@
     <div class="online-detail">
         <section class="online-gallery account-card">
             <img id="anhChinh" class="online-main-image" src="/images/giay-mac-dinh.svg" alt="<c:out value='${sanPham.ten_san_pham}'/>" onerror="this.onerror=null;this.src='/images/giay-mac-dinh.svg';">
-            <div class="online-thumbnails">
-                <c:forEach items="${danhSachAnh}" var="anh">
-                    <c:set var="duongDan" value="${anh.duong_dan_anh}"/>
-                    <c:if test="${not fn:startsWith(duongDan, '/') and not fn:startsWith(duongDan, 'http')}"><c:set var="duongDan" value="/${duongDan}"/></c:if>
-                    <button type="button" class="online-thumbnail" aria-label="Xem ảnh sản phẩm"><img src="<c:out value='${duongDan}'/>" alt="Ảnh sản phẩm" onerror="this.onerror=null;this.src='/images/giay-mac-dinh.svg';"></button>
-                </c:forEach>
-            </div>
         </section>
         <section class="account-card online-product-info">
             <p class="eyebrow"><c:out value="${sanPham.ten_thuong_hieu}"/></p>
@@ -149,4 +142,4 @@
     </div>
     <img src="/images/huong-dan-chon-size.png" alt="Bảng quy đổi size Việt Nam, size US, size UK và chiều dài bàn chân theo centimet">
 </dialog>
-<script src="/js/san-pham-online.js?v=20261018-live"></script></body></html>
+<script src="/js/san-pham-online.js?v=20261019-single-product-image"></script></body></html>

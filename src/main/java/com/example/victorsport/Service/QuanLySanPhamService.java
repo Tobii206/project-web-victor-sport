@@ -84,10 +84,14 @@ public class QuanLySanPhamService {
     }
     public List<Map<String, Object>> layAnh(int id) {
         return jdbc.queryForList("""
-            SELECT a.*, ct.ma_chi_tiet_san_pham FROM anh_chi_tiet_san_pham a
-            JOIN chi_tiet_san_pham ct ON ct.id=a.id_chi_tiet_san_pham
-            WHERE ct.id_san_pham=? AND ISNULL(ct.xoa_mem,0)=0 AND ISNULL(a.xoa_mem,0)=0
-            ORDER BY ct.id, a.la_anh_dai_dien DESC, a.id
+            WITH AnhXepHang AS (
+                SELECT a.*, ct.ma_chi_tiet_san_pham,
+                       ROW_NUMBER() OVER (PARTITION BY ct.id ORDER BY ISNULL(a.la_anh_dai_dien,0) DESC, a.id) AS thu_tu
+                FROM anh_chi_tiet_san_pham a
+                JOIN chi_tiet_san_pham ct ON ct.id=a.id_chi_tiet_san_pham
+                WHERE ct.id_san_pham=? AND ISNULL(ct.xoa_mem,0)=0 AND ISNULL(a.xoa_mem,0)=0
+            )
+            SELECT * FROM AnhXepHang WHERE thu_tu=1 ORDER BY ma_chi_tiet_san_pham
             """, id);
     }
     private void khoaSanPham(int id) {
@@ -162,10 +166,17 @@ public class QuanLySanPhamService {
         khoaSanPham(sanPham);
         if (jdbc.queryForObject("SELECT COUNT(*) FROM chi_tiet_san_pham WHERE id=? AND id_san_pham=? AND ISNULL(xoa_mem,0)=0",Integer.class,mau,sanPham)==0)
             throw new IllegalArgumentException("Không tìm thấy mẫu giày để thêm ảnh.");
-        if (jdbc.queryForObject("SELECT COUNT(*) FROM anh_chi_tiet_san_pham WHERE id_chi_tiet_san_pham=? AND duong_dan_anh=? AND ISNULL(xoa_mem,0)=0",Integer.class,mau,duongDan)>0)
-            return;
-        int coAnh = jdbc.queryForObject("SELECT COUNT(*) FROM anh_chi_tiet_san_pham WHERE id_chi_tiet_san_pham=? AND la_anh_dai_dien=1 AND ISNULL(xoa_mem,0)=0",Integer.class,mau);
-        jdbc.update("INSERT INTO anh_chi_tiet_san_pham (id_chi_tiet_san_pham,duong_dan_anh,la_anh_dai_dien) VALUES (?,?,?)",mau,duongDan,coAnh==0?1:0);
+        var hienTai=jdbc.queryForList("SELECT id,duong_dan_anh FROM anh_chi_tiet_san_pham WHERE id_chi_tiet_san_pham=? AND ISNULL(xoa_mem,0)=0 ORDER BY ISNULL(la_anh_dai_dien,0) DESC,id",mau);
+        for (var anh : hienTai) {
+            if (duongDan.equals(anh.get("duong_dan_anh"))) {
+                int id=((Number)anh.get("id")).intValue();
+                jdbc.update("UPDATE anh_chi_tiet_san_pham SET xoa_mem=1,la_anh_dai_dien=0 WHERE id_chi_tiet_san_pham=? AND id<>? AND ISNULL(xoa_mem,0)=0",mau,id);
+                jdbc.update("UPDATE anh_chi_tiet_san_pham SET la_anh_dai_dien=1 WHERE id=?",id);
+                return;
+            }
+        }
+        jdbc.update("UPDATE anh_chi_tiet_san_pham SET xoa_mem=1,la_anh_dai_dien=0 WHERE id_chi_tiet_san_pham=? AND ISNULL(xoa_mem,0)=0",mau);
+        jdbc.update("INSERT INTO anh_chi_tiet_san_pham (id_chi_tiet_san_pham,duong_dan_anh,la_anh_dai_dien) VALUES (?,?,1)",mau,duongDan);
     }
     @Transactional
     public void suaAnh(int sanPham,int id,boolean xoa) {
@@ -175,8 +186,6 @@ public class QuanLySanPhamService {
         int mau = ((Number)ds.get(0).get("id_chi_tiet_san_pham")).intValue();
         if (xoa) {
             jdbc.update("UPDATE anh_chi_tiet_san_pham SET xoa_mem=1,la_anh_dai_dien=0 WHERE id=?",id);
-            if (jdbc.queryForObject("SELECT COUNT(*) FROM anh_chi_tiet_san_pham WHERE id_chi_tiet_san_pham=? AND ISNULL(xoa_mem,0)=0 AND la_anh_dai_dien=1",Integer.class,mau)==0)
-                jdbc.update("UPDATE anh_chi_tiet_san_pham SET la_anh_dai_dien=1 WHERE id=(SELECT TOP 1 id FROM anh_chi_tiet_san_pham WHERE id_chi_tiet_san_pham=? AND ISNULL(xoa_mem,0)=0 ORDER BY id)",mau);
         } else {
             jdbc.update("UPDATE anh_chi_tiet_san_pham SET la_anh_dai_dien=0 WHERE id_chi_tiet_san_pham=?",mau);
             jdbc.update("UPDATE anh_chi_tiet_san_pham SET la_anh_dai_dien=1 WHERE id=?",id);

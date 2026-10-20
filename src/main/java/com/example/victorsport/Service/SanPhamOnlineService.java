@@ -189,16 +189,6 @@ public class SanPhamOnlineService {
                 """;
     }
 
-    public List<Map<String, Object>> layAnh(int id) {
-        return jdbc.queryForList("""
-                SELECT DISTINCT a.duong_dan_anh, a.la_anh_dai_dien FROM anh_chi_tiet_san_pham a
-                JOIN chi_tiet_san_pham ct ON ct.id = a.id_chi_tiet_san_pham
-                WHERE ct.id_san_pham = ? AND ISNULL(a.xoa_mem, 0) = 0
-                  AND ISNULL(ct.xoa_mem, 0) = 0 AND ISNULL(ct.trang_thai, 1) = 1
-                ORDER BY a.la_anh_dai_dien DESC, a.duong_dan_anh
-                """, id);
-    }
-
     public void kiemTraSoLuong(Map<String, Object> phienBan, int soLuong) {
         int ton = ((Number) phienBan.get("so_luong")).intValue();
         if (soLuong < 1) { throw new IllegalArgumentException("Số lượng phải từ 1 trở lên."); }

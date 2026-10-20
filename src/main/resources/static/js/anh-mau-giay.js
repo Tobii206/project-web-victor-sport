@@ -2,7 +2,10 @@
     function hienAnhMauDangChon() {
         var chon = document.getElementById('mauAnh');
         var thongBao = document.getElementById('khongCoAnhMau');
-        if (!chon || !thongBao) return;
+        if (!chon) return;
+        var idGui = document.getElementById('mauAnhGui');
+        if (idGui) idGui.value = chon.value;
+        if (!thongBao) return;
         var soAnh = 0;
         document.querySelectorAll('#anh-san-pham .product-admin-image[data-mau]').forEach(function (anh) {
             var dungMau = anh.dataset.mau === chon.value;

@@ -32,7 +32,6 @@ public class SanPhamOnlineController {
             for (Map<String, Object> mau : phienBan) tongTonKho += ((Number) mau.get("so_luong")).intValue();
             model.addAttribute("phienBan", phienBan);
             model.addAttribute("tongTonKho", tongTonKho);
-            model.addAttribute("danhSachAnh", service.layAnh(id));
         } catch (IllegalArgumentException loi) { model.addAttribute("error", loi.getMessage()); }
         catch (DataAccessException loi) { model.addAttribute("error", "Chưa tải được sản phẩm. Vui lòng thử lại sau."); }
         if (model.containsAttribute("sanPham")) {

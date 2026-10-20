@@ -59,9 +59,8 @@ public class QuanLySanPhamController {
             if (!model.containsAttribute("sanPham")) model.addAttribute("sanPham",sp);
             model.addAttribute("idSanPham",id);model.addAttribute("maSanPham",sp.get("ma_san_pham"));
             model.addAttribute("danhMuc",service.danhMuc());
-            var cacMau=service.layMau(id);model.addAttribute("cacMau",cacMau);model.addAttribute("cacAnh",service.layAnh(id));
-            if (!model.containsAttribute("mauAnhDangChon") && !cacMau.isEmpty())
-                model.addAttribute("mauAnhDangChon",mau==null?cacMau.get(0).get("id"):mau);
+            var cacMau=service.layMau(id);var cacAnh=service.layAnh(id);model.addAttribute("cacMau",cacMau);model.addAttribute("cacAnh",cacAnh);
+            if(!model.containsAttribute("mauAnhDangChon") && !cacMau.isEmpty()) model.addAttribute("mauAnhDangChon",mau==null?cacMau.get(0).get("id"):mau);
             if (!model.containsAttribute("mauForm")) {
                 Map<String,Object> mauForm=new LinkedHashMap<>(Map.of("trang_thai",true,"so_luong",0));
                 if (mau!=null) {
@@ -131,7 +130,8 @@ public class QuanLySanPhamController {
                 anhDaCo=tep;
             }
             service.themAnh(id,idMau,"/image/"+anhDaCo.getFileName());
-            flash.addFlashAttribute("success",tep==null?"Đã dùng lại ảnh có sẵn cho mẫu giày.":"Đã thêm ảnh cho mẫu giày.");
+            flash.addFlashAttribute("mauAnhDangChon",idMau);
+            flash.addFlashAttribute("success",tep==null?"Đã dùng lại ảnh có sẵn cho mẫu giày.":"Đã lưu ảnh riêng cho mẫu giày.");
         } catch(IllegalArgumentException | IOException | DataAccessException e) {
             if(tep!=null)try {Files.deleteIfExists(tep);} catch(IOException boQua) { }
             flash.addFlashAttribute("error",e instanceof IllegalArgumentException?e.getMessage():"Không lưu được ảnh. Vui lòng thử lại.");

@@ -140,18 +140,7 @@ INSERT INTO anh_chi_tiet_san_pham (id_chi_tiet_san_pham, duong_dan_anh, la_anh_d
 (9, '/images/products/asics-gel-kayano-30-1.png', 1, N'Asics Gel-Kayano 30 xám'),
 (10, '/images/products/nike-air-zoom-pegasus-1.png', 1, N'Nike Air Zoom Pegasus 40 xanh'),
 (11, '/images/products/new-balance-550-1.png', 1, N'New Balance 550 White Green'),
-(12, '/images/products/adidas-samba-og-1.png', 1, N'Adidas Samba OG Black White'),
-(11, '/images/products/new-balance-550-2.png', 0, N'Ảnh sản phẩm'),
-(11, '/images/products/new-balance-550-3.png', 0, N'Ảnh sản phẩm'),
-(11, '/images/products/new-balance-550-4.png', 0, N'Ảnh sản phẩm'),
-(12, '/images/products/adidas-samba-og-2.png', 0, N'Ảnh sản phẩm'),
-(12, '/images/products/adidas-samba-og-3.png', 0, N'Ảnh sản phẩm'),
-(12, '/images/products/adidas-samba-og-4.png', 0, N'Ảnh sản phẩm');
--- Bổ sung các góc ảnh cho những mẫu giày còn lại.
-INSERT INTO anh_chi_tiet_san_pham (id_chi_tiet_san_pham, duong_dan_anh, la_anh_dai_dien, mo_ta)
-SELECT a.id_chi_tiet_san_pham, REPLACE(a.duong_dan_anh, '-1.png', '-' + CAST(so.stt AS VARCHAR(1)) + '.png'), 0, N'Ảnh sản phẩm'
-FROM anh_chi_tiet_san_pham a CROSS JOIN (VALUES (2), (3), (4)) so(stt)
-WHERE a.id_chi_tiet_san_pham BETWEEN 1 AND 10 AND a.duong_dan_anh LIKE '/images/products/%-1.png';
+(12, '/images/products/adidas-samba-og-1.png', 1, N'Adidas Samba OG Black White');
 
 INSERT INTO gio_hang (id_khach_hang) VALUES
 (1),
@@ -249,3 +238,26 @@ INSERT INTO chuc_nang (ma_chuc_nang, ten_chuc_nang, mo_ta) VALUES
 INSERT INTO quyen_han_chuc_nang (id_quyen_han, id_chuc_nang) VALUES
 (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6),
 (2, 1), (2, 3), (2, 4), (2, 5);
+
+-- DỌN ẢNH CŨ (chỉ chạy riêng khối này nếu database đã có nhiều ảnh cho cùng một mẫu).
+-- Giữ ảnh đại diện trước, nếu không có thì giữ ảnh được tạo sớm nhất; ảnh còn lại được xóa mềm.
+SET XACT_ABORT ON;
+BEGIN TRANSACTION;
+
+;WITH AnhXepHang AS (
+    SELECT a.id,
+           ROW_NUMBER() OVER (
+               PARTITION BY a.id_chi_tiet_san_pham
+               ORDER BY ISNULL(a.la_anh_dai_dien, 0) DESC, a.id
+           ) AS thu_tu
+    FROM anh_chi_tiet_san_pham a
+    JOIN chi_tiet_san_pham ct ON ct.id = a.id_chi_tiet_san_pham
+    WHERE ISNULL(a.xoa_mem, 0) = 0 AND ISNULL(ct.xoa_mem, 0) = 0
+)
+UPDATE a
+SET a.xoa_mem = 1, a.la_anh_dai_dien = 0
+FROM anh_chi_tiet_san_pham a
+JOIN AnhXepHang xep ON xep.id = a.id
+WHERE xep.thu_tu > 1;
+
+COMMIT TRANSACTION;

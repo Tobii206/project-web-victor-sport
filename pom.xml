@@ -108,7 +108,10 @@
             <resource>
                 <directory>database</directory>
                 <targetPath>database</targetPath>
-                <includes><include>schema-bao-mat.sql</include></includes>
+                <includes>
+                    <include>qlyGiaytt.sql</include>
+                    <include>insertGiay.sql</include>
+                </includes>
             </resource>
         </resources>
         <plugins>
