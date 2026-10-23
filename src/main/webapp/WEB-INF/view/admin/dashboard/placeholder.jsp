@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${tenChucNang} - Victor Sport</title>
     <link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head>
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1"></head>
 <body>
 <div class="app-shell">
     <jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/>
@@ -31,9 +31,14 @@
         <main class="content-layout">
             <section class="panel">
                 <div class="panel-header">
-                   
+                    <h2>${tenChucNang}</h2>
                 </div>
-                <div class="panel-body placeholder-blank"></div>
+                <div class="panel-body empty-state">
+                    <p class="muted">Khu vực quản lý VictorSport</p>
+                    <h2>Chức năng đang được cập nhật</h2>
+                    <p>Bạn có thể tiếp tục sử dụng các chức năng trong thanh điều hướng.</p>
+                    <a class="button secondary" href="${currentUser.trangLamViec}">Về trang làm việc</a>
+                </div>
             </section>
         </main>
     </div>

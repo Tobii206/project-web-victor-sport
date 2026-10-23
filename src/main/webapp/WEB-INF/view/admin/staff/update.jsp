@@ -3,7 +3,7 @@
 <!DOCTYPE html><html lang="vi"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${empty idNhanVien ? 'Thêm nhân viên' : 'Thông tin nhân viên'} — VictorSport</title>
 <link rel="icon" href="/logo/favicon-victorsport.svg"><link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=admin-20261014">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
 <%@ include file="/WEB-INF/view/admin/layout/staff-header.jsp" %>
 <main class="content-layout"><section class="panel">
 <div class="panel-header"><h2>${empty idNhanVien ? 'Thêm nhân viên' : 'Thông tin nhân viên'} <c:out value="${maNhanVien}"/></h2><a class="button secondary" href="/quan-ly/nhan-vien">Về danh sách</a></div>

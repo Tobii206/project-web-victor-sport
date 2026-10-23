@@ -5,7 +5,7 @@
 <!DOCTYPE html><html lang="vi"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${currentUser.suaSanPham ? 'Quản lý sản phẩm' : 'Xem tồn kho'} — VictorSport</title>
 <link rel="icon" href="/logo/favicon-victorsport.svg"><link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=admin-20261014">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
 <%@ include file="/WEB-INF/view/admin/layout/product-header.jsp" %>
 <main class="content-layout"><section class="panel"><div class="panel-header"><h2>Danh sách sản phẩm</h2><c:if test="${currentUser.suaSanPham}"><a class="button" href="/quan-ly/san-pham/them">+ Thêm sản phẩm</a></c:if></div><div class="panel-body">
 <c:if test="${not empty error}"><div class="alert error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>

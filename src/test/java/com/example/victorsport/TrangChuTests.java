@@ -20,6 +20,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class TrangChuTests {
     @Test
+    void dongHoDemDenHetNgayCuoiCuaDotGiamGia() {
+        var jdbc = mock(org.springframework.jdbc.core.JdbcTemplate.class);
+        when(jdbc.queryForObject(contains("DATEADD(day,1"), eq(java.sql.Timestamp.class)))
+                .thenReturn(java.sql.Timestamp.valueOf("2026-11-20 00:00:00"));
+        org.junit.jupiter.api.Assertions.assertEquals(
+                java.time.Instant.parse("2026-11-19T17:00:00Z").toEpochMilli(),
+                new TrangChuService(jdbc).layHanUuDai());
+    }
+
+    @Test
+    void khongCoDotGiamGiaThiKhongTaoThoiHanGia() {
+        org.junit.jupiter.api.Assertions.assertNull(new TrangChuService(mock(org.springframework.jdbc.core.JdbcTemplate.class)).layHanUuDai());
+    }
+
+    @Test
     void locKetHopGiuLaiSizeMauVaCacDieuKienDaChon() throws Exception {
         TrangChuService service = mock(TrangChuService.class);
         taoTrang(service).perform(get("/").param("thuongHieu", "2").param("nhuCau", "6")

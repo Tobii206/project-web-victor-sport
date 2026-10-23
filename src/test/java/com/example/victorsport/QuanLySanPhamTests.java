@@ -22,9 +22,12 @@ class QuanLySanPhamTests {
         when(jdbc.queryForList("SELECT id FROM san_pham WITH (UPDLOCK,HOLDLOCK) WHERE id=? AND ISNULL(xoa_mem,0)=0",8))
             .thenReturn(java.util.List.of(Map.of("id",8)));
         when(jdbc.queryForObject("SELECT COUNT(*) FROM chi_tiet_san_pham WHERE id=? AND id_san_pham=? AND ISNULL(xoa_mem,0)=0",Integer.class,12,8)).thenReturn(1);
-        when(jdbc.queryForObject("SELECT COUNT(*) FROM anh_chi_tiet_san_pham WHERE id_chi_tiet_san_pham=? AND duong_dan_anh=? AND ISNULL(xoa_mem,0)=0",Integer.class,12,"/image/anh-cu.png")).thenReturn(1);
+        when(jdbc.queryForList(contains("SELECT id,duong_dan_anh FROM anh_chi_tiet_san_pham"),eq(12)))
+            .thenReturn(java.util.List.of(Map.of("id",31,"duong_dan_anh","/image/anh-cu.png")));
         new QuanLySanPhamService(jdbc).themAnh(8,12,"/image/anh-cu.png");
-        verify(jdbc,never()).update(anyString(),any(Object[].class));
+        verify(jdbc,never()).update(contains("INSERT INTO anh_chi_tiet_san_pham"),any(Object[].class));
+        verify(jdbc).update(contains("id<>?"),eq(12),eq(31));
+        verify(jdbc).update("UPDATE anh_chi_tiet_san_pham SET la_anh_dai_dien=1 WHERE id=?",31);
     }
     private byte[] anhThu(int kieu) throws Exception {
         var anh=new java.awt.image.BufferedImage(3,2,kieu);

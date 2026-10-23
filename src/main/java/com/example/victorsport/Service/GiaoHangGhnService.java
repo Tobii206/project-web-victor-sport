@@ -60,9 +60,10 @@ public class GiaoHangGhnService {
         var ds=jdbc.queryForList("SELECT * FROM van_don_ghn WITH (UPDLOCK,HOLDLOCK) WHERE id_hoa_don=?",id);
         if(ds.isEmpty()) throw new IllegalArgumentException("Đơn này chưa có địa chỉ và báo giá GHN. Chỉ đơn đặt qua luồng GHN mới tạo được vận đơn.");
         var vd=ds.get(0);
+        int trangThai=((Number)dong.get("trang_thai_hien_tai")).intValue();
+        if(trangThai==4 && vd.get("ma_van_don")!=null) return vd.get("ma_van_don").toString();
+        if(trangThai!=3) throw new IllegalArgumentException("Chỉ tạo vận đơn khi đơn đang chuẩn bị hàng.");
         if(vd.get("ma_van_don")!=null) return vd.get("ma_van_don").toString();
-        if(((Number)dong.get("trang_thai_hien_tai")).intValue()!=4)
-            throw new IllegalArgumentException("Vui lòng xác nhận đơn trước khi tạo vận đơn GHN.");
         var thu=jdbc.queryForObject("SELECT ISNULL(SUM(so_tien),0) FROM giao_dich_thanh_toan WHERE id_hoa_don=? AND trang_thai=N'thanh_cong' AND ISNULL(xoa_mem,0)=0",BigDecimal.class,id);
         BigDecimal tong=(BigDecimal)dong.get("tong_tien_sau_giam"),conLai=tong.subtract(thu==null?BigDecimal.ZERO:thu).max(BigDecimal.ZERO);
         var pt=jdbc.queryForList("""

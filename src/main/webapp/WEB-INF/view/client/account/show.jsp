@@ -8,14 +8,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thông tin tài khoản — VictorSport</title>
-    <link rel="stylesheet" href="/css/trang-chu.css?v=muot-1">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head>
+    <link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1"></head>
 <body class="store-page">
-<header class="store-header">
-    <a class="store-logo" href="/" aria-label="Trang chủ VictorSport"><img src="/logo/logo-nobackgroud.png" alt="VictorSport" width="210" height="67"></a>
-    <nav aria-label="Điều hướng chính"><a href="/">Trang chủ</a><a href="/#san-pham">Sản phẩm</a><a href="/#thuong-hieu">Thương hiệu</a><a href="/#gioi-thieu">Về VictorSport</a></nav>
-    <%@ include file="/WEB-INF/view/client/layout/header-actions.jsp" %>
-</header>
+<%@ include file="/WEB-INF/view/client/layout/header.jsp" %>
 <main class="account-container store-container">
 <c:if test="${not empty success}"><p role="status" data-vs-flash="success"><c:out value="${success}"/></p></c:if>
     <a class="account-back" href="/">← Về trang chủ</a>
@@ -35,7 +31,7 @@
                 </aside>
                 <section class="account-card">
                     <h2>Thông tin cá nhân</h2>
-                    <c:if test="${not laNhanVien}"><p><a href="/tai-khoan/chinh-sua">Chỉnh sửa thông tin</a> · <a href="/tai-khoan/doi-mat-khau">Đổi mật khẩu</a></p></c:if>
+                    <c:if test="${not laNhanVien}"><div class="account-profile-actions"><a href="/tai-khoan/chinh-sua">Chỉnh sửa thông tin</a><a href="/tai-khoan/doi-mat-khau">Đổi mật khẩu</a><a href="/tai-khoan/dia-chi">Địa chỉ của tôi</a></div></c:if>
                     <p class="subtle">Thông tin đang được lưu trong tài khoản của bạn.</p>
                     <dl class="account-info">
                         <div><dt>Họ và tên</dt><dd><c:out value="${thongTin.ho_ten}"/></dd></div>

@@ -7,8 +7,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập — VictorSport</title>
-    <link rel="stylesheet" href="/css/trang-chu.css?v=muot-1">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1">
+    <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1">
+</head>
 <body>
 <%@ include file="/WEB-INF/view/client/layout/header.jsp" %>
 <main class="account-container store-container">

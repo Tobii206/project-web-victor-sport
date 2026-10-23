@@ -11,7 +11,7 @@
     <title>Bán hàng tại quầy - Victor Sport</title>
     <link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014">
     <link rel="stylesheet" href="/css/pos-gio-hang.css?v=1">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head>
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1"></head>
 <body>
 <div class="app-shell">
     <jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/>

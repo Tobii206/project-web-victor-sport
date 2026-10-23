@@ -106,8 +106,24 @@ public class HoaDonService {
             throw new IllegalArgumentException("Chỉ xác nhận được đơn COD đang chờ xác nhận.");
         if(jdbcTemplate.queryForList("SELECT id FROM hoa_don_chi_tiet WHERE id_hoa_don=? AND so_luong>0 AND ISNULL(xoa_mem,0)=0",id).isEmpty())
             throw new IllegalArgumentException("Đơn chưa có sản phẩm.");
-        jdbcTemplate.update("UPDATE hoa_don SET trang_thai_hien_tai=4,ngay_cap_nhat=SYSDATETIME(),nguoi_cap_nhat=? WHERE id=? AND trang_thai_hien_tai=1",admin,id);
-        ghiLichSuAdmin(id,4,"Xác nhận đơn COD và giao hàng. Chưa ghi nhận thu tiền.",admin);
+        jdbcTemplate.update("UPDATE hoa_don SET trang_thai_hien_tai=2,ngay_cap_nhat=SYSDATETIME(),nguoi_cap_nhat=? WHERE id=? AND trang_thai_hien_tai=1",admin,id);
+        ghiLichSuAdmin(id,2,"Quản trị viên xác nhận đơn COD. Đơn chờ chuẩn bị hàng.",admin);
+    }
+
+    @Transactional
+    public void batDauChuanBi(int id,int admin) {
+        kiemTraAdmin(admin);
+        int dong=jdbcTemplate.update("UPDATE hoa_don SET trang_thai_hien_tai=3,ngay_cap_nhat=SYSDATETIME(),nguoi_cap_nhat=? WHERE id=? AND loai_don IN (1,2) AND trang_thai_hien_tai=2 AND ISNULL(xoa_mem,0)=0",admin,id);
+        if(dong!=1) throw new IllegalArgumentException("Chỉ bắt đầu chuẩn bị được đơn đã xác nhận.");
+        ghiLichSuAdmin(id,3,"Cửa hàng bắt đầu chuẩn bị hàng.",admin);
+    }
+
+    @Transactional
+    public void banGiaoShipper(int id,int admin) {
+        kiemTraAdmin(admin);
+        int dong=jdbcTemplate.update("UPDATE hoa_don SET trang_thai_hien_tai=4,ngay_cap_nhat=SYSDATETIME(),nguoi_cap_nhat=? WHERE id=? AND loai_don IN (1,2) AND trang_thai_hien_tai=3 AND ISNULL(xoa_mem,0)=0",admin,id);
+        if(dong!=1) throw new IllegalArgumentException("Chỉ bàn giao shipper được đơn đang chuẩn bị hàng.");
+        ghiLichSuAdmin(id,4,"Shipper đã lấy kiện hàng; đơn chuyển sang đang vận chuyển.",admin);
     }
     @Transactional
     public void xacNhanThuTienCod(int id,int admin) {
@@ -115,7 +131,7 @@ public class HoaDonService {
         var ds=jdbcTemplate.queryForList("SELECT * FROM hoa_don WITH (UPDLOCK,HOLDLOCK) WHERE id=? AND loai_don IN (1,2) AND ISNULL(xoa_mem,0)=0",id);
         if(ds.isEmpty()) throw new IllegalArgumentException("Không tìm thấy đơn.");
         var hd=ds.get(0);int tt=((Number)hd.get("trang_thai_hien_tai")).intValue();
-        if((tt!=4 && tt!=5)||!laCod(id,hd)) throw new IllegalArgumentException("Chỉ ghi nhận thu tiền COD cho đơn đang giao hoặc đã nhận hàng.");
+        if(tt!=5 || !laCod(id,hd)) throw new IllegalArgumentException("Chỉ ghi nhận thu tiền COD sau khi khách đã xác nhận nhận hàng.");
         BigDecimal daThu=jdbcTemplate.queryForObject("SELECT ISNULL(SUM(so_tien),0) FROM giao_dich_thanh_toan WHERE id_hoa_don=? AND trang_thai=N'thanh_cong' AND ISNULL(xoa_mem,0)=0",BigDecimal.class,id);
         BigDecimal conLai=((BigDecimal)hd.get("tong_tien_sau_giam")).subtract(daThu);
         if(conLai.signum()<=0) return;
@@ -124,7 +140,7 @@ public class HoaDonService {
         jdbcTemplate.update("UPDATE giao_dich_thanh_toan SET trang_thai=N'da_huy',thoi_gian_cap_nhat=SYSDATETIME() WHERE id_hoa_don=? AND trang_thai=N'cho_thanh_toan' AND ISNULL(xoa_mem,0)=0",id);
         jdbcTemplate.update("INSERT INTO giao_dich_thanh_toan(id_hoa_don,id_phuong_thuc_thanh_toan,so_tien,trang_thai,nguoi_cap_nhat,ghi_chu) VALUES (?,?,?,N'thanh_cong',?,N'Đã đối soát tiền thu hộ COD')",id,pt.get(0).get("id"),conLai,admin);
         jdbcTemplate.update("UPDATE hoa_don SET ngay_thanh_toan=SYSDATETIME(),ngay_cap_nhat=SYSDATETIME(),nguoi_cap_nhat=? WHERE id=?",admin,id);
-        ghiLichSuAdmin(id,tt,"Đã xác nhận nhận tiền thu hộ COD.",admin);
+        ghiLichSuAdmin(id,tt,"Shipper xác nhận đã thu COD; cửa hàng ghi nhận khoản thu.",admin);
     }
     @Transactional
     public void xacNhanGiaoKhachVangLai(int id,int admin) {
@@ -207,8 +223,7 @@ public class HoaDonService {
         if (ds.isEmpty()) throw new IllegalArgumentException("Không tìm thấy đơn hàng online.");
         var hd = ds.get(0);
         int trangThai = ((Number) hd.get("trang_thai_hien_tai")).intValue();
-        if (trangThai == 5) throw new IllegalArgumentException("Khách đã nhận hàng. Không được chỉnh trạng thái đơn này.");
-        if (trangThai < 1 || trangThai > 3) throw new IllegalArgumentException("Chỉ xác nhận được đơn đang chờ hoặc đang chuẩn bị hàng.");
+        if (trangThai != 1) throw new IllegalArgumentException("Chỉ xác nhận thanh toán và đơn hàng đang chờ xác nhận.");
         if(laCod(idHoaDon,hd)) throw new IllegalArgumentException("Đơn COD phải xác nhận đơn trước; chỉ ghi nhận thanh toán sau khi thu tiền.");
         if (jdbcTemplate.queryForList("""
                 SELECT id FROM hoa_don_chi_tiet WHERE id_hoa_don=? AND so_luong>0 AND ISNULL(xoa_mem,0)=0
@@ -243,14 +258,14 @@ public class HoaDonService {
                     """, idHoaDon,phuongThuc.get(0).get("id"),conLai,idAdmin);
         }
         int dong = jdbcTemplate.update("""
-                UPDATE hoa_don SET trang_thai_hien_tai=4,ngay_thanh_toan=COALESCE(ngay_thanh_toan,SYSDATETIME()),
+                UPDATE hoa_don SET trang_thai_hien_tai=2,ngay_thanh_toan=COALESCE(ngay_thanh_toan,SYSDATETIME()),
                     ngay_cap_nhat=SYSDATETIME(),nguoi_cap_nhat=?
-                WHERE id=? AND trang_thai_hien_tai IN (1,2,3) AND loai_don IN (1,2) AND ISNULL(xoa_mem,0)=0
+                WHERE id=? AND trang_thai_hien_tai=1 AND loai_don IN (1,2) AND ISNULL(xoa_mem,0)=0
                 """, idAdmin,idHoaDon);
         if (dong != 1) throw new IllegalArgumentException("Trạng thái đơn đã thay đổi. Vui lòng tải lại trang.");
         jdbcTemplate.update("""
                 INSERT INTO lich_su_hoa_don (id_hoa_don,trang_thai,ghi_chu,nguoi_cap_nhat,nguoi_thuc_hien,loai_nguoi_thuc_hien)
-                VALUES (?,4,N'Quản trị viên xác nhận thanh toán. Đơn đang vận chuyển.',?,?,'nhan_vien')
+                VALUES (?,2,N'Quản trị viên xác nhận thanh toán và xác nhận đơn hàng.',?,?,'nhan_vien')
                 """, idHoaDon,idAdmin,idAdmin);
         baoChuong(idHoaDon);
         // Kho đã được trừ khi khách đặt hàng, không trừ lại khi xác nhận.

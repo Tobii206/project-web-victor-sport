@@ -23,7 +23,7 @@ class ThongKeVanChuyenTests {
     }
     @Test void trangVaApiChiChoQuanTriVien() throws Exception {
         var tk=mock(ThongKeService.class); var vc=mock(VanChuyenService.class); var ghn=mock(GhnService.class);
-        var mvc=MockMvcBuilders.standaloneSetup(new ThongKeController(tk),new VanChuyenController(vc,ghn)).build();
+        var mvc=MockMvcBuilders.standaloneSetup(new ThongKeController(tk),new VanChuyenController(vc,ghn,mock(com.example.victorsport.Service.HoaDonService.class))).build();
         for(String path:List.of("/quan-ly/thong-ke","/quan-ly/van-chuyen")) {
             mvc.perform(get(path)).andExpect(redirectedUrl("/login"));
             mvc.perform(get(path).session(phien("Nhân viên"))).andExpect(status().isForbidden());
@@ -34,7 +34,7 @@ class ThongKeVanChuyenTests {
     }
     @Test void validatePhiTruocKhiGoiGhn() throws Exception {
         var ghn=mock(GhnService.class);
-        var mvc=MockMvcBuilders.standaloneSetup(new VanChuyenController(mock(VanChuyenService.class),ghn)).build();
+        var mvc=MockMvcBuilders.standaloneSetup(new VanChuyenController(mock(VanChuyenService.class),ghn,mock(com.example.victorsport.Service.HoaDonService.class))).build();
         mvc.perform(post("/quan-ly/van-chuyen/ghn/tinh-phi").session(phien("Quản trị viên"))
                 .param("tinh","201").param("huyen","1444").param("xa","00123").param("khoiLuong","-1")
                 .param("dai","35").param("rong","25").param("cao","15").param("giaTriHang","0"))
@@ -43,7 +43,7 @@ class ThongKeVanChuyenTests {
     }
     @Test void chuaCoTokenApiBaoLoiKhongTraPhiBangKhong() throws Exception {
         var ghn=mock(GhnService.class); when(ghn.tinh()).thenThrow(new IllegalStateException("Chưa cấu hình GHN thử nghiệm."));
-        var mvc=MockMvcBuilders.standaloneSetup(new VanChuyenController(mock(VanChuyenService.class),ghn)).build();
+        var mvc=MockMvcBuilders.standaloneSetup(new VanChuyenController(mock(VanChuyenService.class),ghn,mock(com.example.victorsport.Service.HoaDonService.class))).build();
         mvc.perform(get("/quan-ly/van-chuyen/ghn/dia-chi").session(phien("Quản trị viên")))
                 .andExpect(status().isServiceUnavailable()).andExpect(jsonPath("$.error").exists())
                 .andExpect(header().string("Cache-Control","no-store"));

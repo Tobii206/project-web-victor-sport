@@ -38,9 +38,24 @@
 .invoice-history li:last-child { padding-bottom: 0; border-color: transparent; }
 .invoice-history li strong { color: #425979; font-size: 12px; }
 .invoice-history li p { color: #7b899d; margin: 7px 0 0; line-height: 1.7; }
+.invoice-delivery-steps { margin-top: 28px; padding: 22px; border: 1px solid #e4eaf3; border-radius: 14px; background: #fcfdff; }
+.invoice-delivery-steps h3 { margin-bottom: 18px; }
+.delivery-steps { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 12px; list-style: none; padding: 0; margin: 0; }
+.delivery-step { min-height: 126px; padding: 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 9px; border: 1px solid #e4eaf3; border-radius: 12px; background: #f7f9fc; color: #78879b; }
+.delivery-step-number { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: #e6ebf2; color: #64748b; font-size: 12px; font-weight: 700; }
+.delivery-step strong { color: #536780; font-size: 12px; line-height: 1.45; }
+.delivery-step small { color: #8995a8; font-size: 11px; }
+.delivery-step.is-done { border-color: #cce8d9; background: #f1faf5; }
+.delivery-step.is-done .delivery-step-number { background: #d7f0e2; color: #20734e; }
+.delivery-step.is-done strong,.delivery-step.is-done small { color: #28734f; }
+.delivery-step.is-current { border-color: #ffbd91; background: #fff6ee; box-shadow: 0 0 0 2px #fff0e4; }
+.delivery-step.is-current .delivery-step-number { background: #ffb47c; color: #713c16; }
+.delivery-step.is-current strong,.delivery-step.is-current small { color: #a85619; }
+.delivery-cancelled { margin: 0; color: #b43c4d; }
 @media (max-width: 1100px) {
     .invoice-detail .invoice-info, .invoice-bottom { grid-template-columns: 1fr; }
     .invoice-bottom { gap: 24px; }
+    .delivery-steps { grid-template-columns: repeat(3,minmax(0,1fr)); }
 }
 @media (max-width: 600px) {
     .invoice-info-card { padding: 18px; }
@@ -49,4 +64,6 @@
     .invoice-toolbar form { flex: 1; }
     .invoice-toolbar .button { width: 100%; }
     .invoice-total .total strong { font-size: 20px; }
+    .invoice-delivery-steps { padding: 16px; }
+    .delivery-steps { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }

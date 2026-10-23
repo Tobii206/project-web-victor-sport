@@ -5,10 +5,60 @@ window.VictorKhoiTaoGhn = function () {
     var loi = document.getElementById('ghnDiaChiLoi'), datHang = document.getElementById('nutDatHangOnline');
     var taiLai = document.getElementById('taiLaiDiaChiGhn');
     var diaChiDaLuu = document.getElementById('diaChiDaLuu');
-    var nutLayPhi = box.querySelector('[formaction]');
-    var lan = 0, daDoi = false;
+    var form = box.closest('form'), trangThaiPhi = document.getElementById('ghnTrangThaiPhi');
+    var lan = 0, daDoi = false, phienBan = 0, henPhi, dangLayPhi = false, lanGuiPhi = 0, hetHanPhi;
+    function duThongTin() {
+        return form.isConnected && tinh.value && xa.value && !tinh.disabled && !xa.disabled && form.checkValidity();
+    }
+    function henLayPhi() {
+        clearTimeout(henPhi);
+        datHang.disabled = true;
+        if (!duThongTin()) {
+            trangThaiPhi.textContent = 'Điền đủ thông tin nhận hàng để tự động tính phí giao hàng.';
+            return;
+        }
+        trangThaiPhi.textContent = 'Đang cập nhật phí giao hàng…';
+        henPhi = setTimeout(layPhiTuDong, Math.max(650, 3200 - (Date.now() - lanGuiPhi)));
+    }
+    async function layPhiTuDong() {
+        if (dangLayPhi || !duThongTin()) return;
+        var phienGui = phienBan;
+        dangLayPhi = true;lanGuiPhi = Date.now();datHang.disabled = true;
+        try {
+            var response = await fetch('/thanh-toan/ghn/bao-gia', {
+                method: 'POST', body: new FormData(form), credentials: 'same-origin', cache: 'no-store'
+            });
+            var doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+            if (!form.isConnected || phienGui !== phienBan) return;
+            var baoGia = doc.getElementById('ghnBaoGiaHienTai');
+            var tongKet = doc.querySelector('.checkout-summary');
+            if (!response.ok || !baoGia || !tongKet) {
+                var error = doc.querySelector('.account-error, .alert.error');
+                if (error && error.textContent.includes('Vui lòng đợi vài giây trước khi lấy lại phí')) {
+                    trangThaiPhi.textContent = '';
+                    clearTimeout(henPhi);
+                    henPhi = setTimeout(layPhiTuDong, 3300);
+                    return;
+                }
+                throw new Error(error ? error.textContent.trim() : 'Chưa lấy được phí GHN. Vui lòng thử lại.');
+            }
+            document.querySelector('.checkout-summary').replaceWith(tongKet);
+            if (window.VictorKhoiTaoPhieuOnline) window.VictorKhoiTaoPhieuOnline();
+            daDoi = false;datHang.disabled = false;
+            trangThaiPhi.textContent = '';
+            clearTimeout(hetHanPhi);
+            hetHanPhi = setTimeout(function () { if (form.isConnected) huyBaoGia(); }, 280000);
+        } catch (e) {
+            if (form.isConnected && phienGui === phienBan) {
+                trangThaiPhi.textContent = e.message;datHang.disabled = true;
+            }
+        } finally {
+            dangLayPhi = false;
+            if (form.isConnected && phienGui !== phienBan) henLayPhi();
+        }
+    }
     function huyBaoGia() {
-        daDoi = true;datHang.disabled = true;
+        daDoi = true;phienBan++;datHang.disabled = true;clearTimeout(hetHanPhi);
         var text = document.getElementById('ghnBaoGiaHienTai');
         if (text) text.textContent = 'Thông tin đã thay đổi. Vui lòng lấy lại phí giao hàng.';
         var phieu = document.getElementById('phieuGiamGiaOnline');
@@ -22,6 +72,7 @@ window.VictorKhoiTaoGhn = function () {
             });
             if (phieu.onchange) phieu.onchange();
         }
+        henLayPhi();
     }
     window.VictorHuyBaoGiaGhn = huyBaoGia;
     function baoLoi(error) {
@@ -57,7 +108,7 @@ window.VictorKhoiTaoGhn = function () {
     }
     async function taiDiaChi(tinhCu, xaCu, tenTinh, tenXa) {
         var hienTai = ++lan;
-        taiLai.disabled = true;tinh.disabled = true;xa.disabled = true;datHang.disabled = true;nutLayPhi.disabled = true;
+        taiLai.disabled = true;tinh.disabled = true;xa.disabled = true;datHang.disabled = true;
         try {
             var tinhTam = document.createElement('select'), xaTam = document.createElement('select');
             await tai('/thanh-toan/ghn/dia-chi?cap=tinh', tinhTam, 'Chọn tỉnh / thành phố', tinhCu);
@@ -77,7 +128,10 @@ window.VictorKhoiTaoGhn = function () {
             datHang.disabled = daDoi || !document.getElementById('ghnBaoGiaHienTai') || !tinh.value || !xa.value;
         } catch (e) { if (hienTai === lan) baoLoi(e); }
         finally {
-            if (hienTai === lan) { taiLai.disabled = false;tinh.disabled = false;xa.disabled = !tinh.value;nutLayPhi.disabled = false; }
+            if (hienTai === lan) {
+                taiLai.disabled = false;tinh.disabled = false;xa.disabled = !tinh.value;
+                henLayPhi();
+            }
         }
     }
     tinh.addEventListener('change', function () {

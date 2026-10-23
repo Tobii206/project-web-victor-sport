@@ -67,6 +67,14 @@ public class QuanLySanPhamController {
                     boolean timThay=false;
                     for(var pb:cacMau) if(((Number)pb.get("id")).intValue()==mau) {mauForm=pb;timThay=true;break;}
                     if(!timThay)throw new IllegalArgumentException("Không tìm thấy mẫu giày.");
+                } else if (!cacMau.isEmpty()) {
+                    // Các biến thể thuộc cùng một sản phẩm dùng chung mức giá khởi tạo và ghi chú.
+                    // Lấy mẫu được tạo đầu tiên (ID nhỏ nhất), không phụ thuộc thứ tự hiển thị danh sách.
+                    Map<String,Object> mauDauTien=cacMau.stream()
+                            .min(Comparator.comparingInt(pb -> ((Number)pb.get("id")).intValue()))
+                            .orElseThrow();
+                    mauForm.put("gia_ban",mauDauTien.get("gia_ban"));
+                    mauForm.put("ghi_chu",mauDauTien.get("ghi_chu"));
                 }
                 model.addAttribute("mauForm",mauForm);
             }

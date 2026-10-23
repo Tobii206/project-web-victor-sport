@@ -25,13 +25,31 @@ class LuongThanhToanMoiTests {
     }
     @Test void xacNhanDonCodKhongGhiNhanThuTien() {
         var jdbc=jdbcCod();new HoaDonService(jdbc).xacNhanDonCod(10,2);
-        verify(jdbc).update(contains("trang_thai_hien_tai=4"),eq(2),eq(10));
+        verify(jdbc).update(contains("trang_thai_hien_tai=2"),eq(2),eq(10));
         verify(jdbc,never()).update(contains("INSERT INTO giao_dich_thanh_toan"),any(Object[].class));
         verify(jdbc,never()).queryForObject(contains("SUM(so_tien)"),eq(BigDecimal.class),any(Object[].class));
+    }
+    @Test void trangThaiDonDiTuanTuDaXacNhanSangChuanBiVaBanGiao() {
+        var jdbc=jdbcCod();var service=new HoaDonService(jdbc);
+        when(jdbc.update(contains("SET trang_thai_hien_tai=3"),eq(2),eq(10))).thenReturn(1);
+        when(jdbc.update(contains("SET trang_thai_hien_tai=4"),eq(2),eq(10))).thenReturn(1);
+        service.batDauChuanBi(10,2);
+        service.banGiaoShipper(10,2);
+        verify(jdbc).update(argThat(sql -> sql.contains("SET trang_thai_hien_tai=3") && sql.contains("AND trang_thai_hien_tai=2")),eq(2),eq(10));
+        verify(jdbc).update(argThat(sql -> sql.contains("SET trang_thai_hien_tai=4") && sql.contains("AND trang_thai_hien_tai=3")),eq(2),eq(10));
+        verify(jdbc).update(contains("INSERT INTO lich_su_hoa_don"),eq(10),eq(3),eq("Cửa hàng bắt đầu chuẩn bị hàng."),eq(2),eq(2));
+        verify(jdbc).update(contains("INSERT INTO lich_su_hoa_don"),eq(10),eq(4),eq("Shipper đã lấy kiện hàng; đơn chuyển sang đang vận chuyển."),eq(2),eq(2));
     }
     @Test void khongXacNhanTienCodKhiDonChuaGiao() {
         var jdbc=jdbcCod();var service=new HoaDonService(jdbc);
         assertThrows(IllegalArgumentException.class,()->service.xacNhanThanhToan(10,2));
+        assertThrows(IllegalArgumentException.class,()->service.xacNhanThuTienCod(10,2));
+        verify(jdbc,never()).update(contains("INSERT INTO giao_dich_thanh_toan"),any(Object[].class));
+    }
+    @Test void chuaChoGhiNhanThuCodTruocKhiKhachXacNhanDaNhan() {
+        var jdbc=jdbcCod();var service=new HoaDonService(jdbc);
+        when(jdbc.queryForList(contains("WITH (UPDLOCK,HOLDLOCK)"),eq(10)))
+            .thenReturn(List.of(Map.of("trang_thai_hien_tai",4,"tong_tien_sau_giam",new BigDecimal("130000"))));
         assertThrows(IllegalArgumentException.class,()->service.xacNhanThuTienCod(10,2));
         verify(jdbc,never()).update(contains("INSERT INTO giao_dich_thanh_toan"),any(Object[].class));
     }

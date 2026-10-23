@@ -4,9 +4,9 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Địa chỉ của tôi — VictorSport</title>
     <link rel="icon" href="/logo/favicon-victorsport.svg">
-    <link rel="stylesheet" href="/css/trang-chu.css?v=gia-giam-1">
+    <link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1">
     <link rel="stylesheet" href="/css/dia-chi-khach-hang.css">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head><body>
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1"></head><body>
 <%@ include file="/WEB-INF/view/client/layout/header.jsp" %>
 <main class="store-container online-container">
     <a href="/tai-khoan">← Về tài khoản</a>

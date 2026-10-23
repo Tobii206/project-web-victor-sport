@@ -40,6 +40,7 @@ public class TrangChuController {
         try {
             model.addAttribute("thuongHieu", trangChuService.layThuongHieu());
             model.addAttribute("boLoc", trangChuService.layBoLoc());
+            model.addAttribute("hanUuDai", trangChuService.layHanUuDai());
             model.addAttribute("sanPham", trangChuService.timSanPham(tuKhoa, thuongHieu, nhuCau, chatLieu, xuatXu, kichThuoc, mauSac, conHang, sapXep));
         } catch (DataAccessException loi) {
             model.addAttribute("thuongHieu", Collections.emptyList());

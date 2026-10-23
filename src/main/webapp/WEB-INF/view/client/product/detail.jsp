@@ -6,8 +6,13 @@
 <!DOCTYPE html>
 <html lang="vi"><head>
     <link rel="icon" type="image/svg+xml" href="/logo/favicon-victorsport.svg?v=1"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><c:out value="${sanPham.ten_san_pham}" default="Chi tiết sản phẩm"/> — VictorSport</title>
-<link rel="stylesheet" href="/css/trang-chu.css?v=gia-giam-1"><link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head>
+    <title><c:out value="${sanPham.ten_san_pham}" default="Chi tiết sản phẩm"/> — VictorSport</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1">
+    <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1">
+</head>
 <body><%@ include file="/WEB-INF/view/client/layout/header.jsp" %>
 <main class="store-container online-container">
     <p class="online-breadcrumb"><a href="/">Trang chủ</a> / <a href="/#san-pham">Sản phẩm</a> / <c:out value="${sanPham.ten_san_pham}"/></p>
@@ -135,11 +140,86 @@
     </section>
     </c:if>
 </main>
-<dialog id="huongDanSize" class="size-guide-dialog" aria-labelledby="tieuDeHuongDanSize">
-    <div class="size-guide-heading">
-        <h2 id="tieuDeHuongDanSize">Hướng dẫn chọn size</h2>
-        <button type="button" id="dongHuongDanSize" aria-label="Đóng hướng dẫn chọn size">×</button>
+
+<dialog id="huongDanSize" class="size-modal">
+    <div class="size-modal-card">
+        <div class="size-modal-header">
+            <h3>Bảng quy đổi kích thước giày (Size Guide)</h3>
+            <button type="button" id="dongHuongDanSize" class="size-modal-close" aria-label="Đóng bảng size">✕</button>
+        </div>
+        <div class="size-modal-body">
+            <p style="margin-bottom: 16px; color: #475569;">Để chọn size chính xác nhất, bạn hãy đo chiều dài bàn chân từ gót đến ngón dài nhất.</p>
+            <div class="size-table-wrapper">
+                <table class="size-table">
+                    <thead>
+                        <tr>
+                            <th>Size VN/EU</th>
+                            <th>Chiều dài chân (cm)</th>
+                            <th>Size US</th>
+                            <th>Form chân khuyến nghị</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>38</strong></td><td>23.5 - 24.0</td><td>6.0</td><td>Thon / Chuẩn</td></tr>
+                        <tr><td><strong>39</strong></td><td>24.0 - 24.5</td><td>6.5</td><td>Thon / Chuẩn</td></tr>
+                        <tr><td><strong>40</strong></td><td>24.5 - 25.0</td><td>7.0</td><td>Chuẩn</td></tr>
+                        <tr><td><strong>41</strong></td><td>25.0 - 25.5</td><td>8.0</td><td>Chuẩn / Bè nhẹ</td></tr>
+                        <tr><td><strong>42</strong></td><td>25.5 - 26.0</td><td>8.5</td><td>Chuẩn / Bè vừa</td></tr>
+                        <tr><td><strong>43</strong></td><td>26.0 - 26.5</td><td>9.5</td><td>Bè to / Dày chân</td></tr>
+                        <tr><td><strong>44</strong></td><td>26.5 - 27.0</td><td>10.0</td><td>Bè to / Dày chân</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="size-tip">
+                💡 <strong>Mẹo chuyên gia:</strong> Nếu mu bàn chân dày hoặc bề ngang bè, bạn nên tăng thêm <strong>0.5 đến 1 size</strong> so với giày đi làm/giày sneaker thông thường để thi đấu đạt hiệu suất cao nhất và không bị tức mũi.
+            </div>
+        </div>
     </div>
-    <img src="/images/huong-dan-chon-size.png" alt="Bảng quy đổi size Việt Nam, size US, size UK và chiều dài bàn chân theo centimet">
 </dialog>
-<script src="/js/san-pham-online.js?v=20261019-single-product-image"></script></body></html>
+<footer class="store-footer">
+    <div class="store-container footer-content">
+        <div class="footer-brand">
+            <a class="store-logo" href="/" aria-label="VictorSport">
+                <img src="/logo/logo-nobackgroud.png" alt="VictorSport" width="200" height="64" style="filter: brightness(1.1);">
+            </a>
+            <p>Hệ thống giày thể thao & bóng đá chính hãng hàng đầu. Đồng hành cùng mỗi bước chạy và niềm đam mê thể thao của bạn.</p>
+            <div class="footer-hotline">
+                <span>Hotline đặt hàng:</span>
+                <a href="tel:0325327602" style="color: inherit;">0325.327.602</a>
+            </div>
+        </div>
+        <div class="footer-column">
+            <h4>Sản phẩm</h4>
+            <ul>
+                <li><a href="/#san-pham">Tất cả giày thể thao</a></li>
+                <li><a href="/?nhuCau=1#san-pham">Giày bóng đá tiền đạo</a></li>
+                <li><a href="/?nhuCau=5#san-pham">Giày chạy bộ marathon</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4>Chính sách & Hỗ trợ</h4>
+            <ul>
+                <li><a href="/tra-cuu-don-hang">Tra cứu đơn hàng</a></li>
+                <li><a href="/#nhu-cau">Hướng dẫn chọn size</a></li>
+                <li><a href="#san-pham">Chính sách đổi trả 7 ngày</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4>Thanh toán & Kết nối</h4>
+            <div class="footer-payment-badges">
+                <span class="payment-tag">COD</span>
+                <span class="payment-tag">VietQR</span>
+                <span class="payment-tag">Napas 247</span>
+                <span class="payment-tag">GHN Express</span>
+            </div>
+        </div>
+    </div>
+    <div class="store-container footer-bottom">
+        <div>© 2026 VictorSport. Bản quyền thuộc về Cửa hàng Thể thao VictorSport.</div>
+        <div>Đồng hành cùng mỗi bước chân • Designed with Excellence</div>
+    </div>
+</footer>
+<button type="button" class="back-to-top" id="backToTopBtn" aria-label="Lên đầu trang">↑</button>
+<script src="/js/san-pham-online.js?v=20261019-single-product-image"></script>
+<script src="/js/victor-modern.js?v=20261023-countdown"></script>
+</body></html>

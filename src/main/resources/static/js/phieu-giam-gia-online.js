@@ -27,7 +27,7 @@ if (chonPhieuOnline) {
                 ? (giamPhi > 0 ? 'Đã áp dụng phiếu giảm phí vận chuyển.' : 'Đơn đang miễn phí vận chuyển. Không trừ lượt phiếu freeship.')
                 : 'Đã chọn phiếu giảm giá.';
         }
-        if (choPhi) thongBao = 'Vui lòng lấy phí GHN. Phiếu freeship sẽ được tính sau khi có phí giao hàng.';
+        if (choPhi) thongBao = 'Phí GHN sẽ tự động cập nhật khi đủ địa chỉ. Phiếu freeship được tính sau khi có phí giao hàng.';
         document.getElementById('thongBaoPhieu').textContent = thongBao;
     }
     chonPhieuOnline.onchange = capNhatPhieuOnline;

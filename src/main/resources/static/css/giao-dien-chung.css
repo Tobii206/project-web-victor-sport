@@ -1,27 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 /* Giao diện chung cho trang quản lý và cửa hàng. Không áp dụng khi in hóa đơn. */
 @media screen {
     :root {
-        --vs-ink: #183153;
-        --vs-muted: #64748b;
-        --vs-line: #e3e9f1;
-        --vs-canvas: #f4f6fa;
-        --vs-accent: #ed8a47;
-        --vs-radius: 14px;
-        --vs-shadow: 0 3px 16px rgb(24 49 83 / 4%);
+        --vs-font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        --vs-font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+        --vs-primary: #FF5E1E;
+        --vs-primary-hover: #E84E10;
+        --vs-primary-gradient: linear-gradient(135deg, #FF5E1E 0%, #FF8A00 100%);
+        --vs-primary-glow: rgba(255, 94, 30, 0.35);
+        --vs-primary-subtle: #FFF2EC;
+
+        --vs-ink: #0F172A;
+        --vs-ink-secondary: #334155;
+        --vs-muted: #64748B;
+        --vs-light-muted: #94A3B8;
+        --vs-line: #E2E8F0;
+        --vs-line-subtle: #F1F5F9;
+        --vs-canvas: #F8FAFC;
+        --vs-surface: #FFFFFF;
+        --vs-accent: #FF5E1E;
+        --vs-radius: 16px;
+        --vs-radius-sm: 10px;
+        --vs-radius-lg: 24px;
+        --vs-radius-full: 9999px;
+        --vs-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+        --vs-shadow-hover: 0 20px 40px -10px rgba(15, 23, 42, 0.12), 0 10px 20px -5px rgba(255, 94, 30, 0.08);
     }
-    body { background: var(--vs-canvas); color: var(--vs-ink); font-size: 15px; line-height: 1.55; }
+    body {
+        background: var(--vs-canvas);
+        color: var(--vs-ink);
+        font-family: var(--vs-font-body);
+        font-size: 15px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    h1, h2, h3, h4, .brand-font {
+        font-family: var(--vs-font-heading);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
     button, input, select, textarea { font-family: inherit; }
-    input, select, textarea { max-width: 100%; }
-    input[type="checkbox"], input[type="radio"] { accent-color: #183153; }
+    input, select, textarea {
+        max-width: 100%;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+    input[type="checkbox"], input[type="radio"] { accent-color: var(--vs-primary); }
     input:disabled, select:disabled, textarea:disabled { cursor: not-allowed; }
     :is(.input, .select, .textarea, .account-form input, .account-form select):focus-visible {
-        outline: 0; border-color: #c98451; box-shadow: 0 0 0 3px #fcebdc;
+        outline: 0;
+        border-color: var(--vs-primary);
+        box-shadow: 0 0 0 3px rgba(255, 94, 30, 0.18);
     }
-    :is(.button, .store-button) { gap: 8px; min-height: 44px; border-radius: 9px; font-size: 14px; line-height: 1.45; padding: 11px 18px; }
-    :is(.button, .store-button):active:not(:disabled) { transform: translateY(1px); }
-    :is(.button, .store-button):disabled { transform: none; }
+    :is(.button, .store-button) {
+        gap: 8px;
+        min-height: 46px;
+        border-radius: 12px;
+        font-family: var(--vs-font-heading);
+        font-weight: 700;
+        font-size: 14px;
+        letter-spacing: 0.01em;
+        line-height: 1.45;
+        padding: 12px 22px;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    :is(.button, .store-button):hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px -4px rgba(255, 94, 30, 0.35);
+    }
+    :is(.button, .store-button):active:not(:disabled) { transform: translateY(0); }
+    :is(.button, .store-button):disabled { transform: none; opacity: 0.5; }
     .muted, .subtle { color: var(--vs-muted); }
-    .money, .summary-row strong, .online-price, .product-price { font-variant-numeric: tabular-nums; }
+    .money, .summary-row strong, .online-price, .product-price {
+        font-variant-numeric: tabular-nums;
+        font-family: var(--vs-font-heading);
+    }
 
     /* Quản lý: thanh điều hướng, bảng dữ liệu và biểu mẫu. */
     .app-shell { grid-template-columns: 260px minmax(0, 1fr); }
@@ -234,4 +292,106 @@
         .table tbody tr, .button, .store-button { transition: none; transform: none; }
         .vs-loading-bar::after { width: 100%; animation: none; }
     }
+}
+
+/* Complete account, address, authentication and management screens. */
+@media screen {
+    .account-card { background: #fff; border: 1px solid var(--vs-line); border-radius: 20px; }
+    .account-container { min-height: 72vh; max-width: 1240px; }
+    .account-heading { padding: 8px 0 4px; margin: 22px 0 30px; }
+    .account-heading h1 { margin: 8px 0 12px; font-weight: 800; }
+    .account-heading > p:last-child { color: var(--vs-muted); max-width: 640px; line-height: 1.8; }
+    .account-layout { display: grid; grid-template-columns: 290px minmax(0,1fr); align-items: start; gap: 26px; }
+    .account-layout > .account-card { padding: 30px; }
+    .account-sidebar { text-align: center; position: sticky; top: 100px; overflow: hidden; }
+    .account-sidebar::before { content: ''; position: absolute; inset: 0 0 auto; height: 94px; background: linear-gradient(135deg,#fff2ec,#ffe0c8); }
+    .account-avatar { position: relative; display: grid; place-items: center; width: 82px; height: 82px; margin: 5px auto 20px; border: 5px solid #fff; border-radius: 50%; background: #fff5ee; box-shadow: 0 6px 18px #172b4d12; }
+    .account-sidebar h2 { position: relative; margin: 0 0 12px; font-size: 22px; }
+    .account-role { display: inline-flex; padding: 5px 12px; border-radius: 30px; background: #fff2ec; color: #b74414; font-size: 12px; font-weight: 700; }
+    .account-sidebar > .subtle { margin: 12px 0 22px; font-size: 13px; }
+    .account-sidebar .store-button { display: flex; justify-content: center; width: 100%; margin: 12px 0; padding: 13px 12px; font-size: 13px; }
+    .account-sidebar .account-back { display: flex; justify-content: center; padding: 12px; font-size: 13px; }
+    .account-sidebar form { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--vs-line); }
+    .account-sidebar .account-logout { width: 100%; }
+    .account-logout { border: 1px solid #f2d9d5; cursor: pointer; font: inherit; font-size: 13px; min-height: 40px; }
+    .account-profile-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; }
+    .account-profile-actions a { padding: 9px 14px; border: 1px solid var(--vs-line); border-radius: 10px; color: var(--vs-ink); font-size: 13px; font-weight: 600; background: #f8fafc; }
+    .account-profile-actions a:hover { border-color: #ffb68d; background: #fff4ed; color: #b74414; }
+    .account-info { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 24px; margin: 22px 0 0; }
+    .account-info > div { padding: 18px 0; border-bottom: 1px solid #edf1f5; min-width: 0; }
+    .account-info dt { margin-bottom: 7px; font-size: 12px; color: var(--vs-muted); }
+    .account-info dd { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.7; overflow-wrap: anywhere; }
+    .account-info .account-address { grid-column: 1/-1; }
+    .account-form:not(.checkout-form) { display: grid; gap: 10px; max-width: none; margin-top: 24px; }
+    .account-form label { display: block; font-weight: 600; color: #334155; }
+    .account-form input:not([type=hidden]), .account-form select, .account-form textarea { box-sizing: border-box; width: 100%; min-width: 0; border: 1px solid #dce4ee; border-radius: 11px; padding: 12px 14px; color: #172b4d; background: #fff; font: inherit; font-size: 14px; }
+    .account-form input:focus, .account-form select:focus, .account-form textarea:focus { outline: 0; border-color: #ff9c69; box-shadow: 0 0 0 3px #ff5e1e12; }
+    .account-form input[type=checkbox] { width: 18px; min-height: 18px; height: 18px; accent-color: #ff5e1e; padding: 0; }
+    .account-form input[readonly] { background: #f6f8fb; color: #64748b; }
+    .account-form:not(.checkout-form) > .store-button { margin-top: 14px; justify-content: center; }
+    .account-error, .online-success, .self-success { padding: 15px 18px; margin: 18px 0; border: 1px solid #f2d9d5; border-radius: 12px; line-height: 1.7; font-size: 14px; }
+    .account-error { background: #fff3ef; color: #ad3c22; }
+    .online-success, .self-success { border-color: #d5ebdf; background: #edf8f1; color: #246347; }
+    .self-account { max-width: 680px; min-height: 70vh; margin: 32px auto 60px; }
+    .self-account .account-card { padding: 34px; border-top: 4px solid #ff7a31; }
+    .self-account h1 { line-height: 1.3; font-size: 30px; letter-spacing: -.8px; margin: 12px 0 22px; }
+    .self-account .account-back { padding: 10px 0; }
+    .account-self-links { display: flex; flex-wrap: wrap; gap: 16px; padding-top: 18px; border-top: 1px solid var(--vs-line); }
+    .address-layout { grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap: 24px; }
+    .address-card { border-left: 3px solid #ffd5b6; }
+    .address-default { font-weight: 700; }
+    .address-actions a, .address-actions button { font-size: 13px; font-weight: 600; padding: 8px 11px; border-radius: 8px; background: #f5f7fb; text-decoration: none; }
+    .address-actions .address-delete { background: #fff1ef; }
+    .address-checkbox { margin: 12px 0; }
+    .don-hang-card { background: #fff; }
+    .don-hang-card .online-price { margin: 10px 0; }
+    .don-hang-actions form { margin: 0; }
+    .empty-state { text-align: center; padding: 46px 26px; }
+    .empty-state .store-button { margin-top: 14px; }
+    .account-container > .account-card { margin-top: 24px; padding: 36px; }
+    .account-back { text-decoration: none; font-size: 13px; font-weight: 600; }
+    .account-back:hover { color: #d95016; }
+    .app-shell .panel { background: #fff; }
+    .app-shell .panel-header { background: linear-gradient(100deg,#fff,#fafbfe); }
+    .app-shell .panel-header h2 { font-weight: 800; }
+    .app-shell .product-admin-filters { border: 1px solid #e6ebf2; background: #f8fafc; }
+    .app-shell .table th { color: #617188; border-bottom: 1px solid #e3e9f1; }
+    .app-shell .table tbody tr:hover { background: #fffaf6; }
+    .app-shell .product-admin-section > h3 { padding-bottom: 12px; border-bottom: 1px solid #edf1f5; }
+    .app-shell .field label { font-size: 13px; }
+    .app-shell .field :is(input,select,textarea):focus { border-color: #ff9c69; box-shadow: 0 0 0 3px #ff5e1e12; }
+    .app-shell .product-admin-actions { display: flex; flex-wrap: wrap; align-items: center; }
+    .store-footer .footer-content { align-items: start; }
+    [hidden] { display: none !important; }
+    @media (max-width: 900px) {
+        .account-layout { grid-template-columns: 240px minmax(0,1fr); gap: 18px; }
+        .account-layout > .account-card { padding: 24px; }
+        .address-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 680px) {
+        .account-layout { grid-template-columns: 1fr; }
+        .account-sidebar { position: static; }
+        .account-info { grid-template-columns: 1fr; }
+        .account-profile-actions a { flex: 1; text-align: center; }
+        .account-heading { margin: 18px 0 24px; }
+        .self-account .account-card { padding: 24px 20px; }
+        .self-account h1 { font-size: 26px; }
+        .don-hang-actions { width: 100%; justify-content: flex-start; }
+        .don-hang-actions .store-button { min-height: 42px; padding: 10px 14px; }
+        .account-container > .account-card { padding: 24px; }
+    }
+}
+@media screen {
+    .account-welcome { padding: 36px 28px; border-radius: 20px; color: #fff; background: radial-gradient(circle at top right,#65442e 0,transparent 65%),linear-gradient(145deg,#152b4b,#0e1b31); box-shadow: 0 16px 40px #172b4d18; }
+    .account-welcome h2 { color: #fff; font-size: 30px; line-height: 1.35; margin: 24px 0 14px; }
+    .account-welcome p { color: #c5d0e0; font-size: 14px; line-height: 1.9; }
+    .account-welcome .account-avatar { margin: 0 0 24px; }
+    .account-layout > .account-card > p:last-child a { color: #bd4516; font-weight: 600; font-size: 13px; }
+    .online-related { margin-top: 38px; }
+    .online-related > h2 { font-size: 26px; margin-bottom: 22px; }
+    .online-return-note { padding: 18px 22px; border: 1px solid #e5ebf2; border-radius: 12px; background: #f8fafc; color: #52637a; line-height: 1.8; }
+    .size-modal-body { padding: 22px; overflow: auto; }
+    .checkout-empty { max-width: 680px; margin: 36px auto; text-align: center; padding: 48px 28px; }
+    .checkout-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+    .checkout-products { max-height: 480px; overflow: auto; }
 }

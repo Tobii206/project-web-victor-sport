@@ -77,11 +77,25 @@ public class HoaDonController {
         if (!user.isQuanLy()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         try {
             hoaDonService.xacNhanThanhToan(id,user.getId());
-            thongBao.addFlashAttribute("success","Đã xác nhận thanh toán. Đơn hàng đang vận chuyển.");
+            thongBao.addFlashAttribute("success","Đã xác nhận thanh toán và đơn hàng. Đơn chuyển sang chờ chuẩn bị.");
         } catch (IllegalArgumentException e) { thongBao.addFlashAttribute("error",e.getMessage()); }
         catch (DataAccessException e) { thongBao.addFlashAttribute("error","Chưa xác nhận được thanh toán. Vui lòng thử lại."); }
+        if ("van-chuyen".equals(quayLai)) return "redirect:/quan-ly/van-chuyen";
         if ("danh-sach".equals(quayLai)) return "redirect:/quan-ly/hoa-don";
         return "redirect:/quan-ly/hoa-don/" + id;
+    }
+
+    @PostMapping("/quan-ly/hoa-don/{id}/chuan-bi")
+    public String batDauChuanBi(@PathVariable int id,@RequestParam(defaultValue="chi-tiet") String quayLai,
+                                HttpSession session,Model model,RedirectAttributes flash) {
+        var user=DangNhapController.layNguoiDungDangNhap(session,model);
+        if(user==null) return "redirect:/login";
+        if(!user.isQuanLy()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        try { hoaDonService.batDauChuanBi(id,user.getId()); flash.addFlashAttribute("success","Đơn hàng chuyển sang trạng thái đang chuẩn bị."); }
+        catch(IllegalArgumentException e){flash.addFlashAttribute("error",e.getMessage());}
+        catch(DataAccessException e){flash.addFlashAttribute("error","Chưa cập nhật được đơn hàng. Vui lòng thử lại.");}
+        if ("van-chuyen".equals(quayLai)) return "redirect:/quan-ly/van-chuyen";
+        return "redirect:/quan-ly/hoa-don"+("danh-sach".equals(quayLai)?"":"/"+id);
     }
 
     @PostMapping("/quan-ly/hoa-don/{id}/{thaoTac:xac-nhan-don-cod|thu-tien-cod|giao-khach-vang-lai}")
@@ -97,6 +111,7 @@ public class HoaDonController {
             flash.addFlashAttribute("success","Đã cập nhật đơn hàng.");
         } catch(IllegalArgumentException e){flash.addFlashAttribute("error",e.getMessage());}
         catch(DataAccessException e){flash.addFlashAttribute("error","Chưa cập nhật được đơn hàng. Vui lòng thử lại.");}
+        if ("van-chuyen".equals(quayLai)) return "redirect:/quan-ly/van-chuyen";
         return "redirect:/quan-ly/hoa-don"+("danh-sach".equals(quayLai)?"":"/"+id);
     }
 }

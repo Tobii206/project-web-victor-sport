@@ -8,9 +8,13 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xác nhận đơn hàng — VictorSport</title>
     <link rel="icon" type="image/svg+xml" href="/logo/favicon-victorsport.svg?v=1">
-    <link rel="stylesheet" href="/css/trang-chu.css?v=gia-giam-1">
-    <link rel="stylesheet" href="/css/thanh-toan-online.css?v=20261018-ghn-2">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1">
+    <link rel="stylesheet" href="/css/thanh-toan-online.css?v=20261023-ui-1">
+    <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1">
+</head>
 <body>
 <%@ include file="/WEB-INF/view/client/layout/header.jsp" %>
 <main class="store-container checkout-page">
@@ -49,8 +53,8 @@
                 <div class="checkout-field"><label for="diaChi">${dungGhn ? 'Địa chỉ chi tiết' : 'Địa chỉ nhận hàng'}</label><input id="diaChi" name="diaChi" autocomplete="street-address" maxlength="255" value="<c:out value='${diaChi}'/>" ${not empty idDiaChiDaChon ? 'readonly' : ''} required><c:if test="${dungGhn}"><p class="checkout-payment-note">Nhập số nhà, ngõ, tên đường. Phí giao hàng được tính theo tỉnh/phường đã chọn.</p></c:if></div>
                     <p id="ghnDiaChiLoi" role="alert"></p>
                     <button type="button" id="taiLaiDiaChiGhn" class="store-button" hidden>Tải lại địa chỉ</button>
-                    <button type="submit" class="store-button" formaction="/thanh-toan/ghn/bao-gia" data-bo-qua-xac-nhan>Lấy phí giao hàng</button>
-                    <c:choose><c:when test="${not empty baoGiaGhn}"><p class="checkout-payment-note" id="ghnBaoGiaHienTai">Địa chỉ giao hàng: <c:out value="${baoGiaGhn.diaChi()}"/>. Báo giá có hiệu lực 5 phút.</p></c:when><c:otherwise><p class="checkout-payment-note">Chưa có phí GHN. Vui lòng lấy phí trước khi đặt hàng.</p></c:otherwise></c:choose>
+                    <p id="ghnTrangThaiPhi" class="checkout-payment-note" role="status" aria-live="polite">Phí giao hàng sẽ tự động cập nhật khi điền đủ địa chỉ.</p>
+                    <c:if test="${not empty baoGiaGhn}"><p id="ghnBaoGiaHienTai" hidden>Địa chỉ giao hàng: <c:out value="${baoGiaGhn.diaChi()}"/>. Báo giá có hiệu lực 5 phút.</p></c:if>
                 </div>
                 </c:if>
                 <c:if test="${not dungGhn}">
@@ -102,9 +106,54 @@
     <c:otherwise><section class="account-card checkout-empty"><h2>Chưa có sản phẩm để thanh toán</h2><a class="store-button" href="/#san-pham">Tiếp tục mua sắm</a></section></c:otherwise>
     </c:choose>
 </main>
+<footer class="store-footer">
+    <div class="store-container footer-content">
+        <div class="footer-brand">
+            <a class="store-logo" href="/" aria-label="VictorSport">
+                <img src="/logo/logo-nobackgroud.png" alt="VictorSport" width="200" height="64" style="filter: brightness(1.1);">
+            </a>
+            <p>Hệ thống giày thể thao & bóng đá chính hãng hàng đầu. Đồng hành cùng mỗi bước chạy và niềm đam mê thể thao của bạn.</p>
+            <div class="footer-hotline">
+                <span>Hotline đặt hàng:</span>
+                <a href="tel:0325327602" style="color: inherit;">0325.327.602</a>
+            </div>
+        </div>
+        <div class="footer-column">
+            <h4>Sản phẩm</h4>
+            <ul>
+                <li><a href="/#san-pham">Tất cả giày thể thao</a></li>
+                <li><a href="/?nhuCau=1#san-pham">Giày bóng đá tiền đạo</a></li>
+                <li><a href="/?nhuCau=5#san-pham">Giày chạy bộ marathon</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4>Chính sách & Hỗ trợ</h4>
+            <ul>
+                <li><a href="/tra-cuu-don-hang">Tra cứu đơn hàng</a></li>
+                <li><a href="/#nhu-cau">Hướng dẫn chọn size</a></li>
+                <li><a href="#san-pham">Chính sách đổi trả 7 ngày</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4>Thanh toán & Kết nối</h4>
+            <div class="footer-payment-badges">
+                <span class="payment-tag">COD</span>
+                <span class="payment-tag">VietQR</span>
+                <span class="payment-tag">Napas 247</span>
+                <span class="payment-tag">GHN Express</span>
+            </div>
+        </div>
+    </div>
+    <div class="store-container footer-bottom">
+        <div>© 2026 VictorSport. Bản quyền thuộc về Cửa hàng Thể thao VictorSport.</div>
+        <div>Đồng hành cùng mỗi bước chân • Designed with Excellence</div>
+    </div>
+</footer>
+<button type="button" class="back-to-top" id="backToTopBtn" aria-label="Lên đầu trang">↑</button>
 <script src="/js/dia-chi-thanh-toan.js?v=20261018-muot"></script>
-<script src="/js/ghn-thanh-toan.js?v=20261018-muot"></script>
+<script src="/js/ghn-thanh-toan.js?v=20261023-auto-ship-3"></script>
 <script src="/js/phieu-giam-gia-online.js?v=20261018-muot"></script>
+<script src="/js/victor-modern.js?v=20261023-countdown"></script>
 <%@ include file="/WEB-INF/view/client/layout/payment-confirm.jsp" %>
 </body>
 </html>

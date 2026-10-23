@@ -3,6 +3,7 @@ package com.example.victorsport.Controller;
 import com.example.victorsport.Dto.TinhPhiGhnForm;
 import com.example.victorsport.Service.GhnService;
 import com.example.victorsport.Service.VanChuyenService;
+import com.example.victorsport.Service.HoaDonService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -20,10 +21,11 @@ import java.util.Map;
 public class VanChuyenController {
     private final VanChuyenService service;
     private final GhnService ghn;
+    private final HoaDonService hoaDonService;
     @org.springframework.beans.factory.annotation.Autowired
     private com.example.victorsport.Service.GiaoHangGhnService giaoHang;
 
-    public VanChuyenController(VanChuyenService service,GhnService ghn) { this.service=service; this.ghn=ghn; }
+    public VanChuyenController(VanChuyenService service,GhnService ghn,HoaDonService hoaDonService) { this.service=service; this.ghn=ghn; this.hoaDonService=hoaDonService; }
 
     private boolean quanLy(HttpSession session,Model model) {
         var user=DangNhapController.layNguoiDungDangNhap(session,model);
@@ -81,10 +83,34 @@ public class VanChuyenController {
         if(csrfVanChuyen==null || !csrfVanChuyen.equals(session.getAttribute("csrfVanChuyen")))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         try {
-            if("tao".equals(thaoTac)) f.addFlashAttribute("success","Đã tạo vận đơn GHN thử nghiệm: "+giaoHang.taoVanDon(id));
+            if("tao".equals(thaoTac)) f.addFlashAttribute("success","Đã tạo vận đơn GHN: "+giaoHang.taoVanDon(id)+". Hãy xác nhận bàn giao sau khi giao kiện hàng cho shipper.");
             else {giaoHang.dongBo(id);f.addFlashAttribute("success","Đã cập nhật trạng thái từ GHN.");}
         }catch(IllegalArgumentException | IllegalStateException e){f.addFlashAttribute("error",e.getMessage());}
         catch(DataAccessException e){f.addFlashAttribute("error","Chưa lưu được thông tin vận đơn. Vui lòng thử lại; hệ thống giữ nguyên mã đơn shop để tránh tạo trùng.");}
+        return "redirect:/quan-ly/van-chuyen";
+    }
+    @PostMapping("/{id}/ban-giao")
+    public String banGiao(@PathVariable int id,@RequestParam(required=false) String csrfVanChuyen,
+                          HttpSession session,Model model,org.springframework.web.servlet.mvc.support.RedirectAttributes f) {
+        if(!quanLy(session,model)) return "redirect:/login";
+        if(csrfVanChuyen==null || !csrfVanChuyen.equals(session.getAttribute("csrfVanChuyen")))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        var user=DangNhapController.layNguoiDungDangNhap(session,model);
+        try { hoaDonService.banGiaoShipper(id,user.getId()); f.addFlashAttribute("success","Đã ghi nhận shipper lấy hàng. Đơn chuyển sang đang vận chuyển."); }
+        catch(IllegalArgumentException e){f.addFlashAttribute("error",e.getMessage());}
+        catch(DataAccessException e){f.addFlashAttribute("error","Chưa cập nhật được bàn giao. Vui lòng thử lại.");}
+        return "redirect:/quan-ly/van-chuyen";
+    }
+    @PostMapping("/{id}/thu-cod")
+    public String ghiNhanThuCod(@PathVariable int id,@RequestParam(required=false) String csrfVanChuyen,
+                                HttpSession session,Model model,org.springframework.web.servlet.mvc.support.RedirectAttributes f) {
+        if(!quanLy(session,model)) return "redirect:/login";
+        if(csrfVanChuyen==null || !csrfVanChuyen.equals(session.getAttribute("csrfVanChuyen")))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        var user=DangNhapController.layNguoiDungDangNhap(session,model);
+        try { hoaDonService.xacNhanThuTienCod(id,user.getId()); f.addFlashAttribute("success","Đã ghi nhận shipper báo thu đủ tiền COD."); }
+        catch(IllegalArgumentException e){f.addFlashAttribute("error",e.getMessage());}
+        catch(DataAccessException e){f.addFlashAttribute("error","Chưa ghi nhận được tiền COD. Vui lòng thử lại.");}
         return "redirect:/quan-ly/van-chuyen";
     }
     private ResponseEntity<?> traLoi(HttpStatus status,Object body) {

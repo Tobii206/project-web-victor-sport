@@ -12,6 +12,15 @@ public class TrangChuService {
     private final JdbcTemplate jdbcTemplate;
     public TrangChuService(JdbcTemplate jdbcTemplate) { this.jdbcTemplate = jdbcTemplate; }
 
+    public Long layHanUuDai() {
+        var han = jdbcTemplate.queryForObject("""
+            SELECT DATEADD(day,1,CAST(MIN(ngay_ket_thuc) AS datetime2)) FROM dot_giam_gia
+            WHERE trang_thai=1 AND ISNULL(xoa_mem,0)=0
+              AND CAST(GETDATE() AS date) BETWEEN ngay_bat_dau AND ngay_ket_thuc
+            """, java.sql.Timestamp.class);
+        return han == null ? null : han.toLocalDateTime().atZone(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).toInstant().toEpochMilli();
+    }
+
     public List<Map<String, Object>> layThuongHieu() {
         return jdbcTemplate.queryForList("SELECT id, ten_thuong_hieu FROM thuong_hieu WHERE ISNULL(xoa_mem, 0) = 0 AND ISNULL(trang_thai, 1) = 1 ORDER BY ten_thuong_hieu");
     }

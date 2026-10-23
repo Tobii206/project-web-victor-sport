@@ -31,7 +31,7 @@
     }
     function khoiTao() {
         ['VictorKhoiTaoSanPham', 'VictorKhoiTaoDiaChi', 'VictorKhoiTaoDiaChiThanhToan',
-            'VictorKhoiTaoGhn', 'VictorKhoiTaoPhieuOnline', 'VictorKhoiTaoQr'].forEach(function (ten) {
+            'VictorKhoiTaoGhn', 'VictorKhoiTaoPhieuOnline', 'VictorKhoiTaoQr', 'VictorKhoiTaoModern'].forEach(function (ten) {
             if (typeof window[ten] === 'function') window[ten]();
         });
         document.dispatchEvent(new CustomEvent('vs:du-lieu-da-cap-nhat'));

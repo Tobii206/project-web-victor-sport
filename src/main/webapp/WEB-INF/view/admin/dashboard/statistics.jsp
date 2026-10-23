@@ -4,8 +4,8 @@
 <fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Thống kê — VictorSport</title><link rel="icon" href="/logo/favicon-victorsport.svg">
-<link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014"><link rel="stylesheet" href="/css/tong-quan.css?v=20261018"><link rel="stylesheet" href="/css/thong-ke.css?v=1">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261018-2"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
+<link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014"><link rel="stylesheet" href="/css/tong-quan.css?v=20261023-ui-1"><link rel="stylesheet" href="/css/thong-ke.css?v=1">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
 <%@ include file="/WEB-INF/view/admin/layout/dashboard-header.jsp" %>
 <main class="content-layout overview-page stats-page">
 <section class="overview-intro"><div><p class="overview-eyebrow">KẾT QUẢ KINH DOANH</p><h2>Tổng quan bán hàng</h2><p class="muted">Theo dõi doanh thu, đơn hàng và sản phẩm bán chạy.</p></div><a class="button secondary stats-invoice-link" href="/quan-ly/hoa-don">Xem hóa đơn <span aria-hidden="true">↗</span></a></section>

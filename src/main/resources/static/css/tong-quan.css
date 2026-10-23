@@ -6,6 +6,7 @@
 .overview-filter { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)) auto; align-items: end; gap: 16px; padding: 22px; }
 .overview-filter .field,.shipping-fee-form .field { margin: 0; }
 .overview-cards { display: grid; grid-template-columns: 1.5fr repeat(3,1fr); gap: 18px; }
+.shipping-overview-cards { grid-template-columns: repeat(3,minmax(0,1fr)); }
 .overview-card { background: white; border: 1px solid #e2e9f3; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .overview-card span { color: #536780; font-size: 14px; }
 .overview-card strong { font-size: clamp(22px,2vw,32px); line-height: 1.25; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
@@ -44,6 +45,6 @@
 .shipping-fee-result { border-radius: 12px; background: #e8f6ee; color: #216245; padding: 20px; margin-top: 20px; font-size: 16px; line-height: 1.6; }
 .shipping-fee-result.error { background: #fff0eb; color: #a33d24; }
 .shipping-fee-result[hidden] { display: none; }
-@media(max-width:1200px) { .overview-cards { grid-template-columns: repeat(2,minmax(0,1fr)); } .overview-filter { grid-template-columns: repeat(2,minmax(0,1fr)); } .shipping-search { grid-column: span 1; } }
+@media(max-width:1200px) { .overview-cards,.shipping-overview-cards { grid-template-columns: repeat(2,minmax(0,1fr)); } .overview-filter { grid-template-columns: repeat(2,minmax(0,1fr)); } .shipping-search { grid-column: span 1; } }
 @media(max-width:720px) { .overview-intro { align-items: start; flex-direction: column; } .overview-filter,.shipping-fee-form { grid-template-columns: 1fr; } .overview-card { padding: 18px; } .overview-page { gap: 18px; } .overview-page .panel-header { flex-wrap: wrap; gap: 12px; } }
 @media(prefers-reduced-motion:reduce) { .overview-page * { scroll-behavior: auto; } }

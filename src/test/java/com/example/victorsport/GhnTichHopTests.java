@@ -96,8 +96,10 @@ class GhnTichHopTests {
     }
     @Test void codThuDungTongKhongThuPhiHaiLanVaGiuMaChongTrung() {
         var jdbc=mock(JdbcTemplate.class);var ghn=mock(GhnService.class);var svc=new GiaoHangGhnService(jdbc,ghn);
-        when(jdbc.queryForList(contains("FROM hoa_don WITH"),eq(10))).thenReturn(List.of(hoaDon(4)));
+        var hd=hoaDon(3);when(jdbc.queryForList(contains("FROM hoa_don WITH"),eq(10))).thenReturn(List.of(hd));
         var vd=vanDon();when(jdbc.queryForList(contains("FROM van_don_ghn WITH"),eq(10))).thenReturn(List.of(vd));
+        when(jdbc.update(contains("UPDATE van_don_ghn SET ma_van_don="),eq("TEST123"),eq(new BigDecimal("31000")),eq(10)))
+            .thenAnswer(call -> { vd.put("ma_van_don", call.getArgument(1)); return 1; });
         when(jdbc.queryForObject(contains("SUM(so_tien)"),eq(BigDecimal.class),eq(10))).thenReturn(BigDecimal.ZERO);
         when(jdbc.queryForList(contains("pt.nha_cung_cap"),eq(10))).thenReturn(List.of(Map.of("nha_cung_cap","COD")));
         var result=Map.<String,Object>of("order_code","TEST123","total_fee",31000);
@@ -106,7 +108,7 @@ class GhnTichHopTests {
             assertEquals("VS-10-fixed",body.get("client_order_code"));assertEquals(true,body.get("is_new_to_address"));return result;});
         when(ghn.docPhi(result)).thenReturn(new BigDecimal("31000"));
         assertEquals("TEST123",svc.taoVanDon(10));
-        vd.put("ma_van_don","TEST123");assertEquals("TEST123",svc.taoVanDon(10));verify(ghn,times(1)).taoDon(anyMap());
+        assertEquals("TEST123",svc.taoVanDon(10));verify(ghn,times(1)).taoDon(anyMap());
         verify(jdbc,never()).update(contains("UPDATE hoa_don"),any(Object[].class));
     }
     @Test void donChuaXacNhanVaQrChuaDuTienKhongTaoVanDon() {
@@ -114,7 +116,7 @@ class GhnTichHopTests {
         when(jdbc.queryForList(contains("FROM hoa_don WITH"),eq(10))).thenReturn(List.of(hoaDon(1)));
         when(jdbc.queryForList(contains("FROM van_don_ghn WITH"),eq(10))).thenReturn(List.of(vanDon()));
         assertThrows(IllegalArgumentException.class,()->svc.taoVanDon(10));
-        when(jdbc.queryForList(contains("FROM hoa_don WITH"),eq(10))).thenReturn(List.of(hoaDon(4)));
+        when(jdbc.queryForList(contains("FROM hoa_don WITH"),eq(10))).thenReturn(List.of(hoaDon(3)));
         when(jdbc.queryForObject(contains("SUM(so_tien)"),eq(BigDecimal.class),eq(10))).thenReturn(BigDecimal.ZERO);
         when(jdbc.queryForList(contains("pt.nha_cung_cap"),eq(10))).thenReturn(List.of(Map.of("nha_cung_cap","VietQR")));
         assertThrows(IllegalArgumentException.class,()->svc.taoVanDon(10));verifyNoInteractions(ghn);
@@ -153,7 +155,7 @@ class GhnTichHopTests {
         verifyNoInteractions(jdbc);
     }
     @Test void taoVanDonBatBuocAdminVaMaBaoVe() throws Exception {
-        var controller=new VanChuyenController(mock(VanChuyenService.class),mock(GhnService.class));var svc=mock(GiaoHangGhnService.class);
+        var controller=new VanChuyenController(mock(VanChuyenService.class),mock(GhnService.class),mock(HoaDonService.class));var svc=mock(GiaoHangGhnService.class);
         ReflectionTestUtils.setField(controller,"giaoHang",svc);var mvc=MockMvcBuilders.standaloneSetup(controller).build();
         var s=new MockHttpSession();s.setAttribute(DangNhapController.KHOA_NGUOI_DUNG_DANG_NHAP,new NguoiDungDangNhap(1,"a@gmail.com","A","Nhân viên"));
         mvc.perform(post("/quan-ly/van-chuyen/10/ghn/tao").session(s)).andExpect(status().isForbidden());

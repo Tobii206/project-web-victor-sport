@@ -1,22 +1,167 @@
-.don-hang-heading,.don-hang-row,.don-hang-actions { display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap; }
-.don-hang-heading { margin:24px 0 30px; }
-.don-hang-heading h1 { margin:8px 0; }
-.don-hang-card { margin:20px 0; }
-.don-hang-card h2 { margin:0 0 12px; }
-.don-hang-status { display:inline-block; padding:10px 16px; border-radius:24px; background:#fff0e4; color:#a6430c; font-weight:600; }
-.don-hang-status.da-nhan { background:#e1f5ea; color:#18714c; }
-.don-hang-status.da-huy { background:#fcebea; color:#b13a31; }
-.store-button.don-hang-cancel { background:#fff3f1; color:#b13a31; border:1px solid #f1cec8; }
-.store-button.don-hang-cancel:hover { background:#fce3df; }
-.don-hang-columns { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:24px 0; }
-.don-hang-columns p { line-height:1.7; overflow-wrap:anywhere; }
-.don-hang-columns .online-price { margin:0; font-size:22px; }
-.don-hang-item { padding:20px 0; border-bottom:1px solid #e1e8f0; }
-.don-hang-item:last-child { border-bottom:0; }
-.don-hang-actions { justify-content:flex-end; }
-.don-hang-actions form { margin:0; }
-.don-hang-timeline { padding-left:24px; margin:24px 0 0; border-left:2px solid #dce5f2; list-style:none; }
-.don-hang-timeline li { position:relative; padding:0 0 18px; }
-.don-hang-timeline li::before { content:""; position:absolute; left:-31px; top:6px; width:12px; height:12px; background:#ffb278; border-radius:50%; }
-.don-hang-timeline p { margin:0 0 8px; line-height:1.6; }
-@media(max-width:700px) { .don-hang-columns { grid-template-columns:1fr; } .don-hang-actions { justify-content:flex-start; } }
+/* ==========================================================================
+   VICTORSPORT — ORDER LIST & DETAIL MODERN STYLES
+   ========================================================================== */
+
+.don-hang-heading,
+.don-hang-row,
+.don-hang-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.don-hang-heading {
+    margin: 28px 0 36px;
+}
+
+.don-hang-heading h1 {
+    font-family: var(--vs-font-heading, 'Outfit', sans-serif);
+    font-size: clamp(28px, 2.8vw, 36px);
+    font-weight: 800;
+    margin: 6px 0;
+    color: #0f172a;
+}
+
+.don-hang-card {
+    margin: 22px 0;
+    border-radius: 20px;
+    padding: 26px 30px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+    transition: all 0.25s ease;
+}
+
+.don-hang-card:hover {
+    transform: translateY(-3px);
+    border-color: #ffcaa8;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.don-hang-card h2 {
+    font-family: var(--vs-font-heading);
+    font-size: 19px;
+    font-weight: 800;
+    margin: 0 0 6px;
+}
+
+.don-hang-card h2 a:hover {
+    color: #ff5e1e;
+}
+
+.don-hang-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: 999px;
+    background: #fff2ec;
+    border: 1px solid #ffd8c5;
+    color: #ff5e1e;
+    font-family: var(--vs-font-heading);
+    font-size: 12.5px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+}
+
+.don-hang-status.da-nhan {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #059669;
+}
+
+.don-hang-status.da-huy {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #dc2626;
+}
+
+.store-button.don-hang-cancel {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    box-shadow: none;
+}
+
+.store-button.don-hang-cancel:hover {
+    background: #fee2e2;
+    transform: translateY(-1px);
+}
+
+.don-hang-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin: 24px 0;
+}
+
+.don-hang-columns p {
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+    color: #475569;
+}
+
+.don-hang-columns .online-price {
+    margin: 0;
+    font-size: 24px;
+    color: #ff5e1e;
+    font-weight: 800;
+}
+
+.don-hang-item {
+    padding: 20px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.don-hang-item:last-child {
+    border-bottom: 0;
+}
+
+.don-hang-actions {
+    justify-content: flex-end;
+}
+
+.don-hang-actions form {
+    margin: 0;
+}
+
+.don-hang-timeline {
+    padding-left: 28px;
+    margin: 28px 0 0;
+    border-left: 2px solid #e2e8f0;
+    list-style: none;
+}
+
+.don-hang-timeline li {
+    position: relative;
+    padding: 0 0 22px;
+}
+
+.don-hang-timeline li::before {
+    content: "";
+    position: absolute;
+    left: -35px;
+    top: 5px;
+    width: 14px;
+    height: 14px;
+    background: #ff5e1e;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 2px #ff5e1e;
+}
+
+.don-hang-timeline p {
+    margin: 0 0 6px;
+    line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+    .don-hang-columns {
+        grid-template-columns: 1fr;
+    }
+    .don-hang-actions {
+        justify-content: flex-start;
+    }
+}
