@@ -15,6 +15,43 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class DonHangTests {
+    @Test void khachDangNhapTimTheoMaVanDonCuaMinh() throws Exception {
+        var service=mock(HoaDonService.class);
+        MockMvcBuilders.standaloneSetup(new DonHangController(service)).build()
+                .perform(get("/don-hang").session(khach()).param("tuKhoa","GHN123").param("idKhachHang","99"))
+                .andExpect(view().name("client/order/show")).andExpect(model().attribute("tuKhoa","GHN123"));
+        verify(service).layDonCuaKhach(7,"GHN123");
+    }
+    @Test void truyVanTimDonGiuDieuKienChuDonVaSoDienThoai() {
+        var jdbc=mock(JdbcTemplate.class);
+        when(jdbc.queryForList(contains("FROM khach_hang"),eq(7))).thenReturn(List.of(Map.of("id",7)));
+        when(jdbc.queryForList(contains("id_khach_hang IS NULL"),eq("GHN123"),eq("GHN123"),eq("0325327602")))
+                .thenReturn(List.of(Map.of("id",10)));
+        var service=new HoaDonService(jdbc);
+        service.layDonCuaKhach(7," ghn123 ");
+        verify(jdbc).queryForList(argThat(sql -> sql.contains("id_khach_hang=?") && sql.contains("loai_don IN (1,2)") && sql.contains("vd.ma_van_don=?") && sql.contains("ISNULL(xoa_mem,0)=0")),eq(7),eq("GHN123"),eq("GHN123"));
+        assertEquals(10,service.traCuuDon(" ghn123 ","0325327602"));
+        verify(jdbc).queryForList(argThat(sql -> sql.contains("id_khach_hang IS NULL") && sql.contains("so_dien_thoai_khach_hang=?") && sql.contains("vd.ma_van_don=?")),eq("GHN123"),eq("GHN123"),eq("0325327602"));
+    }
+    @Test void khachVangLaiNhapMaVanDonCanDungSoDienThoai() throws Exception {
+        var service=mock(HoaDonService.class);when(service.traCuuDon("GHN123","0325327602")).thenReturn(10);
+        when(service.traCuuDon("GHN123","0912345678")).thenReturn(null);
+        var mvc=MockMvcBuilders.standaloneSetup(new DonVangLaiController(service)).build();
+        var s=new MockHttpSession();
+        mvc.perform(post("/tra-cuu-don-hang").session(s).param("ma","GHN123").param("sdt","0325327602"))
+                .andExpect(redirectedUrl("/don-vang-lai/10"));
+        assertEquals(true,s.getAttribute("donVangLai_10"));
+        var other=new MockHttpSession();
+        mvc.perform(post("/tra-cuu-don-hang").session(other).param("ma","GHN123").param("sdt","0912345678"))
+                .andExpect(redirectedUrl("/tra-cuu-don-hang")).andExpect(flash().attributeExists("error"));
+        assertNull(other.getAttribute("donVangLai_10"));
+    }
+    @Test void maTraCuuSaiDinhDangKhongTruyVanDatabase() {
+        var jdbc=mock(JdbcTemplate.class);var service=new HoaDonService(jdbc);
+        assertNull(service.traCuuDon("ma' OR 1=1","0325327602"));
+        assertNull(service.traCuuDon("GHN123","123"));
+        verifyNoInteractions(jdbc);
+    }
     @Test void adminHuyHoaDonNhanVienKhongDuocHuy() throws Exception {
         var service=mock(HoaDonService.class);
         var mvc=MockMvcBuilders.standaloneSetup(new HoaDonController(service)).build();
@@ -79,14 +116,35 @@ class DonHangTests {
         verify(jdbc,never()).update(anyString(),any(Object[].class));
     }
 
-    @Test void chiTrangThaiChoXacNhanMoiDuocHuy() {
-        for (int trangThai : new int[]{0,2,3,4,5,6}) {
+    @Test void khongDuocHuyTuLucGuiHang() {
+        for (int trangThai : new int[]{0,4,5,6}) {
             var jdbc = mock(JdbcTemplate.class);
             when(jdbc.queryForList(contains("FROM khach_hang"),eq(7))).thenReturn(List.of(Map.of("id",7)));
             when(jdbc.queryForList(contains("WITH (UPDLOCK,HOLDLOCK)"),eq(10),eq(7)))
                     .thenReturn(List.of(Map.of("trang_thai_hien_tai",trangThai)));
             assertThrows(IllegalArgumentException.class,()->new HoaDonService(jdbc).huyDonCuaKhach(10,7));
             verify(jdbc,never()).update(anyString(),any(Object[].class));
+        }
+    }
+
+    @Test void khachVaKhachVangLaiDuocHuyDenBuocChuanBiChuaThanhToan() {
+        for (int trangThai : new int[]{1,2,3}) for (boolean vangLai : new boolean[]{false,true}) {
+            var jdbc=mock(JdbcTemplate.class);
+            when(jdbc.queryForList(contains("FROM khach_hang"),eq(7))).thenReturn(List.of(Map.of("id",7)));
+            var row=List.<Map<String,Object>>of(Map.of("trang_thai_hien_tai",trangThai,"id_phieu_giam_gia",3));
+            if(vangLai) when(jdbc.queryForList(contains("WITH (UPDLOCK,HOLDLOCK)"),eq(10))).thenReturn(row);
+            else when(jdbc.queryForList(contains("WITH (UPDLOCK,HOLDLOCK)"),eq(10),eq(7))).thenReturn(row);
+            when(jdbc.queryForList(contains("FROM hoa_don_chi_tiet"),eq(10))).thenReturn(List.of(Map.of("id_chi_tiet_san_pham",9,"so_luong",2)));
+            when(jdbc.update(contains("UPDATE chi_tiet_san_pham"),eq(2),eq(9))).thenReturn(1);
+            if(vangLai) when(jdbc.update(contains("UPDATE hoa_don"),eq(10))).thenReturn(1);
+            else when(jdbc.update(contains("UPDATE hoa_don"),eq(10),eq(7))).thenReturn(1);
+            var service=new HoaDonService(jdbc);
+            if(vangLai) service.huyDonVangLai(10,true);else service.huyDonCuaKhach(10,7);
+            verify(jdbc).update(contains("UPDATE chi_tiet_san_pham"),eq(2),eq(9));
+            verify(jdbc).update(contains("so_luong_su_dung=so_luong_su_dung+1"),eq(3));
+            verify(jdbc).update(contains("UPDATE giao_dich_thanh_toan"),eq(10));
+            if(vangLai) verify(jdbc).update(contains("trang_thai_hien_tai IN (1,2,3)"),eq(10));
+            else verify(jdbc).update(contains("trang_thai_hien_tai IN (1,2,3)"),eq(10),eq(7));
         }
     }
 

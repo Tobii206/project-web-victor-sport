@@ -157,7 +157,7 @@
                 else if (path.startsWith('/san-pham/')) { capNhatSanPham(doc);thayCacVung(doc, '.product-grid'); }
                 else if (path === '/') thayCacVung(doc, '.product-grid');
                 else if (path === '/quan-ly/thong-ke') {
-                    thayCacVung(doc, '.overview-cards,.stats-middle,.stats-bestsellers');
+                    thayCacVung(doc, '.overview-cards,.stats-finance,.stats-dialog');
                 } else if (path === '/quan-ly/van-chuyen') {
                     thayCacVung(doc, '.overview-cards,.overview-page > section.panel,.overview-pagination');
                 } else if (path.startsWith('/quan-ly/') || path === '/pos') {

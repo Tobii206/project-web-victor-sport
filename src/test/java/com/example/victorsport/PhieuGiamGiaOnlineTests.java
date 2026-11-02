@@ -41,27 +41,78 @@ class PhieuGiamGiaOnlineTests {
                 .andExpect(model().attribute("tongTien",goc));
     }
 
-    @Test void sanPhamDangGiamChiHienFreeshipVaKhongTruTienHang() {
+    @Test void sanPhamDangGiamVanHienPhieuDuDieuKienVaFreeship() {
         var jdbc=mock(JdbcTemplate.class);var service=new SanPhamOnlineService(jdbc);
         var thuong=new HashMap<String,Object>(Map.of("id",1,"ten_phieu_giam_gia","Giảm 20%","loai_phieu_giam_gia",false,"gia_tri_giam_gia",new BigDecimal("20")));
-        var ship=new HashMap<String,Object>(Map.of("id",2,"ten_phieu_giam_gia","Freeship nội thành","loai_phieu_giam_gia",true,"gia_tri_giam_gia",new BigDecimal("30000")));
+        var ship=new HashMap<String,Object>(Map.of("id",2,"ten_phieu_giam_gia","Freeship nội thành","ap_dung_van_chuyen",true,"chi_ap_dung_ha_noi",true,"loai_phieu_giam_gia",true,"gia_tri_giam_gia",new BigDecimal("30000")));
         when(jdbc.queryForList(contains("FROM phieu_giam_gia"),eq(new BigDecimal("1000000")))).thenReturn(List.of(thuong,ship));
         var ds=service.layPhieuKhaDung(new BigDecimal("1000000"),true);
-        assertEquals(1,ds.size());assertEquals(2,ds.get(0).get("id"));assertEquals(BigDecimal.ZERO,ds.get(0).get("tien_giam"));
+        assertEquals(2,ds.size());assertEquals(new BigDecimal("200000.00"),ds.get(0).get("tien_giam"));assertEquals(BigDecimal.ZERO,ds.get(1).get("tien_giam"));
         assertEquals(2,service.layPhieuKhaDung(new BigDecimal("1000000"),false).size());
     }
 
-    @Test void guiTrucTiepPhieuThuongVanBiChanKhiCoDotGiam() {
-        var jdbc=mock(JdbcTemplate.class);var service=spy(new SanPhamOnlineService(jdbc));
+    private SanPhamOnlineService don(JdbcTemplate jdbc,BigDecimal goc,BigDecimal giamDot,BigDecimal giamPhieu) {
+        var service=spy(new SanPhamOnlineService(jdbc));
         var dong=new HashMap<String,Object>();dong.put("id",9);dong.put("so_luong",3);dong.put("so_luong_mua",1);
-        dong.put("gia_ban",new BigDecimal("1000000"));dong.put("thanh_tien_goc",new BigDecimal("1000000"));dong.put("thanh_tien",new BigDecimal("900000"));
+        dong.put("gia_ban",goc);dong.put("thanh_tien_goc",goc);dong.put("thanh_tien",goc.subtract(giamDot));
         doReturn(List.of(dong)).when(service).layGioHang(anyMap());
         when(jdbc.update(contains("UPDATE chi_tiet_san_pham"),any(),any(),any(),any())).thenReturn(1);
         when(jdbc.queryForList(contains("FROM phieu_giam_gia WITH"),eq(3),any()))
-                .thenReturn(List.of(Map.of("ten_phieu_giam_gia","Giảm 50%","loai_phieu_giam_gia",false,"gia_tri_giam_gia",new BigDecimal("50"))));
-        var loi=assertThrows(IllegalArgumentException.class,()->service.datHang(Map.of(9,1),null,"Long","0325327602","Hà Nội",false,"COD",3,new BigDecimal("500000")));
-        assertTrue(loi.getMessage().contains("chỉ được dùng voucher freeship"));
+                .thenReturn(List.of(Map.of("ten_phieu_giam_gia","Giảm đơn từ 2 triệu","loai_phieu_giam_gia",true,"gia_tri_giam_gia",giamPhieu,"hoa_don_toi_thieu",new BigDecimal("2000000"))));
+        when(jdbc.update(contains("so_luong_su_dung=so_luong_su_dung-1"),eq(3))).thenReturn(1);
+        when(jdbc.queryForObject(contains("INSERT INTO hoa_don"),eq(Integer.class),any(Object[].class))).thenReturn(20);
+        when(jdbc.queryForList(contains("nha_cung_cap=N'COD'"))).thenReturn(List.of(Map.of("id",2)));
+        return service;
+    }
+    @Test void donBaBonTrieuVanDungPhieuNguongHaiTrieuDuCoDotGiam() {
+        for(String tien:List.of("3000000","4000000")) {
+            var jdbc=mock(JdbcTemplate.class);var goc=new BigDecimal(tien);
+            var service=don(jdbc,goc,new BigDecimal("300000"),new BigDecimal("500000"));
+            assertEquals(20,service.datHang(Map.of(9,1),null,"Long","0325327602","Hà Nội",false,"COD",3,goc.subtract(new BigDecimal("500000"))));
+            verify(jdbc).queryForList(argThat(sql -> sql.contains("FROM phieu_giam_gia WITH") && sql.contains("ISNULL(hoa_don_toi_thieu,0)<=?")),eq(3),eq(goc));
+            verify(jdbc).update(contains("so_luong_su_dung=so_luong_su_dung-1"),eq(3));
+            verify(jdbc).update(contains("UPDATE hoa_don SET phi_van_chuyen"),eq(BigDecimal.ZERO),eq(3),eq(20));
+        }
+    }
+    @Test void phieuTuChonKemHonHoacBangDotVanApDungVaTruLuot() {
+        for(String giam:List.of("100000","300000")) {
+            var jdbc=mock(JdbcTemplate.class);
+            var service=don(jdbc,new BigDecimal("3000000"),new BigDecimal("300000"),new BigDecimal(giam));
+            assertEquals(20,service.datHang(Map.of(9,1),null,"Long","0325327602","Hà Nội",false,"COD",3,new BigDecimal("3000000").subtract(new BigDecimal(giam))));
+            verify(jdbc).update(contains("so_luong_su_dung=so_luong_su_dung-1"),eq(3));
+            verify(jdbc).update(contains("UPDATE hoa_don SET phi_van_chuyen"),eq(BigDecimal.ZERO),eq(3),eq(20));
+        }
+    }
+    @Test void tongThanhToanTheoPhieuTuChonDuGiamItHonDot() throws Exception {
+        var service=mock(SanPhamOnlineService.class);
+        var goc=new BigDecimal("2190000");var dot=new BigDecimal("219000");
+        var cacPhieu=List.<Map<String,Object>>of(Map.of("id",3,"tien_giam",new BigDecimal("200000")));
+        when(service.phiGiaoHang()).thenReturn(new BigDecimal("147355"));
+        when(service.tongTienGoc(anyList())).thenReturn(goc);
+        when(service.tinhTong(anyList())).thenReturn(goc.subtract(dot));
+        when(service.layPhieuKhaDung(goc,true)).thenReturn(cacPhieu);
+        var mvc=MockMvcBuilders.standaloneSetup(new SanPhamOnlineController(service,mock(DiaChiKhachHangService.class))).build();
+        mvc.perform(get("/thanh-toan").flashAttr("idPhieuDaChon",3))
+                .andExpect(model().attribute("idPhieuDaChon",3))
+                .andExpect(model().attribute("tongTien",new BigDecimal("2137355")));
+        mvc.perform(get("/thanh-toan").flashAttr("idPhieuDaChon",""))
+                .andExpect(model().attribute("tongTien",new BigDecimal("2118355")));
+    }
+    @Test void giaThayDoiVanBatXacNhanLaiKhongTuTruLuotPhieu() {
+        var jdbc=mock(JdbcTemplate.class);var service=don(jdbc,new BigDecimal("3000000"),new BigDecimal("300000"),new BigDecimal("100000"));
+        var loi=assertThrows(IllegalArgumentException.class,()->service.datHang(Map.of(9,1),null,"Long","0325327602","Hà Nội",false,"COD",3,new BigDecimal("2500000")));
+        assertTrue(loi.getMessage().contains("đã thay đổi"));
         verify(jdbc,never()).update(contains("so_luong_su_dung=so_luong_su_dung-1"),anyInt());
+        verify(jdbc,never()).queryForObject(contains("INSERT INTO hoa_don"),eq(Integer.class),any(Object[].class));
+    }
+    @Test void tuChonPhieuTheoLoiIchThemSoVoiDotGiam() {
+        var service=new SanPhamOnlineService(mock(JdbcTemplate.class));var dot=new BigDecimal("300000");
+        var kem=Map.<String,Object>of("id",1,"tien_giam",new BigDecimal("100000"));
+        var ship=Map.<String,Object>of("id",2,"tien_giam",BigDecimal.ZERO,"giam_phi_van_chuyen",new BigDecimal("30000"));
+        assertEquals(2,service.chonPhieuTotNhat(List.of(kem,ship),dot));
+        assertNull(service.chonPhieuTotNhat(List.of(kem),dot));
+        assertEquals(4,service.chonPhieuTotNhat(List.of(Map.of("id",4,"tien_giam",dot)),dot));
+        assertEquals(3,service.chonPhieuTotNhat(List.of(ship,Map.of("id",3,"tien_giam",new BigDecimal("400000"))),dot));
     }
 
     @Test void phanTramCoTranVaTienMatKhongVuotTongDon() {

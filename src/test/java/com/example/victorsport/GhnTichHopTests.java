@@ -138,7 +138,7 @@ class GhnTichHopTests {
         doReturn(List.of(dong)).when(svc).layGioHang(anyMap());
         when(jdbc.update(contains("UPDATE chi_tiet_san_pham"),any(),any(),any(),any())).thenReturn(1);
         when(jdbc.queryForList(contains("FROM phieu_giam_gia WITH"),eq(3),any()))
-            .thenReturn(List.of(Map.of("ten_phieu_giam_gia","Freeship","loai_phieu_giam_gia",true,"gia_tri_giam_gia",new BigDecimal("30000"))));
+            .thenReturn(List.of(Map.of("ten_phieu_giam_gia","Freeship","ap_dung_van_chuyen",true,"loai_phieu_giam_gia",true,"gia_tri_giam_gia",new BigDecimal("30000"))));
         when(jdbc.update(contains("so_luong_su_dung=so_luong_su_dung-1"),eq(3))).thenReturn(1);
         when(jdbc.queryForObject(contains("INSERT INTO hoa_don"),eq(Integer.class),any(Object[].class))).thenReturn(10);
         when(jdbc.queryForList(contains("nha_cung_cap=N'COD'"))).thenReturn(List.of(Map.of("id",2)));

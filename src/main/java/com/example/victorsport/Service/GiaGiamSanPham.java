@@ -6,38 +6,48 @@ import java.math.RoundingMode;
 import java.util.*;
 
 public class GiaGiamSanPham {
+    public record KetQua(Integer idDotGiamGia, BigDecimal giaSauGiam) {}
     public static BigDecimal giaSauGiam(JdbcTemplate jdbc, int idMau, BigDecimal giaGoc) {
+        return tinhGia(jdbc,idMau,giaGoc).giaSauGiam();
+    }
+
+    public static KetQua tinhGia(JdbcTemplate jdbc, int idMau, BigDecimal giaGoc) {
         var cacDot = jdbc.queryForList("""
-                SELECT d.loai_giam_gia,d.muc_uu_tien,
+                SELECT d.id AS id_dot_giam_gia,d.loai_giam_gia,
                        d.gia_tri_giam_gia AS gia_tri,
                        d.so_tien_giam_toi_da
                 FROM chi_tiet_dot_giam_gia c JOIN dot_giam_gia d ON d.id=c.id_dot_giam_gia
                 WHERE c.id_chi_tiet_san_pham=? AND ISNULL(c.xoa_mem,0)=0 AND ISNULL(d.xoa_mem,0)=0
                   AND c.trang_thai=1 AND d.trang_thai=1
                   AND CAST(GETDATE() AS DATE) BETWEEN d.ngay_bat_dau AND d.ngay_ket_thuc
-                ORDER BY d.muc_uu_tien DESC,d.id
+                ORDER BY d.id DESC
                 """, idMau);
         BigDecimal tienGiam = BigDecimal.ZERO;
-        Integer uuTien = null;
+        Integer idDot = null;
         for (var dot : cacDot) {
-            int muc = dot.get("muc_uu_tien") == null ? 0 : ((Number) dot.get("muc_uu_tien")).intValue();
-            if (uuTien == null) uuTien = muc;
-            if (muc != uuTien) break;
             BigDecimal giaTri = (BigDecimal) dot.get("gia_tri");
             BigDecimal giam = giaTri;
-            if (!Boolean.TRUE.equals(dot.get("loai_giam_gia")))
+            Object loai=dot.get("loai_giam_gia");
+            if (!(Boolean.TRUE.equals(loai) || loai instanceof Number n && n.intValue()==1))
                 giam = giaGoc.multiply(giaTri).divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
             BigDecimal toiDa = (BigDecimal) dot.get("so_tien_giam_toi_da");
             if (toiDa != null && toiDa.signum() > 0) giam = giam.min(toiDa);
-            tienGiam = tienGiam.max(giam);
+            giam=giam.min(giaGoc).max(BigDecimal.ZERO).setScale(2,RoundingMode.HALF_UP);
+            Integer id=dot.get("id_dot_giam_gia") instanceof Number n?n.intValue():null;
+            // ID tăng dần theo lần tạo: cùng mức thực giảm thì chọn đợt tạo mới hơn.
+            if(giam.compareTo(tienGiam)>0 || giam.signum()>0 && giam.compareTo(tienGiam)==0 && id!=null && (idDot==null || id>idDot)) {
+                tienGiam=giam;idDot=id;
+            }
         }
-        return giaGoc.subtract(tienGiam).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
+        return new KetQua(idDot,giaGoc.subtract(tienGiam).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP));
     }
 
     public static void themGia(JdbcTemplate jdbc, Map<String,Object> mau) {
         BigDecimal goc = (BigDecimal) mau.get("gia_ban");
         mau.put("gia_goc", goc);
-        mau.put("gia_sau_giam", giaSauGiam(jdbc, ((Number) mau.get("id")).intValue(), goc));
+        var ketQua=tinhGia(jdbc, ((Number) mau.get("id")).intValue(), goc);
+        mau.put("gia_sau_giam", ketQua.giaSauGiam());
+        mau.put("id_dot_giam_gia",ketQua.idDotGiamGia());
     }
 
     public static void themGiaDanhSach(JdbcTemplate jdbc, List<Map<String,Object>> ds,

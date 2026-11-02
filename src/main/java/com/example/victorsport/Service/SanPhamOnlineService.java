@@ -261,10 +261,21 @@ public class SanPhamOnlineService {
         return id;
     }
 
-    // Database hiện chỉ có loại tiền / phần trăm; phiếu freeship được đặt tên riêng.
+    public Integer chonPhieuTotNhat(List<Map<String,Object>> cacPhieu,BigDecimal giamTheoDot) {
+        Integer id=null;BigDecimal loiThem=BigDecimal.ZERO;
+        for(var phieu:cacPhieu) {
+            BigDecimal loi=((BigDecimal)phieu.get("tien_giam")).subtract(giamTheoDot).max(BigDecimal.ZERO)
+                    .add((BigDecimal)phieu.getOrDefault("giam_phi_van_chuyen",BigDecimal.ZERO));
+            boolean giamBangDot=((BigDecimal)phieu.get("tien_giam")).signum()>0
+                    && ((BigDecimal)phieu.get("tien_giam")).compareTo(giamTheoDot)>=0;
+            if(loi.compareTo(loiThem)>0 || (id==null && giamBangDot)) {id=((Number)phieu.get("id")).intValue();loiThem=loi;}
+        }
+        return id;
+    }
+
     public boolean laPhieuFreeship(Map<String,Object> phieu) {
-        String ten=String.valueOf(phieu.getOrDefault("ten_phieu_giam_gia","")).trim().toLowerCase(java.util.Locale.ROOT);
-        return ten.startsWith("freeship") || ten.startsWith("free ship") || ten.startsWith("miễn phí vận chuyển");
+        Object loai=phieu.get("ap_dung_van_chuyen");
+        return Boolean.TRUE.equals(loai) || loai instanceof Number n && n.intValue()==1;
     }
 
     private String chuanHoaDiaBan(String ten) {
@@ -272,7 +283,8 @@ public class SanPhamOnlineService {
                 .replaceAll("\\p{M}+", "").trim().toLowerCase(java.util.Locale.ROOT);
     }
     public boolean laFreeshipNoiThanh(Map<String,Object> phieu) {
-        return laPhieuFreeship(phieu) && chuanHoaDiaBan(String.valueOf(phieu.get("ten_phieu_giam_gia"))).contains("noi thanh");
+        Object haNoi=phieu.get("chi_ap_dung_ha_noi");
+        return laPhieuFreeship(phieu) && (Boolean.TRUE.equals(haNoi) || haNoi instanceof Number n && n.intValue()==1);
     }
     public boolean laHaNoi(String tinh) {
         String ten=chuanHoaDiaBan(tinh);
@@ -298,7 +310,6 @@ public class SanPhamOnlineService {
         var ketQua=new ArrayList<Map<String,Object>>();
         for(var phieu:ds) {
             boolean freeship=laPhieuFreeship(phieu);
-            if(coDotGiamGia && !freeship) continue;
             phieu.put("freeship",freeship);
             phieu.put("noi_thanh",laFreeshipNoiThanh(phieu));
             phieu.put("tien_giam",freeship ? BigDecimal.ZERO : tinhGiamPhieu(phieu,tongGoc));
@@ -356,16 +367,14 @@ public class SanPhamOnlineService {
                       AND ISNULL(hoa_don_toi_thieu,0)<=?
                     """,idPhieuGiamGia,tongGoc);
             if(cacPhieu.isEmpty()) throw new IllegalArgumentException("Phiếu đã hết hạn, hết lượt hoặc đơn hàng chưa đủ điều kiện. Vui lòng chọn lại.");
-            BigDecimal giamTheoDot=tongGoc.subtract(tong);
             boolean freeship=laPhieuFreeship(cacPhieu.get(0));
             String tinhNhan=dungGhn()?baoGia.tenTinh():tinhTuDiaChi(diaChi);
             if(laFreeshipNoiThanh(cacPhieu.get(0)) && !laHaNoi(tinhNhan))
-                throw new IllegalArgumentException("Phiếu freeship nội thành chỉ áp dụng cho địa chỉ nhận hàng tại Hà Nội. Vui lòng chọn phiếu khác.");
-            if(giamTheoDot.signum()>0 && !freeship)
-                throw new IllegalArgumentException("Đơn có sản phẩm đang giảm giá chỉ được dùng voucher freeship.");
+                throw new IllegalArgumentException("Phiếu giảm giá vận chuyển nội thành chỉ áp dụng cho địa chỉ nhận hàng tại Hà Nội. Vui lòng chọn phiếu khác.");
             if(!freeship) {
                 BigDecimal giamPhieu=tinhGiamPhieu(cacPhieu.get(0),tongGoc);
-                if(giamPhieu.signum()>0) {tong=tongGoc.subtract(giamPhieu);phieuApDung=idPhieuGiamGia;}
+                tong=tongGoc.subtract(giamPhieu);
+                if(giamPhieu.signum()>0) phieuApDung=idPhieuGiamGia;
             }
             else {
                 BigDecimal giamPhi=tinhGiamPhieu(cacPhieu.get(0),phi);

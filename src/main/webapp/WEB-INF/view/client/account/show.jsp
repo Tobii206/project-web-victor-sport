@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thông tin tài khoản — VictorSport</title>
     <link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1"></head>
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2"><link rel="stylesheet" href="/css/anh-dai-dien.css?v=20261102-2"></head>
 <body class="store-page">
 <%@ include file="/WEB-INF/view/client/layout/header.jsp" %>
 <main class="account-container store-container">
@@ -21,9 +21,15 @@
         <c:when test="${not empty thongTin}">
             <div class="account-layout">
                 <aside class="account-card account-sidebar">
-                    <div class="account-avatar"><img src="/images/nguoi-dung.svg" alt="" width="40" height="40"></div>
+                    <div class="account-avatar ${not empty thongTin.anh_dai_dien ? 'has-avatar' : ''}"><img id="anhDaiDienKhach" src="<c:out value="${not empty thongTin.anh_dai_dien ? thongTin.anh_dai_dien : '/images/nguoi-dung.svg'}"/>" alt="Ảnh đại diện" width="82" height="82" onerror="this.onerror=null;this.src='/images/nguoi-dung.svg';this.parentElement.classList.remove('has-avatar');"></div>
+                    <form class="account-avatar-form" method="post" action="/tai-khoan/anh-dai-dien" enctype="multipart/form-data">
+                        <input type="hidden" name="csrfTaiKhoan" value="${csrfTaiKhoan}">
+                        <button type="button" id="nutDoiAnhDaiDien" class="store-button">Đổi ảnh đại diện</button>
+                        <input type="file" id="tepAnhDaiDien" name="tepAnh" accept="image/jpeg,image/png" aria-label="Chọn ảnh đại diện" hidden>
+                        <small id="huongDanAnhDaiDien" role="status"></small>
+                    </form>
                     <h2><c:out value="${thongTin.ho_ten}"/></h2>
-                    <span class="account-role"><c:choose><c:when test="${laNhanVien}">Nhân viên</c:when><c:otherwise>Khách hàng</c:otherwise></c:choose></span>
+                    <span class="account-role"><c:choose><c:when test="${laNhanVien}"><c:out value="${thongTin.vai_tro}"/></c:when><c:otherwise>Khách hàng</c:otherwise></c:choose></span>
                     <p class="subtle"><c:out value="${thongTin.ma_tai_khoan}"/></p>
                     <c:if test="${laNhanVien}"><a class="store-button" href="${sessionScope.nguoiDungDangNhap.trangLamViec}">Vào trang làm việc</a></c:if>
                     <c:if test="${not laNhanVien}"><a class="store-button" href="/don-hang">Đơn hàng của tôi</a><a class="account-back" href="/#san-pham">Tiếp tục mua sắm</a></c:if>
@@ -39,6 +45,7 @@
                         <div><dt>Email</dt><dd><c:choose><c:when test="${empty thongTin.email}">Không có</c:when><c:otherwise><c:out value="${thongTin.email}"/></c:otherwise></c:choose></dd></div>
                         <div><dt>Số điện thoại</dt><dd><c:choose><c:when test="${empty thongTin.so_dien_thoai}">Không có</c:when><c:otherwise><c:out value="${thongTin.so_dien_thoai}"/></c:otherwise></c:choose></dd></div>
                         <div><dt>Ngày sinh</dt><dd><c:choose><c:when test="${empty thongTin.ngay_sinh}">Không có</c:when><c:otherwise><fmt:formatDate value="${thongTin.ngay_sinh}" pattern="dd/MM/yyyy"/></c:otherwise></c:choose></dd></div>
+                        <c:if test="${not laNhanVien}"><div><dt>Giới tính</dt><dd><c:choose><c:when test="${thongTin.gioi_tinh == null}">Chưa cung cấp</c:when><c:when test="${thongTin.gioi_tinh == 1}">Nam</c:when><c:otherwise>Nữ</c:otherwise></c:choose></dd></div></c:if>
                         <div><dt>Vai trò</dt><dd><c:out value="${thongTin.vai_tro}"/></dd></div>
                         <c:if test="${not laNhanVien}"><div><dt>Tên tài khoản</dt><dd><c:out value="${thongTin.ten_tai_khoan}"/></dd></div></c:if>
                         <div class="account-address"><dt>Địa chỉ</dt><dd>
@@ -66,5 +73,6 @@
     </c:if>
 </main>
 <footer class="store-footer"><div class="store-container footer-content"><a class="store-logo" href="/" aria-label="Trang chủ VictorSport"><img src="/logo/logo.png" alt="VictorSport" width="210" height="67"></a><a href="/#san-pham">Khám phá sản phẩm</a><small>© VictorSport</small></div></footer>
+<script src="/js/anh-dai-dien.js?v=20261102-3"></script>
 </body>
 </html>

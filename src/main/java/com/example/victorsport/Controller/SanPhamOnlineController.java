@@ -126,13 +126,14 @@ public class SanPhamOnlineController {
             try {
                 var cacPhieu=service.dungGhn()?service.layPhieuKhaDung(tongGoc,coDot,phiGoc,baoGia==null?null:baoGia.tenTinh()):service.layPhieuKhaDung(tongGoc,coDot);
                 model.addAttribute("phieuKhaDung",cacPhieu);
+                model.addAttribute("phieuTuChon",model.containsAttribute("idPhieuDaChon"));
                 if(!model.containsAttribute("idPhieuDaChon"))
-                    model.addAttribute("idPhieuDaChon",service.chonPhieuTotNhat(cacPhieu));
+                    model.addAttribute("idPhieuDaChon",coDot?service.chonPhieuTotNhat(cacPhieu,(java.math.BigDecimal)model.getAttribute("giamTheoDot")):service.chonPhieuTotNhat(cacPhieu));
                 for(var phieu:cacPhieu) {
                     if(phieu.get("id").equals(model.getAttribute("idPhieuDaChon"))) {
                         var giamPhieu=(java.math.BigDecimal)phieu.get("tien_giam");
                         var giamDot=(java.math.BigDecimal)model.getAttribute("giamTheoDot");
-                        model.addAttribute("tongTien",tongGoc.subtract(giamPhieu.max(giamDot)));
+                        model.addAttribute("tongTien",tongGoc.subtract(service.laPhieuFreeship(phieu)?giamDot:giamPhieu));
                         phi=phi.subtract((java.math.BigDecimal)phieu.getOrDefault("giam_phi_van_chuyen",java.math.BigDecimal.ZERO));
                         break;
                     }

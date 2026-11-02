@@ -76,7 +76,7 @@ class FormValidationTests {
         var service = mock(QuanLySanPhamService.class);
         var mvc = MockMvcBuilders.standaloneSetup(new QuanLySanPhamController(service)).build();
         mvc.perform(post("/quan-ly/san-pham/luu").session(admin()).param("ten_san_pham", "   ")
-                .param("id_thuong_hieu", "1").param("trang_thai_kinh_doanh", "1"))
+                .param("id_thuong_hieu", "1").param("trang_thai_kinh_doanh", "1").param("gia_ban", "2490000"))
                 .andExpect(redirectedUrl("/quan-ly/san-pham/them"))
                 .andExpect(flash().attribute("error", "Vui lòng nhập tên sản phẩm."));
         verifyNoInteractions(service);

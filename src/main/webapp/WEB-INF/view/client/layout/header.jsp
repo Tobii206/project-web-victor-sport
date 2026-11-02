@@ -23,7 +23,7 @@
         <a href="/">Trang chủ</a>
         <a href="/#san-pham">Sản phẩm</a>
         <a href="/#nhu-cau">Nhu cầu sử dụng</a>
-        <a href="/#flash-sale">Flash Sale 🔥</a>
+        <a href="/#flash-sale">Flash Sale</a>
         <a href="/#lien-he">Showroom</a>
     </nav>
     <%@ include file="/WEB-INF/view/client/layout/header-actions.jsp" %>

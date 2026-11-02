@@ -3,7 +3,7 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Thông tin sản phẩm — VictorSport</title>
-<link rel="icon" href="/logo/favicon-victorsport.svg"><link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=admin-20261014"><link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1"></head><body>
+<link rel="icon" href="/logo/favicon-victorsport.svg"><link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=admin-20261014"><link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2"></head><body>
 <div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area"><%@ include file="/WEB-INF/view/admin/layout/product-header.jsp" %><main class="content-layout">
 <div class="product-admin-actions"><a class="button secondary" href="/quan-ly/san-pham">← Danh sách sản phẩm</a><c:if test="${not empty idSanPham}"><strong><c:out value="${maSanPham}"/></strong></c:if></div>
 <c:if test="${not empty error}"><div class="alert error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if><c:if test="${not empty success}"><div class="alert success" role="status" data-vs-flash="success"><c:out value="${success}"/></div></c:if>
@@ -12,6 +12,7 @@
 <section class="panel product-admin-section"><div class="panel-header"><h2>${empty idSanPham ? 'Thêm sản phẩm' : 'Thông tin sản phẩm'}</h2><span class="muted">Mã sản phẩm được tạo tự động</span></div><div class="panel-body">
 <form class="product-admin-form" method="post" action="/quan-ly/san-pham${empty idSanPham ? '' : '/'.concat(idSanPham)}/luu">
     <div class="field product-admin-wide"><label for="tenSanPham">Tên sản phẩm *</label><input class="input" id="tenSanPham" name="ten_san_pham" maxlength="255" value="<c:out value='${sanPham.ten_san_pham}'/>" required></div>
+    <div class="field"><label for="giaBanSanPham">Giá bán (đ) *</label><input class="input" type="number" id="giaBanSanPham" name="gia_ban" min="0" step="0.01" value="<c:out value='${sanPham.gia_ban}'/>" required><small class="muted">Áp dụng cho tất cả mẫu size, màu và form của sản phẩm khi lưu.</small></div>
     <c:forEach items="${danhMuc}" var="dm" end="5"><div class="field"><label for="${dm.truong}"><c:out value="${dm.nhan}"/>${dm.truong == 'id_thuong_hieu' ? ' *' : ''}</label><select class="select" id="${dm.truong}" name="${dm.truong}" ${dm.truong == 'id_thuong_hieu' ? 'required' : ''}><option value="">Chọn thông tin</option><c:forEach items="${dm.luaChon}" var="muc"><option value="${muc.id}" <c:if test="${sanPham[dm.truong] == muc.id}">selected</c:if>><c:out value="${muc.ten}"/></option></c:forEach></select></div></c:forEach>
     <div class="field"><label for="trangThaiBan">Trạng thái</label><select class="select" id="trangThaiBan" name="trang_thai_kinh_doanh"><option value="1" ${sanPham.trang_thai_kinh_doanh ? 'selected' : ''}>Đang bán</option><option value="0" ${not sanPham.trang_thai_kinh_doanh ? 'selected' : ''}>Ngừng bán</option></select></div>
     <div class="field product-admin-wide"><label for="moTaNgan">Mô tả ngắn</label><textarea class="textarea" id="moTaNgan" name="mo_ta_ngan" maxlength="500"><c:out value="${sanPham.mo_ta_ngan}"/></textarea></div>
@@ -21,14 +22,13 @@
 </c:if>
 <c:if test="${not empty idSanPham}">
 <section id="mau-giay" class="panel product-admin-section"><div class="panel-header"><h2>Mẫu giày và tồn kho</h2><span class="muted">Mỗi mẫu gồm size, màu và form chân</span></div><div class="panel-body">
-<c:set var="giaMacDinhMau" value=""/><c:set var="ghiChuMacDinhMau" value=""/><c:forEach items="${cacMau}" var="mauMacDinh"><c:set var="giaMacDinhMau" value="${mauMacDinh.gia_ban}"/><c:set var="ghiChuMacDinhMau" value="${mauMacDinh.ghi_chu}"/></c:forEach>
+<c:set var="ghiChuMacDinhMau" value=""/><c:forEach items="${cacMau}" var="mauMacDinh"><c:set var="ghiChuMacDinhMau" value="${mauMacDinh.ghi_chu}"/></c:forEach>
 <c:if test="${currentUser.suaSanPham}">
 <h3>${empty mauForm.id ? 'Thêm mẫu giày' : 'Sửa mẫu giày'}</h3>
-<c:if test="${empty mauForm.id and not empty cacMau}"><p class="muted product-admin-wide">Giá được điền sẵn theo mẫu đầu tiên. Mô tả ngắn và chi tiết dùng chung cho toàn bộ biến thể, chỉnh ở mục Thông tin sản phẩm phía trên.</p></c:if>
+<p class="muted product-admin-wide">Giá bán và mô tả dùng chung cho tất cả mẫu, chỉnh và lưu ở phần Thông tin sản phẩm phía trên.</p>
 <form method="post" action="/quan-ly/san-pham/${idSanPham}/mau/luu" class="product-admin-form">
     <input type="hidden" name="idMau" value="<c:out value='${mauForm.id}'/>"><input type="hidden" name="so_luong_cu" value="<c:out value='${empty mauForm.so_luong_cu ? mauForm.so_luong : mauForm.so_luong_cu}'/>">
     <c:forEach items="${danhMuc}" var="dm" begin="6"><div class="field"><label for="${dm.truong}"><c:out value="${dm.nhan}"/> *</label><select class="select" id="${dm.truong}" name="${dm.truong}" required><option value="">Chọn thông tin</option><c:forEach items="${dm.luaChon}" var="muc"><option value="${muc.id}" <c:if test="${mauForm[dm.truong] == muc.id}">selected</c:if>><c:out value="${muc.ten}"/></option></c:forEach></select></div></c:forEach>
-    <div class="field"><label for="giaBan">Giá (đ) *</label><input class="input" type="number" id="giaBan" name="gia_ban" min="0" step="0.01" value="<c:out value='${empty mauForm.gia_ban and empty mauForm.id ? giaMacDinhMau : mauForm.gia_ban}'/>" required></div>
     <div class="field"><label for="soLuongTon">Số lượng tồn kho *</label><input class="input" type="number" id="soLuongTon" name="so_luong" min="0" step="1" value="<c:out value='${mauForm.so_luong}'/>" required></div>
     <div class="field"><label for="trangThaiMau">Trạng thái mẫu</label><select class="select" id="trangThaiMau" name="trang_thai"><option value="1" ${mauForm.trang_thai ? 'selected' : ''}>Đang bán</option><option value="0" ${not mauForm.trang_thai ? 'selected' : ''}>Ngừng bán</option></select></div>
     <input type="hidden" name="ghi_chu" value="<c:out value='${empty mauForm.ghi_chu and empty mauForm.id ? ghiChuMacDinhMau : mauForm.ghi_chu}'/>" />

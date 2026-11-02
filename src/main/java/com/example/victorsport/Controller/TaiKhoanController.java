@@ -35,6 +35,9 @@ public class TaiKhoanController {
             } else if (idKhachHang instanceof Integer) {
                 model.addAttribute("thongTin", taiKhoanService.layThongTinKhachHang((Integer) idKhachHang));
             }
+            if(phienDangNhap.getAttribute("csrfTaiKhoan")==null)
+                phienDangNhap.setAttribute("csrfTaiKhoan",java.util.UUID.randomUUID().toString());
+            model.addAttribute("csrfTaiKhoan",phienDangNhap.getAttribute("csrfTaiKhoan"));
         } catch (IllegalArgumentException loi) {
             phienDangNhap.invalidate();
             model.addAttribute("error", loi.getMessage());

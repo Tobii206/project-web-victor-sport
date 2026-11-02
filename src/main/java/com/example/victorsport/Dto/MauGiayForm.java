@@ -17,7 +17,6 @@ public class MauGiayForm {
     @Positive(message = "Vui lòng chọn màu sắc, kích thước và dáng giày.")
     private Integer id_form_chan;
 
-    @NotNull(message = "Vui lòng nhập giá.")
     @DecimalMin(value = "0", message = "Giá không được âm.")
     @Digits(integer = 16, fraction = 2, message = "Giá tối đa 16 chữ số và 2 chữ số thập phân.")
     private BigDecimal gia_ban;

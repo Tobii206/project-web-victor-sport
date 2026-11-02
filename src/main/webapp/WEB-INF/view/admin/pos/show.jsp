@@ -11,7 +11,7 @@
     <title>Bán hàng tại quầy - Victor Sport</title>
     <link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014">
     <link rel="stylesheet" href="/css/pos-gio-hang.css?v=1">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1"></head>
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2"></head>
 <body>
 <div class="app-shell">
     <jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/>
@@ -187,15 +187,16 @@
                 <form class="checkout-grid" method="post" action="/pos/phieu-giam-gia/chon">
                     <div class="field">
                         <label for="discountCouponId">Phiếu giảm giá</label>
-                        <select class="select" id="discountCouponId" name="discountCouponId" onchange="this.form.requestSubmit()">
+                        <select class="select" id="discountCouponId" name="discountCouponId" onchange="this.form.requestSubmit()" ${empty discountCoupons or cart.rong ? 'disabled' : ''}>
                             <option value="">
                                 <c:choose>
-                                    <c:when test="${empty selectedDiscountCouponId and not empty summary.idPhieuGiamGia}">
+                                    <c:when test="${empty discountCoupons or cart.rong}">Không có phiếu đủ điều kiện</c:when>
+                                    <c:when test="${not empty selectedDiscountCouponId}">Tự động chọn ưu đãi tốt nhất</c:when>
+                                    <c:when test="${not empty summary.idPhieuGiamGia}">
                                         Tự động: ${summary.tenUuDai}
                                     </c:when>
-                                    <c:otherwise>
-                                        Tự động: không có phiếu phù hợp
-                                    </c:otherwise>
+                                    <c:when test="${summary.tienGiam gt 0}">Tự động: giữ đợt giảm giá có lợi hơn</c:when>
+                                    <c:otherwise>Tự động chọn ưu đãi tốt nhất</c:otherwise>
                                 </c:choose>
                             </option>
                             <c:forEach items="${discountCoupons}" var="coupon">
@@ -204,6 +205,8 @@
                                 </option>
                             </c:forEach>
                         </select>
+                        <c:if test="${not empty discountCoupons and summary.tienGiam gt 0 and empty summary.idPhieuGiamGia}"><small class="muted">Đợt giảm giá sản phẩm có lợi hơn phiếu. Bạn vẫn có thể chọn phiếu khác để áp dụng mức giảm của phiếu đó.</small></c:if>
+                        <c:if test="${empty discountCoupons and not cart.rong}"><small class="muted">Chưa có phiếu còn hiệu lực, còn lượt và đạt ngưỡng đơn hàng. Phiếu giảm giá vận chuyển chỉ dùng cho đơn giao hàng.</small></c:if>
                     </div>
                 </form>
 
@@ -235,9 +238,14 @@
                             </c:forEach>
                         </select>
                     </div>
+                    <div class="field">
+                        <label for="paidAmount">Tiền khách đã thanh toán (đ) *</label>
+                        <input class="input" type="number" id="paidAmount" name="paidAmount" min="0" max="9999999999999999.99" step="0.01" inputmode="decimal" autocomplete="off" value="<c:out value='${paidAmount}'/>" placeholder="Nhập số tiền đã nhận" aria-describedby="paidAmountHelp" required>
+                        <small class="muted" id="paidAmountHelp">Nhập đúng tổng tiền cần thu sau ưu đãi. Với chuyển khoản, kiểm tra tiền đã vào tài khoản trước khi xác nhận.</small>
+                    </div>
                     <details class="pos-cart-note" ${not empty donChoDangChon.ghi_chu ? 'open' : ''}><summary>Ghi chú đơn hàng</summary><label class="pos-cart-sr-only" for="note">Ghi chú đơn hàng</label><textarea class="textarea" id="note" name="note" rows="2"><c:out value="${donChoDangChon.ghi_chu}"/></textarea></details>
                     <div class="pos-cart-checkout-actions">
-                    <button class="button secondary full" type="submit" name="hanhDong" value="luu-don-cho"
+                    <button class="button secondary full" type="submit" name="hanhDong" value="luu-don-cho" formnovalidate
                             <c:if test="${donChoDaMat}">disabled</c:if>>
                         <c:choose><c:when test="${not empty donChoDangChon}">Lưu đơn chờ</c:when><c:otherwise>Tạo đơn chờ</c:otherwise></c:choose>
                     </button>
@@ -276,6 +284,7 @@
 <c:if test="${not empty loiThemKhachHang}">
     <script>document.getElementById('themKhachHang').showModal();</script>
 </c:if>
+<script src="/js/thanh-toan-tai-quay.js?v=20261102-paid-amount"></script>
 <%@ include file="/WEB-INF/view/client/layout/payment-confirm.jsp" %>
 </body>
 </html>

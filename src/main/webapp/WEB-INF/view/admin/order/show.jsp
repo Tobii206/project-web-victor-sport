@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý hóa đơn - Victor Sport</title>
     <link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1"></head>
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2"></head>
 <body>
 <div class="app-shell">
     <jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/>
@@ -34,7 +34,6 @@
             <section class="panel">
                 <div class="panel-header">
                     <h2>Danh sách hóa đơn</h2>
-                    <span class="muted">Đơn mới nhất ở trên</span>
                 </div>
                 <div class="panel-body">
                     <c:if test="${not empty error}">
@@ -79,8 +78,7 @@
                                         <a class="button secondary" href="/quan-ly/hoa-don/${hd.id}">Xem chi tiết</a>
 <c:if test="${currentUser.quanLy and (hd.loai_don == 1 or hd.loai_don == 2) and hd.phuong_thuc == 'COD' and hd.trang_thai_hien_tai == 1}">
 <form method="post" action="/quan-ly/hoa-don/${hd.id}/xac-nhan-don-cod" data-xac-nhan-thanh-toan data-tieu-de="Xác nhận đơn COD" data-nhan-xac-nhan="Xác nhận đơn" data-tong-tien="${hd.tong_tien_sau_giam}" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đã xác nhận đơn" data-noi-dung="Xác nhận đơn COD để chuyển sang bước chuẩn bị hàng."><input type="hidden" name="quayLai" value="danh-sach"><button class="button">Xác nhận đơn COD</button></form></c:if>
-<c:if test="${currentUser.quanLy and (hd.loai_don == 1 or hd.loai_don == 2) and hd.phuong_thuc == 'COD' and not hd.da_thanh_toan and hd.trang_thai_hien_tai == 5}">
-<form method="post" action="/quan-ly/hoa-don/${hd.id}/thu-tien-cod" data-xac-nhan-thanh-toan data-tieu-de="Ghi nhận shipper đã thu COD" data-tong-tien="${hd.tong_tien_sau_giam}" data-noi-dung="Chỉ ghi nhận sau khi shipper báo đã thu đủ tiền COD."><input type="hidden" name="quayLai" value="danh-sach"><button class="button">Shipper đã thu COD</button></form></c:if>
+
 
                                         <c:if test="${currentUser.quanLy and (hd.loai_don == 1 or hd.loai_don == 2) and hd.phuong_thuc != 'COD' and hd.trang_thai_hien_tai == 1}">
                                             <form method="post" action="/quan-ly/hoa-don/${hd.id}/xac-nhan-thanh-toan" data-xac-nhan-thanh-toan data-ma-hoa-don="<c:out value='${hd.ma_hoa_don}'/>" data-tong-tien="${hd.tong_tien_sau_giam}" data-nhan-phuong-thuc="Trạng thái" data-tieu-de="Xác nhận thanh toán" data-phuong-thuc="Đã xác nhận đơn" data-noi-dung="Kiểm tra khoản chuyển khoản để xác nhận thanh toán và đơn hàng. Đơn sẽ chuyển sang chờ chuẩn bị.">
@@ -88,7 +86,7 @@
                                             </form>
                                         </c:if>
                                         <c:if test="${currentUser.quanLy and (hd.loai_don == 1 or hd.loai_don == 2) and hd.trang_thai_hien_tai == 2}">
-                                            <form method="post" action="/quan-ly/hoa-don/${hd.id}/chuan-bi" data-xac-nhan-thanh-toan data-tieu-de="Bắt đầu chuẩn bị hàng" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đang chuẩn bị hàng" data-noi-dung="Xác nhận cửa hàng bắt đầu lấy và đóng gói sản phẩm.">
+                                            <form method="post" action="/quan-ly/hoa-don/${hd.id}/chuan-bi" data-xac-nhan-thanh-toan data-tong-tien="${hd.tong_tien_sau_giam}" data-tieu-de="Bắt đầu chuẩn bị hàng" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đang chuẩn bị hàng" data-noi-dung="Xác nhận cửa hàng bắt đầu lấy và đóng gói sản phẩm.">
                                                 <input type="hidden" name="quayLai" value="danh-sach"><button class="button" type="submit">Bắt đầu chuẩn bị</button>
                                             </form>
                                         </c:if>
@@ -96,6 +94,9 @@
                                             <form method="post" action="/quan-ly/hoa-don/${hd.id}/huy" data-xac-nhan-thanh-toan data-ma-hoa-don="<c:out value='${hd.ma_hoa_don}'/>" data-tong-tien="${hd.tong_tien_sau_giam}" data-tieu-de="Hủy hóa đơn" data-nhan-xac-nhan="Hủy hóa đơn" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đã hủy" data-noi-dung="Bạn có chắc muốn hủy hóa đơn này? Số lượng sản phẩm sẽ được hoàn lại tồn kho.">
                                                 <input type="hidden" name="quayLai" value="danh-sach"><button class="button danger" type="submit">Hủy hóa đơn</button>
                                             </form>
+                                        </c:if>
+                                        <c:if test="${currentUser.quanLy and empty hd.id_khach_hang and (hd.loai_don == 1 or hd.loai_don == 2) and hd.trang_thai_hien_tai == 4}">
+                                            <form method="post" action="/quan-ly/hoa-don/${hd.id}/giao-khach-vang-lai" data-xac-nhan-thanh-toan data-tong-tien="${hd.tong_tien_sau_giam}" data-tieu-de="Xác nhận khách vãng lai đã nhận hàng" data-nhan-xac-nhan="Xác nhận đã nhận hàng" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đã nhận hàng" data-noi-dung="Chỉ xác nhận hộ khi khách vãng lai đã nhận hàng và đã trả đủ tiền nếu thanh toán COD. Xác nhận sẽ đồng thời ghi nhận thanh toán COD."><input type="hidden" name="quayLai" value="danh-sach"><button class="button" type="submit">Xác nhận khách vãng lai đã nhận hàng</button></form>
                                         </c:if>
                                         <c:if test="${currentUser.banHangTaiQuay and hd.trang_thai_hien_tai == 0 and hd.loai_don == 0 and hd.id_nhan_vien == currentUser.id}">
                                             <form method="post" action="/pos/don-cho/mo">

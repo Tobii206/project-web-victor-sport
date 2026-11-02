@@ -86,7 +86,7 @@ public class DatLaiMatKhauService {
             jdbc.update("UPDATE bao_mat_tai_khoan SET so_lan_thu_ma=so_lan_thu_ma+1 WHERE id=?",row.get("id"));return false;
         }
         String bang=nhanVien?"nhan_vien":"khach_hang";
-        jdbc.update("UPDATE "+bang+" SET mat_khau=?,ngay_cap_nhat=SYSDATETIME() WHERE id=?",new BCryptPasswordEncoder().encode(mk),idTaiKhoan);
+        jdbc.update("UPDATE "+bang+" SET mat_khau=?,ngay_cap_nhat=SYSDATETIME(),nguoi_cap_nhat=? WHERE id=?",new BCryptPasswordEncoder().encode(mk),idTaiKhoan,idTaiKhoan);
         new BaoMatTaiKhoanService(jdbc).moKhoa(idTaiKhoan,nhanVien);
         return true;
     }

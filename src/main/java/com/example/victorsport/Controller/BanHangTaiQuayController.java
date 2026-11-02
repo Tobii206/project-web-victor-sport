@@ -71,10 +71,16 @@ public class BanHangTaiQuayController {
             }
         }
         model.addAttribute("paymentMethods", banHangTaiQuayService.layPhuongThucThanhToan());
-        model.addAttribute("discountCoupons", banHangTaiQuayService.layPhieuGiamGiaKhaDung(gioHang.getTamTinh()));
-        model.addAttribute("selectedDiscountCouponId", layIdPhieuGiamGia(phienDangNhap));
+        var cacPhieu=banHangTaiQuayService.layPhieuGiamGiaKhaDung(gioHang.getTamTinh());
+        Integer phieuDaChon=layIdPhieuGiamGia(phienDangNhap);
+        if(phieuDaChon!=null && cacPhieu.stream().noneMatch(p -> phieuDaChon.equals(p.getId())))
+            phienDangNhap.removeAttribute(KHOA_PHIEU_GIAM_GIA);
+        model.addAttribute("discountCoupons", cacPhieu);
         model.addAttribute("cart", gioHang);
-        model.addAttribute("summary", banHangTaiQuayService.tinhTongKet(gioHang, layIdPhieuGiamGia(phienDangNhap)));
+        var phieuThuCong=layIdPhieuGiamGia(phienDangNhap);
+        var tongKet=banHangTaiQuayService.tinhTongKet(gioHang,phieuThuCong);
+        model.addAttribute("selectedDiscountCouponId",phieuThuCong!=null?phieuThuCong:(tongKet==null?null:tongKet.getIdPhieuGiamGia()));
+        model.addAttribute("summary",tongKet);
         return "admin/pos/show";
     }
 
@@ -133,8 +139,14 @@ public class BanHangTaiQuayController {
             phienDangNhap.removeAttribute(KHOA_PHIEU_GIAM_GIA);
             thuocTinhChuyenHuong.addFlashAttribute("success", "Đã chọn chế độ tự động áp dụng phiếu tốt nhất.");
         } else {
+            var gio=layGioHang(phienDangNhap);
+            if(gio.isRong() || banHangTaiQuayService.layPhieuGiamGiaKhaDung(gio.getTamTinh()).stream().noneMatch(p -> idPhieuGiamGia.equals(p.getId()))) {
+                phienDangNhap.removeAttribute(KHOA_PHIEU_GIAM_GIA);
+                thuocTinhChuyenHuong.addFlashAttribute("error","Phiếu không đủ điều kiện, đã hết hạn hoặc không áp dụng tại quầy. Vui lòng chọn lại.");
+                return "redirect:/pos";
+            }
             phienDangNhap.setAttribute(KHOA_PHIEU_GIAM_GIA, idPhieuGiamGia);
-            thuocTinhChuyenHuong.addFlashAttribute("success", "Đã chọn phiếu giảm giá");
+            thuocTinhChuyenHuong.addFlashAttribute("success", "Đã áp dụng phiếu giảm giá bạn chọn.");
         }
         return "redirect:/pos";
     }
@@ -212,6 +224,7 @@ public class BanHangTaiQuayController {
                             @RequestParam(value = "customerEmail", required = false) String email,
                             @RequestParam(value = "customerAddress", required = false) String diaChi,
                             @RequestParam(value = "paymentMethodId", required = false) Integer idPhuongThucThanhToan,
+                            @RequestParam(value = "paidAmount", required = false) String tienKhachDaThanhToan,
                             @RequestParam(value = "note", required = false) String ghiChu,
                             HttpSession phienDangNhap,
                             Model model,
@@ -222,9 +235,15 @@ public class BanHangTaiQuayController {
         }
 
         try {
+            java.math.BigDecimal tienDaThu=null;
+            if(!"luu-don-cho".equals(hanhDong)) {
+                if(tienKhachDaThanhToan==null || !tienKhachDaThanhToan.trim().matches("[0-9]{1,16}(\\.[0-9]{1,2})?"))
+                    throw new IllegalArgumentException("Vui lòng nhập tiền khách đã thanh toán hợp lệ, đúng bằng tổng tiền cần thu.");
+                tienDaThu=new java.math.BigDecimal(tienKhachDaThanhToan.trim());
+            }
             BanHangTaiQuayService.YeuCauThanhToan yeuCau = new BanHangTaiQuayService.YeuCauThanhToan(
                     idKhachHang, tenKhachHang, soDienThoai, email, diaChi,
-                    idPhuongThucThanhToan, ghiChu, layIdPhieuGiamGia(phienDangNhap));
+                    idPhuongThucThanhToan, ghiChu, layIdPhieuGiamGia(phienDangNhap),tienDaThu);
             if ("luu-don-cho".equals(hanhDong)) {
                 Integer idDonCho = banHangTaiQuayService.luuDonCho(layGioHang(phienDangNhap), yeuCau,
                         nguoiDungDangNhap, layIdDonCho(phienDangNhap));
@@ -247,6 +266,7 @@ public class BanHangTaiQuayController {
             thuocTinhChuyenHuong.addFlashAttribute("hoaDonVuaTao",idHoaDon);
         } catch (IllegalArgumentException loi) {
             thuocTinhChuyenHuong.addFlashAttribute("error", loi.getMessage());
+            thuocTinhChuyenHuong.addFlashAttribute("paidAmount",tienKhachDaThanhToan);
         }
         return "redirect:/pos";
     }

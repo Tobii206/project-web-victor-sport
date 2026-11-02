@@ -110,21 +110,24 @@ public class QuanLySanPhamService {
         String ten = chu(d.get("ten_san_pham"), "Tên sản phẩm", 255, true);
         String ngan = chu(d.get("mo_ta_ngan"), "Mô tả ngắn", 500, false);
         String chiTiet = chu(d.get("mo_ta_chi_tiet"), "Mô tả chi tiết", 20000, false);
+        BigDecimal giaChung = tien(d.get("gia_ban"), "Giá sản phẩm", true);
         List<Object> args = new ArrayList<>();
         for (int i=0;i<6;i++) args.add(chonDanhMuc(d, i, i==0));
         args.add(ten); args.add(ngan); args.add(chiTiet); args.add(trangThai(d.get("trang_thai_kinh_doanh"))); args.add(nhanVien);
         if (id == null) {
+            args.add(giaChung);
             return jdbc.queryForObject("""
                 INSERT INTO san_pham (id_thuong_hieu,id_xuat_xu,id_vi_tri_thi_dau,id_phong_cach_choi,id_co_giay,id_chat_lieu,
-                    ten_san_pham,mo_ta_ngan,mo_ta_chi_tiet,trang_thai_kinh_doanh,nguoi_tao)
-                OUTPUT INSERTED.id VALUES (?,?,?,?,?,?,?,?,?,?,?)
+                    ten_san_pham,mo_ta_ngan,mo_ta_chi_tiet,trang_thai_kinh_doanh,nguoi_tao,gia_ban)
+                OUTPUT INSERTED.id VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
                 """, Integer.class, args.toArray());
         }
-        khoaSanPham(id); args.add(id);
+        khoaSanPham(id); args.add(giaChung); args.add(id);
         jdbc.update("""
             UPDATE san_pham SET id_thuong_hieu=?,id_xuat_xu=?,id_vi_tri_thi_dau=?,id_phong_cach_choi=?,id_co_giay=?,id_chat_lieu=?,
-                ten_san_pham=?,mo_ta_ngan=?,mo_ta_chi_tiet=?,trang_thai_kinh_doanh=?,nguoi_cap_nhat=?,ngay_cap_nhat=SYSDATETIME() WHERE id=?
+                ten_san_pham=?,mo_ta_ngan=?,mo_ta_chi_tiet=?,trang_thai_kinh_doanh=?,nguoi_cap_nhat=?,gia_ban=?,ngay_cap_nhat=SYSDATETIME() WHERE id=?
             """, args.toArray());
+        jdbc.update("UPDATE chi_tiet_san_pham SET gia_ban=?,nguoi_cap_nhat=?,ngay_cap_nhat=SYSDATETIME() WHERE id_san_pham=? AND ISNULL(xoa_mem,0)=0", giaChung, nhanVien, id);
         return id;
     }
     @Transactional
@@ -138,7 +141,8 @@ public class QuanLySanPhamService {
         Integer mau = chonDanhMuc(d,6,true), size = chonDanhMuc(d,7,true), form = chonDanhMuc(d,8,true);
         int ton = soNguyen(d.get("so_luong"), "Số lượng", true);
         if (ton<0) throw new IllegalArgumentException("Tồn kho không được âm.");
-        BigDecimal gia = tien(d.get("gia_ban"),"Giá",true);
+        BigDecimal gia = jdbc.queryForObject("SELECT gia_ban FROM san_pham WHERE id=? AND ISNULL(xoa_mem,0)=0", BigDecimal.class, sanPham);
+        if (gia == null) throw new IllegalArgumentException("Vui lòng lưu giá trong Thông tin sản phẩm trước khi thêm mẫu.");
         if (jdbc.queryForObject("SELECT COUNT(*) FROM chi_tiet_san_pham WHERE id_san_pham=? AND id_mau_sac=? AND id_kich_thuoc=? AND id_form_chan=? AND ISNULL(xoa_mem,0)=0 AND id<>?", Integer.class,sanPham,mau,size,form,id==null?0:id)>0)
             throw new IllegalArgumentException("Mẫu size, màu và form chân này đã tồn tại.");
         String ghiChu = chu(d.get("ghi_chu"),"Ghi chú",255,false);

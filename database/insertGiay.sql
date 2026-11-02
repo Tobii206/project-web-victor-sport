@@ -174,11 +174,11 @@ INSERT INTO chi_tiet_dot_giam_gia (
 
 INSERT INTO phieu_giam_gia (
     ten_phieu_giam_gia, loai_phieu_giam_gia, gia_tri_giam_gia, so_tien_giam_toi_da,
-    hoa_don_toi_thieu, so_luong_su_dung, ngay_bat_dau, ngay_ket_thuc, mo_ta
+    hoa_don_toi_thieu, so_luong_su_dung, ngay_bat_dau, ngay_ket_thuc, mo_ta, ap_dung_van_chuyen, chi_ap_dung_ha_noi
 ) VALUES
-(N'Giảm 10% đơn từ 1 triệu', 0, 10, 300000, 1000000, 100, '2026-01-01', '2026-12-31', N'Voucher toàn shop'),
-(N'Giảm 200K đơn từ 2 triệu', 1, 200000, 200000, 2000000, 50, '2026-01-01', '2026-12-31', N'Voucher toàn shop'),
-(N'Freeship nội thành', 1, 30000, 30000, 500000, 200, '2026-01-01', '2026-12-31', N'Hỗ trợ phí vận chuyển');
+(N'Giảm 10% đơn từ 1 triệu', 0, 10, 300000, 1000000, 100, '2026-01-01', '2026-12-31', N'Voucher toàn shop',0,0),
+(N'Giảm 200K đơn từ 2 triệu', 1, 200000, 200000, 2000000, 50, '2026-01-01', '2026-12-31', N'Voucher toàn shop',0,0),
+(N'Freeship nội thành', 1, 30000, 30000, 500000, 200, '2026-01-01', '2026-12-31', N'Hỗ trợ phí vận chuyển',1,1);
 
 INSERT INTO hoa_don (
     id_khach_hang, id_nhan_vien, id_phieu_giam_gia,

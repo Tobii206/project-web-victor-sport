@@ -16,6 +16,27 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class ThongKeVanChuyenTests {
+    @Test void chiSoTrungBinhVaTyLeHuyDungVaLocKenhNhatQuan() {
+        var jdbc=mock(JdbcTemplate.class);var ngay=LocalDate.of(2026,10,29);
+        when(jdbc.queryForMap(contains("SELECT COUNT(*) AS so_don"),any(Object[].class)))
+            .thenReturn(Map.of("so_don",10,"hoan_tat",3,"da_huy",2,"doanh_thu",new BigDecimal("300000")));
+        var kq=new ThongKeService(jdbc).thongKe(ngay,ngay,"online");
+        var tong=(Map<?,?>)kq.get("tongQuan");
+        assertEquals(new BigDecimal("100000"),tong.get("trung_binh_don"));
+        assertEquals(new BigDecimal("20.0"),tong.get("ty_le_huy"));
+        verify(jdbc).queryForList(argThat(sql -> sql.contains("GROUP BY CASE WHEN hd.loai_don") && sql.contains("hd.loai_don IN (1,2)") && sql.contains("hd.trang_thai_hien_tai=5")),eq(ngay.atStartOfDay()),eq(ngay.plusDays(1).atStartOfDay()));
+        verify(jdbc).queryForMap(argThat(sql -> sql.contains("AS da_thu") && sql.contains("gd.trang_thai=N'thanh_cong'") && sql.contains("hd.trang_thai_hien_tai=5")),eq(ngay.atStartOfDay()),eq(ngay.plusDays(1).atStartOfDay()));
+    }
+
+    @Test void kyKhongCoDonKhongChiaChoKhong() {
+        var jdbc=mock(JdbcTemplate.class);var ngay=LocalDate.of(2026,10,29);
+        when(jdbc.queryForMap(contains("SELECT COUNT(*) AS so_don"),any(Object[].class)))
+            .thenReturn(Map.of("so_don",0,"hoan_tat",0,"da_huy",0,"doanh_thu",BigDecimal.ZERO));
+        var tong=(Map<?,?>)new ThongKeService(jdbc).thongKe(ngay,ngay,"tat-ca").get("tongQuan");
+        assertEquals(BigDecimal.ZERO,tong.get("trung_binh_don"));
+        assertEquals(BigDecimal.ZERO,tong.get("ty_le_huy"));
+    }
+
     MockHttpSession phien(String quyen) {
         var session=new MockHttpSession();
         session.setAttribute(DangNhapController.KHOA_NGUOI_DUNG_DANG_NHAP,new NguoiDungDangNhap(2,"test@gmail.com","Kiểm tra",quyen));

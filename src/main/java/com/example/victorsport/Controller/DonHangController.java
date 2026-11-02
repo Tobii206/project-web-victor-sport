@@ -24,11 +24,12 @@ public class DonHangController {
     }
 
     @GetMapping
-    public String danhSach(HttpSession session,HttpServletResponse response,Model model) {
+    public String danhSach(@RequestParam(defaultValue="") String tuKhoa,HttpSession session,HttpServletResponse response,Model model) {
         response.setHeader("Cache-Control","no-store");
         Integer khach = khachHang(session);
         if (khach == null) return "redirect:/login";
-        try { model.addAttribute("donHang",service.layDonCuaKhach(khach)); }
+        model.addAttribute("tuKhoa",tuKhoa.trim());
+        try { model.addAttribute("donHang",tuKhoa.isBlank()?service.layDonCuaKhach(khach):service.layDonCuaKhach(khach,tuKhoa)); }
         catch (IllegalArgumentException e) { model.addAttribute("error",e.getMessage()); }
         catch (DataAccessException e) { model.addAttribute("error","Chưa tải được đơn hàng. Vui lòng thử lại."); }
         return "client/order/show";

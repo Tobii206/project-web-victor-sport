@@ -4,6 +4,14 @@ import jakarta.validation.constraints.*;
 
 // Nhận dữ liệu từ form và kiểm tra trước khi lưu.
 public class SanPhamForm {
+    @NotNull(message = "Vui lòng nhập giá sản phẩm.")
+    @DecimalMin(value = "0", message = "Giá không được âm.")
+    @Digits(integer = 16, fraction = 2, message = "Giá tối đa 16 chữ số và 2 chữ số thập phân.")
+    private java.math.BigDecimal gia_ban;
+
+    public java.math.BigDecimal getGia_ban() { return gia_ban; }
+    public void setGia_ban(java.math.BigDecimal gia_ban) { this.gia_ban = gia_ban; }
+
     @NotBlank(message = "Vui lòng nhập tên sản phẩm.")
     @Size(max = 255, message = "Tên sản phẩm tối đa 255 ký tự.")
     private String ten_san_pham;

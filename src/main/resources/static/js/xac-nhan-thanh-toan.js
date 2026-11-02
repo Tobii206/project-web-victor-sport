@@ -34,7 +34,12 @@ if (bangXacNhan) {
             var maHoaDon = formThanhToan.dataset.maHoaDon;
             document.getElementById('dongMaHoaDon').hidden = !maHoaDon;
             document.getElementById('maHoaDonXacNhan').textContent = maHoaDon || '';
-            document.getElementById('tongTienXacNhan').textContent = Number(formThanhToan.dataset.tongTien).toLocaleString('vi-VN') + ' đ';
+            var tongTien = Number(formThanhToan.dataset.tongTien);
+            var tongHopLe = formThanhToan.dataset.tongTien != null && formThanhToan.dataset.tongTien.trim() !== ''
+                && Number.isFinite(tongTien) && tongTien >= 0;
+            document.getElementById('tongTienXacNhan').textContent = tongHopLe ? tongTien.toLocaleString('vi-VN') + ' đ' : 'Chưa xác định';
+            document.getElementById('dongYXacNhan').disabled = !tongHopLe;
+            if (!tongHopLe) document.getElementById('noiDungXacNhan').textContent = 'Chưa tải được tổng thanh toán. Vui lòng tải lại trang trước khi xác nhận.';
             bangXacNhan.showModal();
         });
 

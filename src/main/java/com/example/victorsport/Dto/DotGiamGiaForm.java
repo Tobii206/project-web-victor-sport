@@ -42,7 +42,7 @@ public class DotGiamGiaForm {
 
     @NotNull(message = "Vui lòng nhập mức ưu tiên.")
     @Min(value = 0, message = "Mức ưu tiên không được âm.")
-    private Integer muc_uu_tien;
+    private Integer muc_uu_tien = 0;
 
     public String getTen_dot_giam_gia() { return ten_dot_giam_gia; }
     public void setTen_dot_giam_gia(String ten_dot_giam_gia) {

@@ -34,11 +34,14 @@ class LuongThanhToanMoiTests {
         when(jdbc.update(contains("SET trang_thai_hien_tai=3"),eq(2),eq(10))).thenReturn(1);
         when(jdbc.update(contains("SET trang_thai_hien_tai=4"),eq(2),eq(10))).thenReturn(1);
         service.batDauChuanBi(10,2);
+        when(jdbc.queryForList(contains("WITH (UPDLOCK,HOLDLOCK)"),eq(10)))
+            .thenReturn(List.of(Map.of("trang_thai_hien_tai",3)));
         service.banGiaoShipper(10,2);
         verify(jdbc).update(argThat(sql -> sql.contains("SET trang_thai_hien_tai=3") && sql.contains("AND trang_thai_hien_tai=2")),eq(2),eq(10));
         verify(jdbc).update(argThat(sql -> sql.contains("SET trang_thai_hien_tai=4") && sql.contains("AND trang_thai_hien_tai=3")),eq(2),eq(10));
         verify(jdbc).update(contains("INSERT INTO lich_su_hoa_don"),eq(10),eq(3),eq("Cửa hàng bắt đầu chuẩn bị hàng."),eq(2),eq(2));
-        verify(jdbc).update(contains("INSERT INTO lich_su_hoa_don"),eq(10),eq(4),eq("Shipper đã lấy kiện hàng; đơn chuyển sang đang vận chuyển."),eq(2),eq(2));
+        verify(jdbc).update(contains("INSERT INTO lich_su_hoa_don"),eq(10),eq(4),eq("Đã gửi hàng cho shipper."),eq(2),eq(2));
+        verify(jdbc).update(contains("INSERT INTO lich_su_hoa_don"),eq(10),eq(4),eq("Đơn hàng đang vận chuyển."),eq(2),eq(2));
     }
     @Test void khongXacNhanTienCodKhiDonChuaGiao() {
         var jdbc=jdbcCod();var service=new HoaDonService(jdbc);

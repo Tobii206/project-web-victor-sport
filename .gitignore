@@ -37,3 +37,6 @@ build/
 /application-mail-local.properties
 
 /application-ghn-local.properties
+
+# Customer uploaded avatars
+/image/avatars/

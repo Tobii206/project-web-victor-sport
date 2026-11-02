@@ -13,9 +13,9 @@
     <link rel="icon" type="image/svg+xml" href="/logo/favicon-victorsport.svg?v=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1">
-    <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1">
+    <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2">
 </head>
 <body class="store-page">
 
@@ -46,7 +46,7 @@
         <a href="#trang-chu" class="active">Trang chủ</a>
         <a href="#san-pham">Sản phẩm</a>
         <a href="#nhu-cau">Nhu cầu sử dụng</a>
-        <a href="#flash-sale">Flash Sale 🔥</a>
+        <a href="#flash-sale">Flash Sale</a>
         <a href="#lien-he">Showroom</a>
     </nav>
     <%@ include file="/WEB-INF/view/client/layout/header-actions.jsp" %>
@@ -64,7 +64,7 @@
 
             <div class="hero-cta-group">
                 <a class="store-button" href="#san-pham">Mua sắm ngay <span aria-hidden="true">⚡</span></a>
-                <a class="store-button secondary" href="#flash-sale">Khám phá Flash Sale 🔥</a>
+                <a class="store-button secondary" href="#flash-sale">Khám phá Flash Sale</a>
             </div>
 
             <div class="shop-hero-stats">
@@ -453,6 +453,6 @@
 <!-- 10. Floating Back to Top Button -->
 <button type="button" class="back-to-top" id="backToTopBtn" aria-label="Lên đầu trang">↑</button>
 
-<script src="/js/victor-modern.js?v=20261023-countdown"></script>
+<script src="/js/victor-modern.js?v=20261023-slider-2"></script>
 </body>
 </html>

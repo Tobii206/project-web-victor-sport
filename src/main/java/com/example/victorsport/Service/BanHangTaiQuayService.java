@@ -185,6 +185,7 @@ public class BanHangTaiQuayService {
                   AND CAST(GETDATE() AS DATE) BETWEEN ngay_bat_dau AND ngay_ket_thuc
                   AND ISNULL(hoa_don_toi_thieu, 0) <= ?
                   AND ISNULL(so_luong_su_dung, 0) > 0
+                  AND ISNULL(ap_dung_van_chuyen, 0) = 0
                 ORDER BY ten_phieu_giam_gia
                 """;
         return jdbcTemplate.query(cauLenhSql, (ketQua, soDong) -> new LuaChonPhieuGiamGia(
@@ -211,9 +212,9 @@ public class BanHangTaiQuayService {
         }
         BigDecimal giamTheoSanPham = timUuDaiSanPham(gioHang);
         BigDecimal giamTheoHoaDon = uuDaiHoaDon.getTienGiam();
-        BigDecimal tienGiam = giamTheoHoaDon.max(giamTheoSanPham).setScale(2, RoundingMode.HALF_UP);
         boolean apDungPhieu = giamTheoHoaDon.compareTo(BigDecimal.ZERO) > 0
-                && giamTheoHoaDon.compareTo(giamTheoSanPham) >= 0;
+                && (idPhieuGiamGiaDangChon != null || giamTheoHoaDon.compareTo(giamTheoSanPham) >= 0);
+        BigDecimal tienGiam = (apDungPhieu ? giamTheoHoaDon : giamTheoSanPham).setScale(2, RoundingMode.HALF_UP);
         String tenUuDai = "Không áp dụng";
         Integer idPhieuGiamGia = null;
         if (apDungPhieu) {
@@ -235,6 +236,7 @@ public class BanHangTaiQuayService {
                   AND CAST(GETDATE() AS DATE) BETWEEN ngay_bat_dau AND ngay_ket_thuc
                   AND ISNULL(hoa_don_toi_thieu, 0) <= ?
                   AND ISNULL(so_luong_su_dung, 0) > 0
+                  AND ISNULL(ap_dung_van_chuyen, 0) = 0
                 """;
         List<UuDaiHoaDon> danhSach = jdbcTemplate.query(cauLenhSql,
                 (ketQua, soDong) -> taoUuDaiHoaDonTuKetQua(tamTinh, ketQua), tamTinh);
@@ -260,6 +262,7 @@ public class BanHangTaiQuayService {
                   AND CAST(GETDATE() AS DATE) BETWEEN ngay_bat_dau AND ngay_ket_thuc
                   AND ISNULL(hoa_don_toi_thieu, 0) <= ?
                   AND ISNULL(so_luong_su_dung, 0) > 0
+                  AND ISNULL(ap_dung_van_chuyen, 0) = 0
                 """;
         List<UuDaiHoaDon> danhSach = jdbcTemplate.query(cauLenhSql,
                 (ketQua, soDong) -> taoUuDaiHoaDonTuKetQua(tamTinh, ketQua), idPhieuGiamGia, tamTinh);
@@ -334,6 +337,11 @@ public class BanHangTaiQuayService {
         }
 
         TongKetBanHang tongKet = tinhTongKet(gioHang, yeuCau.getIdPhieuGiamGia());
+        BigDecimal tienDaThu=yeuCau.getTienKhachDaThanhToan();
+        if(tienDaThu==null || tienDaThu.signum()<0 || tienDaThu.stripTrailingZeros().scale()>2
+                || tienDaThu.precision()-tienDaThu.scale()>16
+                || tienDaThu.compareTo(tongKet.getTongThanhToan())!=0)
+            throw new IllegalArgumentException("Tiền khách đã thanh toán phải đúng bằng tổng tiền cần thu. Vui lòng kiểm tra lại.");
         Integer idKhachHang = yeuCau.getIdKhachHang();
         ThongTinKhachHang thongTinKhachHang = layThongTinKhachHang(idKhachHang, yeuCau);
         Integer idPhuongThucThanhToan = yeuCau.getIdPhuongThucThanhToan() == null ? 1 : yeuCau.getIdPhuongThucThanhToan();
@@ -610,8 +618,12 @@ public class BanHangTaiQuayService {
         private final Integer idPhuongThucThanhToan;
         private final String ghiChu;
         private final Integer idPhieuGiamGia;
+        private final BigDecimal tienKhachDaThanhToan;
 
         public YeuCauThanhToan(Integer idKhachHang, String tenKhachHang, String soDienThoai, String email, String diaChi, Integer idPhuongThucThanhToan, String ghiChu, Integer idPhieuGiamGia) {
+            this(idKhachHang,tenKhachHang,soDienThoai,email,diaChi,idPhuongThucThanhToan,ghiChu,idPhieuGiamGia,null);
+        }
+        public YeuCauThanhToan(Integer idKhachHang, String tenKhachHang, String soDienThoai, String email, String diaChi, Integer idPhuongThucThanhToan, String ghiChu, Integer idPhieuGiamGia, BigDecimal tienKhachDaThanhToan) {
             this.idKhachHang = idKhachHang;
             this.tenKhachHang = tenKhachHang;
             this.soDienThoai = soDienThoai;
@@ -620,7 +632,10 @@ public class BanHangTaiQuayService {
             this.idPhuongThucThanhToan = idPhuongThucThanhToan;
             this.ghiChu = ghiChu;
             this.idPhieuGiamGia = idPhieuGiamGia;
+            this.tienKhachDaThanhToan=tienKhachDaThanhToan;
         }
+
+        public BigDecimal getTienKhachDaThanhToan() {return tienKhachDaThanhToan;}
 
         public Integer getIdKhachHang() {
             return idKhachHang;

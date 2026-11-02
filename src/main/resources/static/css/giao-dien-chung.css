@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap');
 
 /* Giao diện chung cho trang quản lý và cửa hàng. Không áp dụng khi in hóa đơn. */
 @media screen {
     :root {
-        --vs-font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        --vs-font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        --vs-font-heading: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        --vs-font-body: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
         --vs-primary: #FF5E1E;
         --vs-primary-hover: #E84E10;
@@ -394,4 +394,53 @@
     .checkout-empty { max-width: 680px; margin: 36px auto; text-align: center; padding: 48px 28px; }
     .checkout-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
     .checkout-products { max-height: 480px; overflow: auto; }
+}
+
+/* Consistent Vietnamese typography and control alignment. */
+@media screen {
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    body { font-size: 14px; line-height: 1.65; }
+    h1,h2,h3,h4 { line-height: 1.4; letter-spacing: -.025em; }
+    p,li,dt,dd,label,button,a { text-rendering: optimizeLegibility; }
+    button,input,select,textarea { font-family: var(--vs-font-body); line-height: 1.5; }
+    input,select,textarea { box-sizing: border-box; }
+    .button,.store-button { line-height: 1.5; text-align: center; vertical-align: middle; }
+    .eyebrow,.invoice-caption,.menu-caption { line-height: 1.6; letter-spacing: .08em; }
+    .main-area,.panel-body,.content-layout,.checkout-information,.checkout-summary { min-width: 0; }
+    .panel-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .panel-header h2,.panel-header h3 { margin: 0; }
+    .field { display: flex; flex-direction: column; min-width: 0; }
+    .field label { line-height: 1.5; }
+    .field > .input,.field > .select { width: 100%; box-sizing: border-box; }
+    .product-admin-actions form,.invoice-actions form,.topbar-user form,.don-hang-actions form { margin: 0; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th,.table td { vertical-align: middle; line-height: 1.65; }
+    .table td > p { margin: 5px 0; }
+    .table .button { display: inline-flex; align-items: center; justify-content: center; line-height: 1.4; }
+    .product-admin-tag,.shipping-state,.don-hang-status,.invoice-status { line-height: 1.5; }
+    .topbar-heading,.topbar-user { min-width: 0; }
+    .topbar h1 { line-height: 1.4; }
+    .topbar-user { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .summary-row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+    .summary-row strong,.checkout-discount-row strong,.checkout-grand-total strong,.online-price,.pos-cart-line-total strong { font-variant-numeric: tabular-nums; }
+    .checkout-discount-row,.checkout-grand-total { align-items: baseline; gap: 18px; }
+    .checkout-discount-row strong,.checkout-grand-total > strong { flex-shrink: 0; }
+    .checkout-product-info h3 { line-height: 1.5; }
+    .account-info dt { line-height: 1.5; }
+    .address-heading h2,.don-hang-row h2 { line-height: 1.5; }
+    .overview-card > strong { line-height: 1.3; font-variant-numeric: tabular-nums; }
+    .product-content h3,.product-name { line-height: 1.5; overflow-wrap: break-word; }
+    .online-product-info .online-variant span small { line-height: 1.6; }
+    .pos-cart-panel .pos-cart-meta { align-items: center; }
+    .pos-cart-panel .cart-line-title { line-height: 1.6; }
+    .pos-cart-panel .pos-cart-code,.pos-cart-panel .pos-cart-unit,.pos-cart-panel .pos-cart-meta small { font-size: 11px; line-height: 1.6; }
+    .account-error,.online-success,.alert { overflow-wrap: anywhere; }
+    @media (max-width: 680px) {
+        .panel-header { gap: 12px; }
+        .panel-header .button { min-height: 40px; }
+        .checkout-grand-total { flex-wrap: wrap; }
+        .checkout-grand-total > strong { margin-left: auto; }
+        .topbar-user > span { overflow-wrap: anywhere; }
+        .account-info dd { font-size: 14px; }
+    }
 }

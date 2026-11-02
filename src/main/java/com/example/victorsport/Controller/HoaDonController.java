@@ -98,7 +98,20 @@ public class HoaDonController {
         return "redirect:/quan-ly/hoa-don"+("danh-sach".equals(quayLai)?"":"/"+id);
     }
 
-    @PostMapping("/quan-ly/hoa-don/{id}/{thaoTac:xac-nhan-don-cod|thu-tien-cod|giao-khach-vang-lai}")
+    @PostMapping("/quan-ly/hoa-don/{id}/gui-hang")
+    public String giaoHang(@PathVariable int id,HttpSession session,Model model,RedirectAttributes flash) {
+        var user=DangNhapController.layNguoiDungDangNhap(session,model);
+        if(user==null) return "redirect:/login";
+        if(!user.isQuanLy()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        try {
+            hoaDonService.banGiaoShipper(id,user.getId());
+            flash.addFlashAttribute("success","Đã gửi hàng. Mã vận đơn GHN được tạo tự động cho đơn giao qua GHN.");
+        } catch(IllegalArgumentException | IllegalStateException e) {flash.addFlashAttribute("error",e.getMessage());}
+        catch(DataAccessException e) {flash.addFlashAttribute("error","Chưa cập nhật được giao hàng. Vui lòng thử lại.");}
+        return "redirect:/quan-ly/hoa-don/"+id;
+    }
+
+    @PostMapping("/quan-ly/hoa-don/{id}/{thaoTac:xac-nhan-don-cod|giao-khach-vang-lai}")
     public String xuLyCod(@PathVariable int id,@PathVariable String thaoTac,@RequestParam(defaultValue="chi-tiet") String quayLai,
                           HttpSession session,Model model,RedirectAttributes flash) {
         var user=DangNhapController.layNguoiDungDangNhap(session,model);
@@ -106,7 +119,6 @@ public class HoaDonController {
         if(!user.isQuanLy()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         try {
             if(thaoTac.equals("xac-nhan-don-cod")) hoaDonService.xacNhanDonCod(id,user.getId());
-            else if(thaoTac.equals("thu-tien-cod")) hoaDonService.xacNhanThuTienCod(id,user.getId());
             else hoaDonService.xacNhanGiaoKhachVangLai(id,user.getId());
             flash.addFlashAttribute("success","Đã cập nhật đơn hàng.");
         } catch(IllegalArgumentException e){flash.addFlashAttribute("error",e.getMessage());}

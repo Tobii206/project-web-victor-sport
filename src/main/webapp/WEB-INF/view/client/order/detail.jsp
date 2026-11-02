@@ -4,11 +4,11 @@
 <fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Đơn hàng của tôi — VictorSport</title><link rel="icon" href="/logo/favicon-victorsport.svg">
-<link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1"><link rel="stylesheet" href="/css/don-hang.css?v=20261023-ui-1"><link rel="stylesheet" href="/css/in-hoa-don.css?v=2"><link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1"></head>
+<link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1"><link rel="stylesheet" href="/css/don-hang.css?v=20261023-ui-1"><link rel="stylesheet" href="/css/in-hoa-don.css?v=2"><link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2"></head>
 <body class="store-page"><%@ include file="/WEB-INF/view/client/layout/header.jsp" %>
 <main class="store-container online-container">
-<c:if test="${not empty don.vanDonGhn.ma_van_don}"><p class="subtle">Vận đơn GHN: <strong><c:out value="${don.vanDonGhn.ma_van_don}"/></strong> · <c:out value="${don.vanDonGhn.trang_thai}"/></p></c:if>
-<div class="invoice-print-brand"><img class="invoice-print-logo" src="/logo/logo-nobackgroud.png" alt="VictorSport" width="210" height="64"><span>Cầu Giấy, Hà Nội · 0325327602</span></div><p><button class="store-button" type="button" onclick="window.print()">In / Lưu PDF</button></p>
+<c:if test="${not empty don.vanDonGhn.ma_van_don}"><p class="subtle">Mã vận đơn: <strong><c:out value="${don.vanDonGhn.ma_van_don}"/></strong></p></c:if>
+<div class="invoice-print-brand"><img class="invoice-print-logo" src="/logo/logo-nobackgroud.png" alt="VictorSport" width="210" height="64"><span>Cầu Giấy, Hà Nội · 0325327602</span></div><c:if test="${don.da_thanh_toan}"><p><button class="store-button" type="button" onclick="window.print()">In / Lưu PDF</button></p></c:if>
 <c:if test="${not empty error}"><div class="account-error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
 <c:if test="${not empty success}"><div class="online-success" role="status" data-vs-flash="success"><c:out value="${success}"/></div></c:if>
 <a class="account-back" href="${khachVangLai ? '/tra-cuu-don-hang' : '/don-hang'}">← Quay lại</a>
@@ -17,10 +17,10 @@
 </c:if>
 <div class="don-hang-heading"><div><p class="eyebrow">ĐƠN HÀNG CỦA BẠN</p><h1><c:out value="${don.ma_hoa_don}"/></h1><p class="subtle">Ngày đặt: <fmt:formatDate value="${don.ngay_tao}" pattern="dd/MM/yyyy HH:mm"/></p></div>
 <span class="don-hang-status ${don.trang_thai_hien_tai == 5 ? 'da-nhan' : ''} ${don.trang_thai_hien_tai == 6 ? 'da-huy' : ''}"><c:out value="${don.ten_trang_thai}"/></span></div>
-<c:if test="${don.trang_thai_hien_tai == 1}"><section class="account-card don-hang-row don-hang-card"><p>Đơn hàng đang chờ xác nhận. Bạn có thể hủy nếu không còn nhu cầu mua.</p>
+<c:if test="${(don.trang_thai_hien_tai >= 1 and don.trang_thai_hien_tai <= 3) and not don.co_thanh_toan}"><section class="account-card don-hang-row don-hang-card"><p>Bạn có thể hủy đơn trước khi cửa hàng gửi hàng cho shipper.</p>
 <form method="post" action="${khachVangLai ? '/don-vang-lai/' : '/don-hang/'}${don.id}/huy" data-vs-confirm="Bạn muốn hủy đơn hàng này? Sản phẩm đã chọn trong đơn sẽ được hoàn lại tồn kho." data-vs-title="Hủy đơn hàng" data-vs-button="Hủy đơn hàng" data-vs-tone="danger"><button class="store-button don-hang-cancel" type="submit">Hủy đơn</button></form></section></c:if>
 <c:if test="${don.trang_thai_hien_tai == 4}"><section class="account-card don-hang-row don-hang-card"><p>Đơn hàng đang vận chuyển. Hãy xác nhận sau khi bạn đã nhận được hàng.</p>
-<form method="post" action="${khachVangLai ? '/don-vang-lai/' : '/don-hang/'}${don.id}/da-nhan-hang" data-vs-confirm="Hãy kiểm tra hàng trước khi xác nhận. Sau khi xác nhận, đơn hàng được đánh dấu đã nhận và khóa trạng thái." data-vs-title="Xác nhận đã nhận hàng" data-vs-button="Đã nhận hàng" data-vs-tone="normal"><button class="store-button" type="submit">Đã nhận được hàng</button></form></section></c:if>
+<form method="post" action="${khachVangLai ? '/don-vang-lai/' : '/don-hang/'}${don.id}/da-nhan-hang" data-vs-confirm="Hãy kiểm tra đã nhận đủ hàng. Nếu thanh toán COD, chỉ xác nhận sau khi đã trả đủ tiền cho shipper; hệ thống sẽ đồng thời ghi nhận thanh toán." data-vs-title="Xác nhận đã nhận hàng" data-vs-button="Đã nhận hàng" data-vs-tone="normal"><button class="store-button" type="submit">${don.phuong_thuc == 'COD' ? 'Đã nhận hàng và trả tiền COD' : 'Đã nhận được hàng'}</button></form></section></c:if>
 <c:if test="${don.trang_thai_hien_tai == 5}"><div class="online-success">Đã nhận hàng. Cảm ơn bạn đã mua sắm tại VictorSport!</div></c:if>
 <c:if test="${don.trang_thai_hien_tai == 6}"><div class="account-error">Đơn hàng đã được hủy.</div></c:if>
 <div class="don-hang-columns"><section class="account-card"><h2>Thông tin nhận hàng</h2>

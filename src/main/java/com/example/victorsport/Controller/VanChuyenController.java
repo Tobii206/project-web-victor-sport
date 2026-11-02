@@ -38,14 +38,12 @@ public class VanChuyenController {
                           @RequestParam(defaultValue="1") int trang, HttpSession session, HttpServletResponse response,Model model) {
         if(!quanLy(session,model)) return "redirect:/login";
         response.setHeader("Cache-Control","no-store");
-        model.addAttribute("activeMenu","van-chuyen"); model.addAttribute("tieuDeQuanLy","Quản lý vận chuyển");
-        model.addAttribute("tuKhoa",tuKhoa); model.addAttribute("trangThai",trangThai);
-        model.addAttribute("ghnSanSang",ghn.sanSang());
-        if(session.getAttribute("csrfVanChuyen")==null) session.setAttribute("csrfVanChuyen",java.util.UUID.randomUUID().toString());
-        model.addAttribute("csrfVanChuyen",session.getAttribute("csrfVanChuyen"));
-        try { model.addAllAttributes(service.danhSach(tuKhoa,trangThai,trang)); }
-        catch(IllegalArgumentException e) { model.addAttribute("error",e.getMessage()); }
-        catch(DataAccessException e) { model.addAttribute("error","Chưa tải được danh sách vận chuyển. Vui lòng thử lại."); }
+        model.addAttribute("activeMenu","van-chuyen");
+        model.addAttribute("tieuDeQuanLy","Quản lý vận chuyển");
+        model.addAttribute("tuKhoa",tuKhoa);model.addAttribute("trangThai",trangThai);
+        try {model.addAllAttributes(service.danhSach(tuKhoa,trangThai,trang));}
+        catch(IllegalArgumentException e) {model.addAttribute("error",e.getMessage());}
+        catch(DataAccessException e) {model.addAttribute("error","Chưa tải được thông tin phí giao hàng. Vui lòng thử lại.");}
         return "admin/shipping/show";
     }
 
@@ -99,18 +97,6 @@ public class VanChuyenController {
         try { hoaDonService.banGiaoShipper(id,user.getId()); f.addFlashAttribute("success","Đã ghi nhận shipper lấy hàng. Đơn chuyển sang đang vận chuyển."); }
         catch(IllegalArgumentException e){f.addFlashAttribute("error",e.getMessage());}
         catch(DataAccessException e){f.addFlashAttribute("error","Chưa cập nhật được bàn giao. Vui lòng thử lại.");}
-        return "redirect:/quan-ly/van-chuyen";
-    }
-    @PostMapping("/{id}/thu-cod")
-    public String ghiNhanThuCod(@PathVariable int id,@RequestParam(required=false) String csrfVanChuyen,
-                                HttpSession session,Model model,org.springframework.web.servlet.mvc.support.RedirectAttributes f) {
-        if(!quanLy(session,model)) return "redirect:/login";
-        if(csrfVanChuyen==null || !csrfVanChuyen.equals(session.getAttribute("csrfVanChuyen")))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        var user=DangNhapController.layNguoiDungDangNhap(session,model);
-        try { hoaDonService.xacNhanThuTienCod(id,user.getId()); f.addFlashAttribute("success","Đã ghi nhận shipper báo thu đủ tiền COD."); }
-        catch(IllegalArgumentException e){f.addFlashAttribute("error",e.getMessage());}
-        catch(DataAccessException e){f.addFlashAttribute("error","Chưa ghi nhận được tiền COD. Vui lòng thử lại.");}
         return "redirect:/quan-ly/van-chuyen";
     }
     private ResponseEntity<?> traLoi(HttpStatus status,Object body) {

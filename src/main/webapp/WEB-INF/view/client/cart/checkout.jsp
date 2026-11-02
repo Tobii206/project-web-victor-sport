@@ -10,10 +10,10 @@
     <link rel="icon" type="image/svg+xml" href="/logo/favicon-victorsport.svg?v=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1">
     <link rel="stylesheet" href="/css/thanh-toan-online.css?v=20261023-ui-1">
-    <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1">
+    <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2">
 </head>
 <body>
 <%@ include file="/WEB-INF/view/client/layout/header.jsp" %>
@@ -86,14 +86,15 @@
             </div>
             <div class="checkout-voucher">
                 <label for="phieuGiamGiaOnline">Phiếu giảm giá</label>
-                <select id="phieuGiamGiaOnline" name="idPhieuGiamGia" form="formThanhToanOnline" data-tong-goc="${tongGoc}" data-giam-dot="${giamTheoDot}" data-phi-goc="${phiGiaoHangGoc}" data-cho-phi="${dungGhn and empty baoGiaGhn}">
+                <select id="phieuGiamGiaOnline" name="idPhieuGiamGia" form="formThanhToanOnline" data-tu-chon="${phieuTuChon}" data-tong-goc="${tongGoc}" data-giam-dot="${giamTheoDot}" data-phi-goc="${phiGiaoHangGoc}" data-cho-phi="${dungGhn and empty baoGiaGhn}">
                     <option value="">Không dùng phiếu giảm giá</option>
-                    <c:forEach items="${phieuKhaDung}" var="phieu"><option value="${phieu.id}" data-giam="${phieu.tien_giam}" data-freeship="${phieu.freeship}" data-noi-thanh="${phieu.noi_thanh}" data-giam-phi="${phieu.giam_phi_van_chuyen}" ${idPhieuDaChon == phieu.id ? 'selected' : ''}><c:out value="${phieu.ma_phieu_giam_gia}"/> — <c:out value="${phieu.ten_phieu_giam_gia}"/> <c:choose><c:when test="${dungGhn and empty baoGiaGhn and phieu.freeship}">(tính sau khi có phí GHN)</c:when><c:otherwise>(giảm <fmt:formatNumber value="${phieu.freeship ? phieu.giam_phi_van_chuyen : phieu.tien_giam}"/> đ)</c:otherwise></c:choose></option></c:forEach>
+                    <optgroup label="Phiếu giảm tiền hàng"><c:forEach items="${phieuKhaDung}" var="phieu"><c:if test="${not phieu.freeship}"><option value="${phieu.id}" data-giam="${phieu.tien_giam}" data-freeship="${phieu.freeship}" data-noi-thanh="${phieu.noi_thanh}" data-giam-phi="${phieu.giam_phi_van_chuyen}" ${idPhieuDaChon == phieu.id ? 'selected' : ''}><c:out value="${phieu.ma_phieu_giam_gia}"/> — <c:out value="${phieu.ten_phieu_giam_gia}"/> <c:choose><c:when test="${dungGhn and empty baoGiaGhn and phieu.freeship}">(tính sau khi có phí GHN)</c:when><c:otherwise>(giảm <fmt:formatNumber value="${phieu.freeship ? phieu.giam_phi_van_chuyen : phieu.tien_giam}"/> đ)</c:otherwise></c:choose></option></c:if></c:forEach></optgroup>
+                <optgroup label="Phiếu giảm giá vận chuyển"><c:forEach items="${phieuKhaDung}" var="phieu"><c:if test="${phieu.freeship}"><option value="${phieu.id}" data-giam="${phieu.tien_giam}" data-freeship="${phieu.freeship}" data-noi-thanh="${phieu.noi_thanh}" data-giam-phi="${phieu.giam_phi_van_chuyen}" ${idPhieuDaChon == phieu.id ? 'selected' : ''}><c:out value="${phieu.ma_phieu_giam_gia}"/> — <c:out value="${phieu.ten_phieu_giam_gia}"/> <c:choose><c:when test="${dungGhn and empty baoGiaGhn and phieu.freeship}">(tính sau khi có phí GHN)</c:when><c:otherwise>(giảm <fmt:formatNumber value="${phieu.freeship ? phieu.giam_phi_van_chuyen : phieu.tien_giam}"/> đ)</c:otherwise></c:choose></option></c:if></c:forEach></optgroup>
                 </select>
                 <c:if test="${empty phieuKhaDung}"><p>Chưa có phiếu phù hợp với đơn hàng này.</p></c:if>
                 <c:if test="${not empty loiPhieu}"><p role="alert"><c:out value="${loiPhieu}"/></p></c:if>
                 <c:if test="${not empty phieuKhaDung}"><p>Phiếu phù hợp nhất được chọn sẵn. Bạn có thể đổi hoặc chọn không dùng.</p></c:if>
-                <p id="thongBaoPhieu">${coDotGiamGia ? 'Đơn có sản phẩm đang giảm giá chỉ được dùng voucher freeship.' : 'Chọn phiếu để được giảm giá đơn hàng.'}</p>
+                <p id="thongBaoPhieu">${coDotGiamGia ? 'Chọn phiếu giảm tiền hàng sẽ áp dụng mức giảm của phiếu thay cho đợt giảm giá.' : 'Chọn phiếu để được giảm giá đơn hàng.'}</p>
             </div>
             <div class="checkout-discount-row"><span>Tổng tiền hàng</span><strong><fmt:formatNumber value="${tongGoc}"/> đ</strong></div>
             <div class="checkout-discount-row"><span>Giảm giá</span><strong id="tienGiamOnline"><fmt:formatNumber value="${giamTheoDot}"/> đ</strong></div>
@@ -151,9 +152,9 @@
 </footer>
 <button type="button" class="back-to-top" id="backToTopBtn" aria-label="Lên đầu trang">↑</button>
 <script src="/js/dia-chi-thanh-toan.js?v=20261018-muot"></script>
-<script src="/js/ghn-thanh-toan.js?v=20261023-auto-ship-3"></script>
-<script src="/js/phieu-giam-gia-online.js?v=20261018-muot"></script>
-<script src="/js/victor-modern.js?v=20261023-countdown"></script>
+<script src="/js/ghn-thanh-toan.js?v=20261102-auto-voucher-2"></script>
+<script src="/js/phieu-giam-gia-online.js?v=20261102-shipping-label"></script>
+<script src="/js/victor-modern.js?v=20261023-slider-2"></script>
 <%@ include file="/WEB-INF/view/client/layout/payment-confirm.jsp" %>
 </body>
 </html>

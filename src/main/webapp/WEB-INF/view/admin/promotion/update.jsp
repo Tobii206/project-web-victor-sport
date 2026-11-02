@@ -4,7 +4,7 @@
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title><c:out value="${tenChucNang}"/> — VictorSport</title><link rel="icon" href="/logo/favicon-victorsport.svg">
 <link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=admin-20261014">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
 <%@ include file="/WEB-INF/view/admin/layout/promotion-header.jsp" %><main class="content-layout">
 <section class="panel"><div class="panel-header"><h2>Thông tin đợt giảm giá <span class="muted"><c:out value="${maUuDai}"/></span></h2><a class="button secondary" href="/quan-ly/dot-giam-gia">Về danh sách</a></div><div class="panel-body"><c:if test="${not empty error}"><div class="alert error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
 <c:if test="${not empty success}"><div class="alert success" role="status" data-vs-flash="success"><c:out value="${success}"/></div></c:if>
@@ -15,11 +15,9 @@
 <div class="field"><label for="so_tien_giam_toi_da">Tối đa được giảm</label><input class="input" id="so_tien_giam_toi_da" name="so_tien_giam_toi_da" type="number" value='<c:out value="${uuDai.so_tien_giam_toi_da}"/>' min="0" step="0.01"><small class="muted">Áp dụng cho mọi mẫu giày trong đợt. Để trống hoặc nhập 0 để giảm theo mức đã chọn.</small></div>
 <div class="field"><label for="ngay_bat_dau">Ngày bắt đầu *</label><input class="input" id="ngay_bat_dau" name="ngay_bat_dau" type="date" value='<c:out value="${uuDai.ngay_bat_dau}"/>' required  ></div>
 <div class="field"><label for="ngay_ket_thuc">Ngày kết thúc *</label><input class="input" id="ngay_ket_thuc" name="ngay_ket_thuc" type="date" value='<c:out value="${uuDai.ngay_ket_thuc}"/>' required  ></div>
-<div class="field"><label for="muc_uu_tien">Mức ưu tiên *</label><select class="select" id="muc_uu_tien" name="muc_uu_tien" required>
-<option value="">Chọn mức ưu tiên</option><c:forEach items="${cacMucUuTien}" var="muc"><option value="${muc}" ${uuDai.muc_uu_tien == muc ? 'selected' : ''}>Mức ${muc}</option></c:forEach>
-</select><c:if test="${empty cacMucUuTien}"><small class="muted">Chưa có mức ưu tiên trong dữ liệu.</small></c:if></div>
+<input type="hidden" name="muc_uu_tien" value="${uuDai.muc_uu_tien == null ? 0 : uuDai.muc_uu_tien}">
 <div class="field"><label for="trang_thai">Trạng thái</label><select class="select" id="trang_thai" name="trang_thai"><option value="1" ${uuDai.trang_thai ? 'selected' : ''}>Cho phép áp dụng</option><option value="0" ${not uuDai.trang_thai ? 'selected' : ''}>Ngừng áp dụng</option></select></div>
-<div class="product-admin-wide muted">Giảm theo phần trăm tối đa 100%. Ưu đãi được áp dụng từ ngày bắt đầu đến hết ngày kết thúc.</div>
+<div class="product-admin-wide muted">Giảm theo phần trăm tối đa 100%. Ưu đãi được áp dụng từ ngày bắt đầu đến hết ngày kết thúc. Mỗi mẫu tự nhận đợt có số tiền thực giảm cao nhất; bằng nhau thì chọn đợt tạo mới nhất. Không cộng dồn các đợt giảm giá.</div>
 <c:if test="${empty idUuDai}"><div class="product-admin-wide muted">Tạo đợt mới ở trạng thái “Cho phép áp dụng” sẽ gửi email thông báo đến các khách hàng có tài khoản đang hoạt động. Email được gửi riêng cho từng khách.</div></c:if>
 <c:if test="${not empty idUuDai}"><div class="product-admin-wide muted">Bật lại đợt đã ngừng trong thời gian áp dụng sẽ gửi email thông báo đến khách hàng. Lưu khi đợt đang bật không gửi lại email.</div></c:if>
 <div class="product-admin-actions product-admin-wide"><button class="button">Lưu đợt giảm giá</button></div></form></div></section>

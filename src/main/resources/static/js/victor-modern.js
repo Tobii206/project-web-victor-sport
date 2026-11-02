@@ -69,7 +69,7 @@ window.VictorKhoiTaoModern = function () {
             if (autoTimer) clearInterval(autoTimer);
             autoTimer = setInterval(function () {
                 if (!container.isConnected) { clearInterval(autoTimer); return; }
-                if (!document.hidden && (!container || !container.matches(":hover"))) {
+                if (!document.hidden) {
                     goToSlide(currentIndex + 1);
                 }
             }, 4500);

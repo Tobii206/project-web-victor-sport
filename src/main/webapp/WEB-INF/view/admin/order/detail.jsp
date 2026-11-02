@@ -10,7 +10,7 @@
     <title>Quản lý hóa đơn - Victor Sport</title>
     <link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014">
     <link rel="stylesheet" href="/css/chi-tiet-hoa-don.css?v=20261023-ui-1">
-<link rel="stylesheet" href="/css/in-hoa-don.css?v=2"><link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1"></head>
+<link rel="stylesheet" href="/css/in-hoa-don.css?v=2"><link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2"></head>
 <body>
 <div class="app-shell">
     <jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/>
@@ -42,11 +42,10 @@
                     <c:if test="${not empty success}"><div class="alert success" role="status" data-vs-flash="success"><c:out value="${success}"/></div></c:if>
                     <div class="invoice-toolbar">
                         <span class="invoice-status invoice-status-${hoaDon.trang_thai_hien_tai}"><span aria-hidden="true">●</span> <c:out value="${hoaDon.ten_trang_thai}"/></span>
-                        <div class="invoice-actions"><button type="button" class="button secondary" onclick="window.print()">In / Lưu PDF</button>
+                        <div class="invoice-actions"><c:if test="${hoaDon.da_thanh_toan}"><button type="button" class="button secondary" onclick="window.print()">In / Lưu PDF</button></c:if>
 <c:if test="${currentUser.quanLy and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.phuong_thuc == 'COD' and hoaDon.trang_thai_hien_tai == 1}">
 <form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/xac-nhan-don-cod" data-xac-nhan-thanh-toan data-tieu-de="Xác nhận đơn COD" data-nhan-xac-nhan="Xác nhận đơn" data-tong-tien="${hoaDon.tong_tien_sau_giam}" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đã xác nhận đơn" data-noi-dung="Xác nhận đơn COD để chuyển sang bước chuẩn bị hàng."><input type="hidden" name="quayLai" value="chi-tiet"><button class="button">Xác nhận đơn COD</button></form></c:if>
-<c:if test="${currentUser.quanLy and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.phuong_thuc == 'COD' and not hoaDon.da_thanh_toan and hoaDon.trang_thai_hien_tai == 5}">
-<form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/thu-tien-cod" data-xac-nhan-thanh-toan data-tieu-de="Ghi nhận shipper đã thu COD" data-tong-tien="${hoaDon.tong_tien_sau_giam}" data-noi-dung="Chỉ ghi nhận sau khi shipper báo đã thu đủ tiền COD."><input type="hidden" name="quayLai" value="chi-tiet"><button class="button">Shipper đã thu COD</button></form></c:if>
+
 
                     <c:if test="${currentUser.quanLy and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.phuong_thuc != 'COD' and hoaDon.trang_thai_hien_tai == 1}">
                         <form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/xac-nhan-thanh-toan" class="invoice-actions" data-xac-nhan-thanh-toan data-ma-hoa-don="<c:out value='${hoaDon.ma_hoa_don}'/>" data-tong-tien="${hoaDon.tong_tien_sau_giam}" data-nhan-phuong-thuc="Trạng thái" data-tieu-de="Xác nhận thanh toán" data-phuong-thuc="Đã xác nhận đơn" data-noi-dung="Kiểm tra khoản chuyển khoản để xác nhận thanh toán và đơn hàng. Đơn sẽ chuyển sang chờ chuẩn bị.">
@@ -54,19 +53,25 @@
                         </form>
                     </c:if>
                     <c:if test="${currentUser.quanLy and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 2}">
-                        <form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/chuan-bi" class="invoice-actions" data-xac-nhan-thanh-toan data-tieu-de="Bắt đầu chuẩn bị hàng" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đang chuẩn bị hàng" data-noi-dung="Xác nhận cửa hàng bắt đầu lấy và đóng gói sản phẩm.">
+                        <form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/chuan-bi" class="invoice-actions" data-xac-nhan-thanh-toan data-tong-tien="${hoaDon.tong_tien_sau_giam}" data-tieu-de="Bắt đầu chuẩn bị hàng" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đang chuẩn bị hàng" data-noi-dung="Xác nhận cửa hàng bắt đầu lấy và đóng gói sản phẩm.">
                             <button class="button" type="submit">Bắt đầu chuẩn bị</button>
                         </form>
+                    </c:if>
+                    <c:if test="${currentUser.quanLy and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 3}">
+                        <form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/gui-hang" data-vs-confirm="Xác nhận bàn giao hàng cho shipper? Hệ thống sẽ tự tạo mã vận đơn GHN cho đơn giao qua GHN." data-vs-title="Xác nhận gửi hàng"><button class="button" type="submit">Gửi hàng</button></form>
                     </c:if>
                     <c:if test="${currentUser.quanLy and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 1}">
                         <form class="invoice-actions" method="post" action="/quan-ly/hoa-don/${hoaDon.id}/huy" data-xac-nhan-thanh-toan data-ma-hoa-don="<c:out value='${hoaDon.ma_hoa_don}'/>" data-tong-tien="${hoaDon.tong_tien_sau_giam}" data-tieu-de="Hủy hóa đơn" data-nhan-xac-nhan="Hủy hóa đơn" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đã hủy" data-noi-dung="Bạn có chắc muốn hủy hóa đơn này? Số lượng sản phẩm sẽ được hoàn lại tồn kho.">
                             <button class="button danger" type="submit">Hủy hóa đơn</button>
                         </form>
                     </c:if>
+                        <c:if test="${currentUser.quanLy and empty hoaDon.id_khach_hang and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 4}">
+                            <form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/giao-khach-vang-lai" data-xac-nhan-thanh-toan data-tong-tien="${hoaDon.tong_tien_sau_giam}" data-tieu-de="Xác nhận khách vãng lai đã nhận hàng" data-nhan-xac-nhan="Xác nhận đã nhận hàng" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đã nhận hàng" data-noi-dung="Chỉ xác nhận hộ khi khách vãng lai đã nhận hàng và đã trả đủ tiền nếu thanh toán COD. Xác nhận sẽ đồng thời ghi nhận thanh toán COD."><button class="button" type="submit">Xác nhận khách vãng lai đã nhận hàng</button></form>
+                        </c:if>
                         </div>
                     </div>
                     <c:if test="${(hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 5}">
-                        <div class="alert success">Khách đã nhận hàng. Trạng thái đơn hàng đã được khóa.</div>
+                        <div class="alert success">Đơn đã giao thành công. Trạng thái đơn hàng đã được khóa.</div>
                     </c:if>
                     <c:if test="${currentUser.banHangTaiQuay and hoaDon.trang_thai_hien_tai == 0 and hoaDon.loai_don == 0 and hoaDon.id_nhan_vien == currentUser.id}">
                         <div class="invoice-actions">
@@ -82,7 +87,7 @@
                         </div>
                     </c:if>
                     <p><strong>Phương thức:</strong> <c:out value="${hoaDon.phuong_thuc}"/> · <strong>Thanh toán:</strong> ${hoaDon.da_thanh_toan ? 'Đã thanh toán' : 'Chưa thanh toán'}</p>
-<c:if test="${currentUser.quanLy and empty hoaDon.id_khach_hang and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 4}"><form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/giao-khach-vang-lai" data-xac-nhan-thanh-toan data-tieu-de="Xác nhận giao thành công" data-tong-tien="${hoaDon.tong_tien_sau_giam}" data-noi-dung="Xác nhận đã giao hàng cho khách vãng lai. Trạng thái đơn sẽ được khóa."><button class="button secondary">Xác nhận đã giao hàng</button></form></c:if>
+<c:if test="${not empty hoaDon.vanDonGhn.ma_van_don}"><p><strong>Mã vận đơn:</strong> <c:out value="${hoaDon.vanDonGhn.ma_van_don}"/></p></c:if>
 <div class="invoice-info">
                         <div class="invoice-info-card">
                             <h3>Thông tin khách hàng</h3>
@@ -157,11 +162,9 @@
                                 <li class="delivery-step ${hoaDon.trang_thai_hien_tai > 1 ? 'is-done' : 'is-current'}"><span class="delivery-step-number">1</span><strong>Khách đặt đơn</strong><small>${hoaDon.trang_thai_hien_tai > 1 ? 'Đã xong' : 'Hiện tại'}</small></li>
                                 <li class="delivery-step ${hoaDon.trang_thai_hien_tai > 2 ? 'is-done' : (hoaDon.trang_thai_hien_tai == 2 ? 'is-current' : 'is-waiting')}"><span class="delivery-step-number">2</span><strong>Admin xác nhận đơn</strong><small>${hoaDon.trang_thai_hien_tai > 2 ? 'Đã xong' : (hoaDon.trang_thai_hien_tai == 2 ? 'Hiện tại' : 'Đang chờ')}</small></li>
                                 <li class="delivery-step ${hoaDon.trang_thai_hien_tai > 3 ? 'is-done' : (hoaDon.trang_thai_hien_tai == 3 ? 'is-current' : 'is-waiting')}"><span class="delivery-step-number">3</span><strong>Đang chuẩn bị hàng</strong><small>${hoaDon.trang_thai_hien_tai > 3 ? 'Đã xong' : (hoaDon.trang_thai_hien_tai == 3 ? 'Hiện tại' : 'Đang chờ')}</small></li>
-                                <li class="delivery-step ${hoaDon.trang_thai_hien_tai > 4 ? 'is-done' : (hoaDon.trang_thai_hien_tai == 4 ? 'is-current' : 'is-waiting')}"><span class="delivery-step-number">4</span><strong>Gửi hàng cho shipper</strong><small>${hoaDon.trang_thai_hien_tai > 4 ? 'Đã xong' : (hoaDon.trang_thai_hien_tai == 4 ? 'Đang vận chuyển' : 'Đang chờ')}</small></li>
-                                <li class="delivery-step ${hoaDon.trang_thai_hien_tai == 5 ? 'is-done' : 'is-waiting'}"><span class="delivery-step-number">5</span><strong>Khách xác nhận đã nhận</strong><small>${hoaDon.trang_thai_hien_tai == 5 ? 'Đã xong' : 'Đang chờ'}</small></li>
-                                <c:if test="${hoaDon.phuong_thuc == 'COD'}">
-                                    <li class="delivery-step ${hoaDon.da_thanh_toan ? 'is-done' : (hoaDon.trang_thai_hien_tai == 5 ? 'is-current' : 'is-waiting')}"><span class="delivery-step-number">6</span><strong>Shipper đã thu COD</strong><small>${hoaDon.da_thanh_toan ? 'Đã thu tiền' : (hoaDon.trang_thai_hien_tai == 5 ? 'Chờ xác nhận thu tiền' : 'Chờ khách nhận hàng')}</small></li>
-                                </c:if>
+                                <li class="delivery-step ${hoaDon.trang_thai_hien_tai >= 4 ? 'is-done' : 'is-waiting'}"><span class="delivery-step-number">4</span><strong>Gửi hàng cho shipper</strong><small>${hoaDon.trang_thai_hien_tai >= 4 ? 'Đã bàn giao' : 'Đang chờ'}</small></li>
+                                <li class="delivery-step ${hoaDon.trang_thai_hien_tai > 4 ? 'is-done' : (hoaDon.trang_thai_hien_tai == 4 ? 'is-current' : 'is-waiting')}"><span class="delivery-step-number">5</span><strong>Đang vận chuyển</strong><small>${hoaDon.trang_thai_hien_tai > 4 ? 'Đã xong' : (hoaDon.trang_thai_hien_tai == 4 ? 'Hiện tại' : 'Đang chờ')}</small></li>
+                                <li class="delivery-step ${hoaDon.trang_thai_hien_tai == 5 ? 'is-done' : 'is-waiting'}"><span class="delivery-step-number">6</span><strong>Khách xác nhận đã nhận hàng</strong><small>${hoaDon.trang_thai_hien_tai == 5 ? 'Đã xong' : 'Đang chờ'}</small></li>
                             </ol></c:otherwise>
                         </c:choose>
                     </section>

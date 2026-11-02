@@ -92,7 +92,7 @@ public class TaiKhoanService {
     public Map<String, Object> layThongTinNhanVien(Integer id) {
         List<Map<String, Object>> danhSach = jdbcTemplate.queryForList("""
                 SELECT nv.ma_nhan_vien AS ma_tai_khoan, nv.ten_nhan_vien AS ho_ten, nv.email,
-                       nv.so_dien_thoai, nv.ngay_sinh, nv.dia_chi_cu_the, nv.phuong, nv.quan, nv.thanh_pho,
+                       nv.so_dien_thoai, nv.ngay_sinh, nv.dia_chi_cu_the, nv.phuong, nv.quan, nv.thanh_pho,nv.anh_nhan_vien AS anh_dai_dien,
                        qh.ten_quyen_han AS vai_tro
                 FROM nhan_vien nv JOIN quyen_han qh ON qh.id = nv.id_quyen_han
                 WHERE nv.id = ? AND ISNULL(nv.xoa_mem, 0) = 0 AND ISNULL(nv.trang_thai, 1) = 1
@@ -103,7 +103,7 @@ public class TaiKhoanService {
     public Map<String, Object> layThongTinKhachHang(Integer id) {
         List<Map<String, Object>> danhSach = jdbcTemplate.queryForList("""
                 SELECT TOP 1 kh.ma_khach_hang AS ma_tai_khoan, kh.ten_khach_hang AS ho_ten,
-                       kh.ten_tai_khoan, kh.email, kh.so_dien_thoai, kh.ngay_sinh,
+                       kh.ten_tai_khoan, kh.email, kh.so_dien_thoai, kh.ngay_sinh, CAST(kh.gioi_tinh AS int) AS gioi_tinh,kh.anh_dai_dien,
                        dc.dia_chi_cu_the, dc.phuong, dc.quan, dc.thanh_pho, N'Khách hàng' AS vai_tro
                 FROM khach_hang kh
                 LEFT JOIN dia_chi_khach_hang dc ON dc.id_khach_hang = kh.id AND ISNULL(dc.xoa_mem, 0) = 0

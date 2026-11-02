@@ -7,7 +7,8 @@ if (chonPhieuOnline) {
         var giamDot = Number(chonPhieuOnline.dataset.giamDot);
         var phieu = chonPhieuOnline.options[chonPhieuOnline.selectedIndex];
         var giamPhieu = Number(phieu.dataset.giam || 0);
-        var giam = Math.min(tongGoc, Math.max(giamDot, giamPhieu));
+        var dungPhieuTien = chonPhieuOnline.value && phieu.dataset.freeship !== 'true';
+        var giam = Math.min(tongGoc, dungPhieuTien ? giamPhieu : giamDot);
         var phiGoc = choPhi ? 0 : Number(chonPhieuOnline.dataset.phiGoc || 0);
         var giamPhi = Math.min(phiGoc, Number(phieu.dataset.giamPhi || 0));
         var phi = phiGoc - giamPhi;
@@ -20,17 +21,20 @@ if (chonPhieuOnline) {
         if (nhanTong) nhanTong.textContent = choPhi ? 'Tạm tính, chưa gồm phí giao hàng' : 'Tổng thanh toán';
         document.getElementById('formThanhToanOnline').dataset.tongTien = tong;
         var thongBao = giamDot > 0
-            ? 'Đơn có sản phẩm đang giảm giá chỉ được dùng voucher freeship.'
+            ? 'Chọn phiếu giảm tiền hàng sẽ áp dụng mức giảm của phiếu thay cho đợt giảm giá.'
             : 'Chọn phiếu để được giảm giá đơn hàng.';
         if (chonPhieuOnline.value) {
             thongBao = phieu.dataset.freeship === 'true'
-                ? (giamPhi > 0 ? 'Đã áp dụng phiếu giảm phí vận chuyển.' : 'Đơn đang miễn phí vận chuyển. Không trừ lượt phiếu freeship.')
-                : 'Đã chọn phiếu giảm giá.';
+                ? (giamPhi > 0 ? 'Đã áp dụng phiếu giảm phí vận chuyển.' : 'Đơn đang miễn phí vận chuyển. Không trừ lượt phiếu giảm giá vận chuyển.')
+                : 'Đã áp dụng phiếu giảm giá bạn chọn.';
         }
-        if (choPhi) thongBao = 'Phí GHN sẽ tự động cập nhật khi đủ địa chỉ. Phiếu freeship được tính sau khi có phí giao hàng.';
+        if (choPhi) thongBao = 'Phí GHN sẽ tự động cập nhật khi đủ địa chỉ. Phiếu giảm giá vận chuyển được tính sau khi có phí giao hàng.';
         document.getElementById('thongBaoPhieu').textContent = thongBao;
     }
-    chonPhieuOnline.onchange = capNhatPhieuOnline;
+    chonPhieuOnline.onchange = function (event) {
+        if (event) chonPhieuOnline.dataset.tuChon = 'true';
+        capNhatPhieuOnline();
+    };
     capNhatPhieuOnline();
 }
 

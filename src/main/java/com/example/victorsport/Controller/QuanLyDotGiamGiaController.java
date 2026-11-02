@@ -50,8 +50,6 @@ public class QuanLyDotGiamGiaController {
         if (quanLy(session, model) == null) return "redirect:/login";
         model.addAttribute("duongDanLuu", "/quan-ly/dot-giam-gia/luu");
         if (!model.containsAttribute("uuDai")) model.addAttribute("uuDai", Map.of("trang_thai", true));
-        try { model.addAttribute("cacMucUuTien", service.cacMucUuTien()); }
-        catch (DataAccessException e) { model.addAttribute("error", "Chưa tải được mức ưu tiên. Vui lòng thử lại."); }
         return "admin/promotion/update";
     }
 
@@ -60,7 +58,6 @@ public class QuanLyDotGiamGiaController {
         if (quanLy(session, model) == null) return "redirect:/login";
         try {
             var data = service.lay(id);
-            model.addAttribute("cacMucUuTien", service.cacMucUuTien());
             if (!model.containsAttribute("uuDai")) model.addAttribute("uuDai", data);
             model.addAttribute("idUuDai", id);
             model.addAttribute("duongDanLuu", "/quan-ly/dot-giam-gia/" + id + "/luu");

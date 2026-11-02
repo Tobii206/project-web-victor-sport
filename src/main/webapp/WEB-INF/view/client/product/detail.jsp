@@ -9,9 +9,10 @@
     <title><c:out value="${sanPham.ten_san_pham}" default="Chi tiết sản phẩm"/> — VictorSport</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1">
-    <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-complete-1">
+    <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2">
+    <link rel="stylesheet" href="/css/chi-tiet-san-pham.css?v=20261023-1">
 </head>
 <body><%@ include file="/WEB-INF/view/client/layout/header.jsp" %>
 <main class="store-container online-container">
@@ -30,9 +31,10 @@
             <p class="online-price"><span id="giaBan">Chọn mẫu giày</span> <del id="giaGoc" hidden></del></p>
             <p id="tonKho" class="subtle">Chọn kích thước và màu để xem tồn kho.</p>
             <form method="post" action="/san-pham/${sanPham.id}/chon" id="formChonGiay">
-                <fieldset class="online-variants"><legend>Kích thước · Màu sắc · Dáng giày
+                <fieldset class="online-variants"><legend><span>Kích thước · Màu sắc · Dáng giày</span>
                     <button type="button" id="moHuongDanSize" class="size-guide-button" aria-haspopup="dialog" aria-controls="huongDanSize">Hướng dẫn chọn size</button>
                 </legend>
+                    <div class="online-variant-grid">
                     <c:set var="daChon" value="false"/>
                     <c:forEach items="${phienBan}" var="pb">
                         <c:set var="anhMau" value="${pb.anh}"/>
@@ -45,6 +47,7 @@
                             <span><strong><c:out value="${pb.ten_kich_thuoc}"/></strong><small><c:out value="${pb.ten_mau_sac}"/> · <c:out value="${pb.ten_form_chan}"/></small><c:if test="${pb.so_luong <= 0}"><small>Hết hàng</small></c:if></span>
                         </label>
                     </c:forEach>
+                    </div>
                 </fieldset>
                 <c:if test="${empty phienBan}"><p>Sản phẩm hiện chưa có mẫu để chọn.</p></c:if>
                 <div class="online-purchase">
@@ -221,5 +224,5 @@
 </footer>
 <button type="button" class="back-to-top" id="backToTopBtn" aria-label="Lên đầu trang">↑</button>
 <script src="/js/san-pham-online.js?v=20261019-single-product-image"></script>
-<script src="/js/victor-modern.js?v=20261023-countdown"></script>
+<script src="/js/victor-modern.js?v=20261023-slider-2"></script>
 </body></html>

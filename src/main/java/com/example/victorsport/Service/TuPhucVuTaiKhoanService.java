@@ -38,20 +38,26 @@ public class TuPhucVuTaiKhoanService {
         String email=emailHopLe(form); kiemTraMatKhau(mk,nhapLai); kiemTraEmailTrung(email,null);
         // Tên tài khoản tối đa 50 ký tự trong database. Khách đăng nhập bằng email.
         String tenTaiKhoan=email.length()<=50?email:"kh_"+UUID.randomUUID().toString().replace("-","");
-        return jdbc.queryForObject("""
+        int id=jdbc.queryForObject("""
             INSERT INTO khach_hang(ten_khach_hang,ten_tai_khoan,email,so_dien_thoai,mat_khau,trang_thai,xoa_mem)
             OUTPUT INSERTED.id VALUES (?,?,?,?,?,1,0)
             """,Integer.class,form.hoTen().trim(),tenTaiKhoan,email,form.sdt(),new BCryptPasswordEncoder().encode(mk));
+        jdbc.update("UPDATE khach_hang SET nguoi_tao=id WHERE id=?",id);
+        return id;
     }
     public Map<String,Object> thongTin(int id) {
-        var ds=jdbc.queryForList("SELECT id,ten_khach_hang AS hoTen,email,so_dien_thoai AS sdt FROM khach_hang WHERE id=? AND trang_thai=1 AND ISNULL(xoa_mem,0)=0",id);
+        var ds=jdbc.queryForList("SELECT id,ten_khach_hang AS hoTen,email,so_dien_thoai AS sdt,ngay_sinh AS ngaySinh,CAST(gioi_tinh AS int) AS gioiTinh FROM khach_hang WHERE id=? AND trang_thai=1 AND ISNULL(xoa_mem,0)=0",id);
         if(ds.isEmpty()) throw new IllegalArgumentException("Tài khoản không còn hoạt động.");
         return ds.get(0);
     }
     @Transactional
     public void capNhat(int id,TaiKhoanKhachForm form) {
+        if(form.ngaySinh()!=null && form.ngaySinh().isAfter(java.time.LocalDate.now()))
+            throw new IllegalArgumentException("Ngày sinh không được ở tương lai.");
+        if(form.gioiTinh()!=null && form.gioiTinh()!=0 && form.gioiTinh()!=1)
+            throw new IllegalArgumentException("Chọn giới tính hợp lệ.");
         thongTin(id); String email=emailHopLe(form); kiemTraEmailTrung(email,id);
-        jdbc.update("UPDATE khach_hang SET ten_khach_hang=?,email=?,so_dien_thoai=?,ngay_cap_nhat=SYSDATETIME() WHERE id=? AND trang_thai=1 AND ISNULL(xoa_mem,0)=0",form.hoTen().trim(),email,form.sdt(),id);
+        jdbc.update("UPDATE khach_hang SET ten_khach_hang=?,email=?,so_dien_thoai=?,ngay_sinh=?,gioi_tinh=?,ngay_cap_nhat=SYSDATETIME(),nguoi_cap_nhat=? WHERE id=? AND trang_thai=1 AND ISNULL(xoa_mem,0)=0",form.hoTen().trim(),email,form.sdt(),form.ngaySinh(),form.gioiTinh(),id,id);
     }
     @Transactional
     public void doiMatKhau(int id,String cu,String moi,String nhapLai) {
@@ -59,6 +65,6 @@ public class TuPhucVuTaiKhoanService {
         var ds=jdbc.queryForList("SELECT mat_khau FROM khach_hang WITH (UPDLOCK,HOLDLOCK) WHERE id=? AND trang_thai=1 AND ISNULL(xoa_mem,0)=0",id);
         if(ds.isEmpty() || !dungMatKhau(cu,(String)ds.get(0).get("mat_khau"))) throw new IllegalArgumentException("Mật khẩu hiện tại chưa đúng.");
         if(cu.equals(moi)) throw new IllegalArgumentException("Mật khẩu mới phải khác mật khẩu hiện tại.");
-        jdbc.update("UPDATE khach_hang SET mat_khau=?,ngay_cap_nhat=SYSDATETIME() WHERE id=?",new BCryptPasswordEncoder().encode(moi),id);
+        jdbc.update("UPDATE khach_hang SET mat_khau=?,ngay_cap_nhat=SYSDATETIME(),nguoi_cap_nhat=? WHERE id=?",new BCryptPasswordEncoder().encode(moi),id,id);
     }
 }

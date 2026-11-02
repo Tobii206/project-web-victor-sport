@@ -42,7 +42,16 @@ window.VictorKhoiTaoGhn = function () {
                 }
                 throw new Error(error ? error.textContent.trim() : 'Chưa lấy được phí GHN. Vui lòng thử lại.');
             }
+            var phieuCu = document.getElementById('phieuGiamGiaOnline');
+            var luaChonCu = phieuCu && phieuCu.dataset.tuChon === 'true' ? phieuCu.value : null;
             document.querySelector('.checkout-summary').replaceWith(tongKet);
+            var phieuMoi = document.getElementById('phieuGiamGiaOnline');
+            if (luaChonCu !== null && phieuMoi && Array.from(phieuMoi.options).some(function (o) {
+                return o.value === luaChonCu && !o.disabled;
+            })) {
+                phieuMoi.value = luaChonCu;
+                phieuMoi.dataset.tuChon = 'true';
+            }
             if (window.VictorKhoiTaoPhieuOnline) window.VictorKhoiTaoPhieuOnline();
             daDoi = false;datHang.disabled = false;
             trangThaiPhi.textContent = '';
@@ -66,7 +75,7 @@ window.VictorKhoiTaoGhn = function () {
             phieu.dataset.choPhi = 'true';
             Array.from(phieu.options).forEach(function (option) {
                 if (option.dataset.noiThanh === 'true') {
-                    if (option.selected) phieu.value = '';
+                    if (option.selected) { phieu.value = '';delete phieu.dataset.tuChon; }
                     option.hidden = true;option.disabled = true;
                 }
             });

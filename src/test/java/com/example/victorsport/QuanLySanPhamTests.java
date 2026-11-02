@@ -92,14 +92,14 @@ class QuanLySanPhamTests {
     @Test void loiNhapLieuGiuLaiThongTin() throws Exception {
         var service=mock(QuanLySanPhamService.class);
         when(service.luu(isNull(),anyMap(),eq(1))).thenThrow(new IllegalArgumentException("Chọn thương hiệu."));
-        mvc(service).perform(post("/quan-ly/san-pham/luu").session(session()).param("ten_san_pham","Giày mới").param("trang_thai_kinh_doanh","1"))
+        mvc(service).perform(post("/quan-ly/san-pham/luu").session(session()).param("ten_san_pham","Giày mới").param("trang_thai_kinh_doanh","1").param("gia_ban","2490000"))
             .andExpect(redirectedUrl("/quan-ly/san-pham/them")).andExpect(flash().attribute("error","Chọn thương hiệu."))
-            .andExpect(flash().attribute("sanPham",Map.of("ten_san_pham","Giày mới","trang_thai_kinh_doanh",true)));
+            .andExpect(flash().attribute("sanPham",Map.of("ten_san_pham","Giày mới","trang_thai_kinh_doanh",true,"gia_ban","2490000")));
     }
     @Test void themThanhCongMoChiTietDeThemMau() throws Exception {
         var service=mock(QuanLySanPhamService.class);when(service.luu(isNull(),anyMap(),eq(1))).thenReturn(99);
         mvc(service).perform(post("/quan-ly/san-pham/luu").session(session())
-                .param("ten_san_pham","Giày mới").param("id_thuong_hieu","1").param("trang_thai_kinh_doanh","1"))
+                .param("ten_san_pham","Giày mới").param("id_thuong_hieu","1").param("trang_thai_kinh_doanh","1").param("gia_ban","2490000"))
                 .andExpect(redirectedUrl("/quan-ly/san-pham/99"));
     }
     @Test void tepKhongPhaiAnhKhongDuocGhiDatabase() throws Exception {

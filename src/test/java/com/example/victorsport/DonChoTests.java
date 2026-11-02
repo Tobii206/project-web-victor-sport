@@ -30,7 +30,7 @@ class DonChoTests {
         service = spy(new BanHangTaiQuayService(jdbc));
         gioHang = new GioHangTaiQuay();
         nhanVien = new NguoiDungDangNhap(2, "nv@example.com", "Nhân viên", "Bán hàng");
-        yeuCau = new BanHangTaiQuayService.YeuCauThanhToan(null, null, null, null, null, 1, null, null);
+        yeuCau = new BanHangTaiQuayService.YeuCauThanhToan(null, null, null, null, null, 1, null, null,BigDecimal.ZERO);
         doReturn(new TongKetBanHang(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, "Không áp dụng", null))
                 .when(service).tinhTongKet(any(GioHangTaiQuay.class), nullable(Integer.class));
     }

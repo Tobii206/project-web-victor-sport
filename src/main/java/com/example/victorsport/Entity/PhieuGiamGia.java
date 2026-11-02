@@ -19,6 +19,10 @@ public class PhieuGiamGia {
 
     @Column(name = "loai_phieu_giam_gia")
     private Boolean loaiPhieuGiamGia;
+    @Column(name = "ap_dung_van_chuyen")
+    private Boolean apDungVanChuyen;
+    @Column(name = "chi_ap_dung_ha_noi")
+    private Boolean chiApDungHaNoi;
 
     @Column(name = "gia_tri_giam_gia")
     private BigDecimal giaTriGiamGia;

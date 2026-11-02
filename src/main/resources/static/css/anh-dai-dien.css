@@ -1,0 +1,12 @@
+.account-avatar { overflow: hidden; }
+.account-avatar img { width: 40px; height: 40px; }
+.account-avatar.has-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.account-sidebar .account-avatar-form { position: relative; margin: -6px 0 22px; padding: 0; border: 0; display: grid; gap: 9px; min-width: 0; }
+.account-avatar-form label { font-size: 13px; font-weight: 600; color: #294261; }
+.account-avatar-form input[type=file] { width: 100%; min-width: 0; color: #67788e; font: inherit; font-size: 11px; }
+.account-avatar-form input::file-selector-button { padding: 8px 10px; border: 1px solid #dde6ef; border-radius: 8px; background: #f7f9fc; color: #294261; cursor: pointer; margin-right: 7px; }
+.account-avatar-form small { color: #7a899c; font-size: 11px; line-height: 1.6; }
+.account-sidebar .account-avatar-form .store-button { margin: 0; padding: 9px 12px; }
+.account-avatar-form small.is-error { color: #c94040; }
+.account-avatar-form input[hidden], .account-avatar-form small:empty { display: none; }
+.account-avatar-form button:disabled { opacity: .65; cursor: wait; }

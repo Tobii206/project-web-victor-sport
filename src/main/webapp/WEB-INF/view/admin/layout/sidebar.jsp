@@ -37,7 +37,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8l10 10-8 8L3 11z"/><circle cx="7.5" cy="7.5" r="1"/><path d="m11 10 5 5"/></svg><span>Quản lý đợt giảm giá</span>
         </a>
         <a class="menu-item ${activeMenu == 'phieu-giam-gia' ? 'active' : ''}" href="/quan-ly/phieu-giam-gia" aria-current="${activeMenu == 'phieu-giam-gia' ? 'page' : 'false'}">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4zM14 6v3M14 11v2M14 15v3"/></svg><span>Quản lý phiếu giảm giá</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4zM14 6v3M14 11v2M14 15v3"/></svg><span>Phiếu giảm giá</span>
         </a>
         <p class="menu-caption">CHỨC NĂNG QUẢN LÝ</p>
         <a class="menu-item ${activeMenu == 'nhan-vien' ? 'active' : ''}" href="/quan-ly/nhan-vien" aria-current="${activeMenu == 'nhan-vien' ? 'page' : 'false'}">
@@ -47,5 +47,8 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="3.5"/><path d="M2 21v-2a7 7 0 0 1 14 0v2M16 4a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 4 5v2"/></svg><span>Quản lý khách hàng</span>
         </a>
         </c:if>
+        <a class="menu-item" href="/tai-khoan">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg><span>Tài khoản của tôi</span>
+        </a>
     </nav>
 </aside>

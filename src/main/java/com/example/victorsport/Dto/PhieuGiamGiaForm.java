@@ -6,6 +6,14 @@ import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public class PhieuGiamGiaForm {
+    @NotNull @Min(0) @Max(1)
+    private Integer ap_dung_van_chuyen=0;
+    @NotNull @Min(0) @Max(1)
+    private Integer chi_ap_dung_ha_noi=0;
+    public Integer getAp_dung_van_chuyen() { return ap_dung_van_chuyen; }
+    public void setAp_dung_van_chuyen(Integer value) { ap_dung_van_chuyen=value; }
+    public Integer getChi_ap_dung_ha_noi() { return chi_ap_dung_ha_noi; }
+    public void setChi_ap_dung_ha_noi(Integer value) { chi_ap_dung_ha_noi=value; }
     @Min(value = 0, message = "Số lượt sử dụng cũ không được âm.")
     private Integer so_luong_cu;
 
