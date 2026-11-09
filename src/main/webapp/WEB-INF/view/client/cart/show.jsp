@@ -12,8 +12,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1">
-    <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2">
+    <link rel="stylesheet" href="/css/trang-chu.css?v=20261107-balanced">
+    <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable">
+    <link rel="stylesheet" href="/css/chon-mua-gio-hang.css?v=20261107-balanced">
 </head>
 <body>
 <%@ include file="/WEB-INF/view/client/layout/header.jsp" %>
@@ -31,9 +32,12 @@
         <div class="online-success" role="status" data-vs-flash="success"><c:out value="${success}"/></div>
     </c:if>
 
+    <c:if test="${not empty danhSach}"><div class="cart-selection-controls"><label><input type="checkbox" id="chonTatCaGio"> Chọn tất cả</label><span id="soMauDaChon" role="status"></span></div></c:if>
     <c:forEach items="${danhSach}" var="dong">
         <div class="account-card online-cart-row">
-            <div>
+            <div class="cart-product-choice">
+                <label class="cart-item-checkbox"><input type="checkbox" name="idMau" value="${dong.id}" form="formChonMuaGio" data-chon-mua data-thanh-tien="${dong.thanh_tien}" ${empty mauChonMua or mauChonMua.contains(dong.id) ? 'checked' : ''} aria-label="Chọn <c:out value='${dong.ten_san_pham}'/>"></label>
+                <div>
                 <a href="/san-pham/${dong.id_san_pham}" style="font-family: var(--vs-font-heading); font-size: 17px; font-weight: 700; color: #0f172a;">
                     <c:out value="${dong.ten_san_pham}"/>
                 </a>
@@ -46,6 +50,7 @@
                         <del class="gia-goc"><fmt:formatNumber value="${dong.gia_ban}"/> đ</del>
                     </c:if>
                 </p>
+                </div>
             </div>
 
             <form method="post" action="/gio-hang/sua">
@@ -87,12 +92,12 @@
     <c:if test="${not empty danhSach}">
         <div class="online-cart-bottom" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
             <a href="/#san-pham" style="font-weight: 600; color: #64748b;">← Tiếp tục mua sắm</a>
-            <div style="display: flex; align-items: center; gap: 24px;">
-                <span style="font-size: 15px; color: #64748b;">Tổng tiền:</span>
-                <strong style="font-family: var(--vs-font-heading); font-size: 26px; font-weight: 800; color: #ff5e1e;">
+            <div class="cart-selected-summary">
+                <span style="font-size: 15px; color: #64748b;">Tổng tiền đã chọn:</span>
+                <strong id="tongTienDaChon" style="font-family: var(--vs-font-heading); font-size: 26px; font-weight: 800; color: #ff5e1e;">
                     <fmt:formatNumber value="${tongTien}"/> đ
                 </strong>
-                <a class="store-button" href="/thanh-toan">Tiến hành đặt hàng →</a>
+                <form id="formChonMuaGio" method="post" action="/gio-hang/chon-mua"><input type="hidden" name="csrfChonGio" value="${csrfChonGio}"><button class="store-button" id="nutMuaDaChon" type="submit">Mua sản phẩm đã chọn →</button></form>
             </div>
         </div>
     </c:if>
@@ -143,5 +148,6 @@
 </footer>
 <button type="button" class="back-to-top" id="backToTopBtn" aria-label="Lên đầu trang">↑</button>
 <script src="/js/victor-modern.js?v=20261023-slider-2"></script>
+<script src="/js/chon-mua-gio-hang.js?v=20261103-1"></script>
 </body>
 </html>

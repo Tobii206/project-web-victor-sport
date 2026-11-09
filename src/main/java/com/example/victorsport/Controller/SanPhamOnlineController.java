@@ -1,6 +1,7 @@
 package com.example.victorsport.Controller;
 
 import com.example.victorsport.Service.SanPhamOnlineService;
+import com.example.victorsport.Service.QuanLySanPhamService;
 import com.example.victorsport.Dto.ThanhToanForm;
 import com.example.victorsport.Service.KiemTraForm;
 import jakarta.validation.Valid;
@@ -27,11 +28,13 @@ public class SanPhamOnlineController {
     public String chiTiet(@PathVariable int id, Model model) {
         try {
             model.addAttribute("sanPham", service.laySanPham(id));
+            model.addAttribute("cacDoiTuong", QuanLySanPhamService.DOI_TUONG);
             List<Map<String, Object>> phienBan = service.layPhienBan(id);
             int tongTonKho = 0;
             for (Map<String, Object> mau : phienBan) tongTonKho += ((Number) mau.get("so_luong")).intValue();
             model.addAttribute("phienBan", phienBan);
             model.addAttribute("tongTonKho", tongTonKho);
+            model.addAttribute("boAnh", service.layBoAnh(id));
         } catch (IllegalArgumentException loi) { model.addAttribute("error", loi.getMessage()); }
         catch (DataAccessException loi) { model.addAttribute("error", "Chưa tải được sản phẩm. Vui lòng thử lại sau."); }
         if (model.containsAttribute("sanPham")) {
@@ -58,7 +61,9 @@ public class SanPhamOnlineController {
             if(kh!=null) session.setAttribute("gioHangOnline",service.themVaoGioDaLuu(kh,idPhienBan,soLuong));
             else {
                 Map<Integer, Integer> gio = layGio(session, "gioHangOnline");
-                int tong = gio.getOrDefault(idPhienBan, 0) + soLuong;
+                long tongMoi = gio.getOrDefault(idPhienBan, 0).longValue() + soLuong;
+                if (tongMoi > Integer.MAX_VALUE) throw new IllegalArgumentException("Số lượng vượt tồn kho.");
+                int tong = (int) tongMoi;
                 service.kiemTraSoLuong(pb, tong);
                 gio.put(idPhienBan, tong);
             }
@@ -71,12 +76,37 @@ public class SanPhamOnlineController {
     @GetMapping("/gio-hang")
     public String gioHang(HttpSession session, Model model) {
         hienThiGio(session,"gioHangOnline", model);
+        if(session.getAttribute("csrfChonGio")==null) session.setAttribute("csrfChonGio",java.util.UUID.randomUUID().toString());
+        model.addAttribute("csrfChonGio",session.getAttribute("csrfChonGio"));
+        model.addAttribute("mauChonMua",session.getAttribute("mauChonMuaOnline"));
         return "client/cart/show";
+    }
+
+    @PostMapping("/gio-hang/chon-mua")
+    public String chonMua(@RequestParam(required=false) List<Integer> idMau,@RequestParam(required=false) String csrfChonGio,
+                          HttpSession session,RedirectAttributes flash) {
+        if(csrfChonGio==null || !csrfChonGio.equals(session.getAttribute("csrfChonGio")))
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN);
+        synchronized(session) {
+            try {
+                var gio=layGio(session,"gioHangOnline");
+                if(idMau==null || idMau.isEmpty()) throw new IllegalArgumentException("Vui lòng chọn ít nhất một sản phẩm để mua.");
+                var chon=new java.util.LinkedHashSet<>(idMau);
+                if(chon.stream().anyMatch(id->id==null || !gio.containsKey(id)))
+                    throw new IllegalArgumentException("Sản phẩm đã chọn không còn trong giỏ hàng. Vui lòng chọn lại.");
+                session.setAttribute("mauChonMuaOnline",chon);
+                session.removeAttribute("baoGiaGhn_gioHangOnline");
+                return "redirect:/thanh-toan";
+            } catch(IllegalArgumentException ex) {flash.addFlashAttribute("error",ex.getMessage());}
+            catch(DataAccessException ex) {flash.addFlashAttribute("error","Chưa lấy được sản phẩm đã chọn. Vui lòng thử lại.");}
+            return "redirect:/gio-hang";
+        }
     }
 
     @PostMapping("/gio-hang/sua")
     public String sua(@RequestParam int idPhienBan, @RequestParam int soLuong, HttpSession session, RedirectAttributes tb) {
         try {
+            if (soLuong < 0) throw new IllegalArgumentException("Số lượng không được âm.");
             Integer kh=(Integer)session.getAttribute("khachHangOnlineDangNhap");
             if(kh!=null) {
                 session.setAttribute("gioHangOnline",service.suaGioDaLuu(kh,idPhienBan,soLuong));
@@ -102,6 +132,7 @@ public class SanPhamOnlineController {
                     && session.getAttribute("nguoiDungDangNhap") == null) {
                 session.removeAttribute("gioHangOnline");
                 session.removeAttribute("muaNgayOnline");
+                session.removeAttribute("mauChonMuaOnline");
             }
         }
     }
@@ -111,7 +142,7 @@ public class SanPhamOnlineController {
                             jakarta.servlet.http.HttpServletResponse response) {
         response.setHeader("Cache-Control","no-store");
         model.addAttribute("loai", "mua".equals(loai) ? "mua" : "gio");
-        hienThiGio(session, khoaGio(loai), model);
+        hienThiGio(session, khoaGio(loai), model,true);
         model.addAttribute("dungGhn",service.dungGhn());
         if(session.getAttribute("csrfGhn")==null) session.setAttribute("csrfGhn",java.util.UUID.randomUUID().toString());
         model.addAttribute("csrfGhn",session.getAttribute("csrfGhn"));
@@ -188,7 +219,7 @@ public class SanPhamOnlineController {
                     diaChi=diaChiService.chiTiet(kh,form.getIdDiaChi()).get(service.dungGhn()?"dia_chi_cu_the":"dia_chi_day_du").toString();
                 }
                 if(form.getTinhGhn()==null || form.getXaGhn()==null) throw new IllegalArgumentException("Vui lòng chọn tỉnh/thành và phường/xã giao hàng.");
-                var q=service.baoGiaGhn(layGio(session,khoaGio(loai)),form.getTen(),form.getSdt(),diaChi,form.getPhuongThuc(),form.getTinhGhn(),form.getXaGhn());
+                var q=service.baoGiaGhn(layGioThanhToan(session,khoaGio(loai)),form.getTen(),form.getSdt(),diaChi,form.getPhuongThuc(),form.getTinhGhn(),form.getXaGhn());
                 session.setAttribute("baoGiaGhn_"+khoaGio(loai),q);
                 tb.addFlashAttribute("success","Đã cập nhật phí GHN. Kiểm tra địa chỉ và tổng tiền trước khi đặt hàng.");
             }catch(IllegalArgumentException | IllegalStateException e){tb.addFlashAttribute("error",e.getMessage());}
@@ -208,7 +239,7 @@ public class SanPhamOnlineController {
         synchronized (session) {
             try {
                 KiemTraForm.kiemTra(loiForm);
-                Map<Integer, Integer> gio = layGio(session, khoaGio(loai));
+                Map<Integer, Integer> gio = layGioThanhToan(session, khoaGio(loai));
                 Integer kh = (Integer) session.getAttribute("khachHangOnlineDangNhap");
                 if(form.getIdDiaChi()!=null) {
                     if(kh==null) throw new IllegalArgumentException("Vui lòng đăng nhập để sử dụng địa chỉ đã lưu.");
@@ -230,7 +261,9 @@ public class SanPhamOnlineController {
                 else if ("QR".equals(form.getPhuongThuc()))
                     id = service.datHang(gio, kh, ten, sdt, diaChi,"mua".equals(loai),"QR");
                 else id = service.datHang(gio, kh, ten, sdt, diaChi,"mua".equals(loai));
-                gio.clear();
+                @SuppressWarnings("unchecked") var gioDayDu=(Map<Integer,Integer>)session.getAttribute(khoaGio(loai));
+                if(gioDayDu!=null) gioDayDu.keySet().removeAll(gio.keySet());
+                if(!"mua".equals(loai)) session.removeAttribute("mauChonMuaOnline");
                 if(kh==null) session.setAttribute("donVangLai_"+id,true);
                 if ("QR".equals(form.getPhuongThuc())) {
                     if (kh == null) session.setAttribute("donQr_" + id, true);
@@ -261,8 +294,11 @@ public class SanPhamOnlineController {
     }
 
     private void hienThiGio(HttpSession session,String khoa, Model model) {
+        hienThiGio(session,khoa,model,false);
+    }
+    private void hienThiGio(HttpSession session,String khoa, Model model,boolean thanhToan) {
         try {
-            Map<Integer,Integer> gio=layGio(session,khoa);
+            Map<Integer,Integer> gio=thanhToan?layGioThanhToan(session,khoa):layGio(session,khoa);
             model.addAttribute("gioDaChon", gio);
             List<Map<String, Object>> ds = service.layGioHang(gio);
             model.addAttribute("danhSach", ds); model.addAttribute("tongTien", service.tinhTong(ds));
@@ -277,16 +313,28 @@ public class SanPhamOnlineController {
 
     private String khoaGio(String loai) { return "mua".equals(loai) ? "muaNgayOnline" : "gioHangOnline"; }
 
+    private Map<Integer,Integer> layGioThanhToan(HttpSession session,String khoa) {
+        var gio=layGio(session,khoa);
+        var ketQua=new LinkedHashMap<Integer,Integer>();
+        if("gioHangOnline".equals(khoa) && session.getAttribute("mauChonMuaOnline") instanceof java.util.Set<?> chon) {
+            if(chon.isEmpty() || !gio.keySet().containsAll(chon)) throw new IllegalArgumentException("Sản phẩm đã chọn đã thay đổi. Vui lòng quay lại giỏ hàng để chọn lại.");
+            gio.forEach((id,soLuong)->{if(chon.contains(id)) ketQua.put(id,soLuong);});
+        } else ketQua.putAll(gio);
+        return ketQua;
+    }
+
     @SuppressWarnings("unchecked")
     private Map<Integer, Integer> layGio(HttpSession session, String khoa) {
         Integer kh=(Integer)session.getAttribute("khachHangOnlineDangNhap");
         if(kh!=null && "gioHangOnline".equals(khoa)) {
             Map<Integer,Integer> gio=service.layGioDaLuu(kh);
+            if(!(gio instanceof LinkedHashMap)) gio=new LinkedHashMap<>(gio);
             session.setAttribute(khoa,gio);
             return gio;
         }
         Map<Integer, Integer> gio = (Map<Integer, Integer>) session.getAttribute(khoa);
         if (gio == null) { gio = new LinkedHashMap<>(); session.setAttribute(khoa, gio); }
+        else if(!(gio instanceof LinkedHashMap)) {gio=new LinkedHashMap<>(gio);session.setAttribute(khoa,gio);}
         return gio;
     }
 }

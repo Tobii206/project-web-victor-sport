@@ -83,6 +83,7 @@ public class DangNhapController {
             phienDangNhap.setAttribute("khachHangOnlineDangNhap", id);
             phienDangNhap.setAttribute("gioHangOnline",gioDaLuu);
             phienDangNhap.removeAttribute("muaNgayOnline");
+            phienDangNhap.removeAttribute("mauChonMuaOnline");
             return "redirect:/";
         } catch (IllegalArgumentException loi) {
             thuocTinhChuyenHuong.addFlashAttribute("error", loi.getMessage());

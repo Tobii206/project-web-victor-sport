@@ -24,6 +24,11 @@ import java.io.IOException;
 public class QuanLySanPhamController {
     private final QuanLySanPhamService service;
     public QuanLySanPhamController(QuanLySanPhamService service) {this.service=service;}
+
+    @ModelAttribute("cacDoiTuong")
+    public List<Map<String, String>> cacDoiTuong() {
+        return QuanLySanPhamService.DOI_TUONG;
+    }
     @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
     public String anhQuaLon(jakarta.servlet.http.HttpServletRequest request,RedirectAttributes flash) {
         flash.addFlashAttribute("error","Ảnh vượt quá dung lượng cho phép. Vui lòng chọn ảnh tối đa 5 MB.");
@@ -60,6 +65,7 @@ public class QuanLySanPhamController {
             model.addAttribute("idSanPham",id);model.addAttribute("maSanPham",sp.get("ma_san_pham"));
             model.addAttribute("danhMuc",service.danhMuc());
             var cacMau=service.layMau(id);var cacAnh=service.layAnh(id);model.addAttribute("cacMau",cacMau);model.addAttribute("cacAnh",cacAnh);
+            model.addAttribute("nhomMau",QuanLySanPhamService.nhomTheoMau(cacMau,cacAnh));
             if(!model.containsAttribute("mauAnhDangChon") && !cacMau.isEmpty()) model.addAttribute("mauAnhDangChon",mau==null?cacMau.get(0).get("id"):mau);
             if (!model.containsAttribute("mauForm")) {
                 Map<String,Object> mauForm=new LinkedHashMap<>(Map.of("trang_thai",true,"so_luong",0));
@@ -116,6 +122,24 @@ public class QuanLySanPhamController {
         catch(IllegalArgumentException e) {flash.addFlashAttribute("error",e.getMessage());}
         return "redirect:/quan-ly/san-pham/"+id+"#mau-giay";
     }
+    @PostMapping("/{id}/mau/them-nhanh")
+    public String themNhanhMau(@PathVariable int id, @RequestParam(required = false) List<Integer> sizes,
+                              @RequestParam Map<String, String> duLieu, HttpSession session,
+                              Model model, RedirectAttributes flash) {
+        var user = nguoiDung(session, model);
+        if (user == null) return "redirect:/login";
+        if (!user.isSuaSanPham()) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN);
+        try {
+            int soMau = service.themNhanhMau(id, sizes, duLieu, user.getId());
+            flash.addFlashAttribute("success", "Đã thêm " + soMau + " mẫu giày.");
+        } catch (IllegalArgumentException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+        } catch (DataAccessException e) {
+            flash.addFlashAttribute("error", "Chưa thêm được các mẫu. Vui lòng thử lại.");
+        }
+        return "redirect:/quan-ly/san-pham/" + id + "#mau-giay";
+    }
+
     @PostMapping("/{id}/anh/them")
     public synchronized String themAnh(@PathVariable int id,@RequestParam int idMau,@RequestParam MultipartFile tepAnh,HttpSession session,Model model,RedirectAttributes flash) {
         if(nguoiDung(session,model)==null)return "redirect:/login";
@@ -138,7 +162,7 @@ public class QuanLySanPhamController {
             }
             service.themAnh(id,idMau,"/image/"+anhDaCo.getFileName());
             flash.addFlashAttribute("mauAnhDangChon",idMau);
-            flash.addFlashAttribute("success",tep==null?"Đã dùng lại ảnh có sẵn cho mẫu giày.":"Đã lưu ảnh riêng cho mẫu giày.");
+            flash.addFlashAttribute("success",tep==null?"Đã dùng lại ảnh có sẵn cho tất cả size cùng màu.":"Đã thêm ảnh vào bộ ảnh của màu.");
         } catch(IllegalArgumentException | IOException | DataAccessException e) {
             if(tep!=null)try {Files.deleteIfExists(tep);} catch(IOException boQua) { }
             flash.addFlashAttribute("error",e instanceof IllegalArgumentException?e.getMessage():"Không lưu được ảnh. Vui lòng thử lại.");

@@ -56,6 +56,10 @@ public class SanPhamTrongGio {
         return soLuongTon;
     }
 
+    public void setSoLuongTon(Integer soLuongTon) {
+        this.soLuongTon = soLuongTon;
+    }
+
     public BigDecimal getDonGia() {
         return donGia;
     }

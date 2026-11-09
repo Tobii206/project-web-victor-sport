@@ -108,7 +108,7 @@ public class SanPhamOnlineService {
 
     public Map<String, Object> laySanPham(int id) {
         List<Map<String, Object>> ds = jdbc.queryForList("""
-                SELECT sp.id, sp.ten_san_pham, sp.ma_san_pham, sp.mo_ta_chi_tiet, sp.mo_ta_ngan,
+                SELECT sp.id, sp.ten_san_pham, sp.ma_san_pham, sp.mo_ta_chi_tiet, sp.mo_ta_ngan, sp.doi_tuong, sp.gia_ban,
                        th.id AS id_thuong_hieu, th.ten_thuong_hieu, cl.ten_chat_lieu,
                        xx.ten_xuat_xu, vt.ten_vi_tri, pc.ten_phong_cach, cg.ten_co_giay
                 FROM san_pham sp JOIN thuong_hieu th ON th.id = sp.id_thuong_hieu
@@ -130,33 +130,46 @@ public class SanPhamOnlineService {
         return ds;
     }
 
+    public List<Map<String, Object>> layBoAnh(int id) {
+        return QuanLySanPhamService.layAnhTheoMau(jdbc, id);
+    }
+
+    static final String MAU_DANG_BAN = """
+        SELECT ct.id_san_pham, ct.id_kich_thuoc, ct.id_mau_sac, ct.gia_ban, ct.so_luong
+        FROM chi_tiet_san_pham ct
+        JOIN kich_thuoc kt ON kt.id=ct.id_kich_thuoc AND ISNULL(kt.xoa_mem,0)=0 AND ISNULL(kt.trang_thai,1)=1
+        JOIN mau_sac ms ON ms.id=ct.id_mau_sac AND ISNULL(ms.xoa_mem,0)=0 AND ISNULL(ms.trang_thai,1)=1
+        JOIN form_chan fc ON fc.id=ct.id_form_chan AND ISNULL(fc.xoa_mem,0)=0 AND ISNULL(fc.trang_thai,1)=1
+        WHERE ISNULL(ct.xoa_mem,0)=0 AND ISNULL(ct.trang_thai,1)=1
+        """;
+
     public List<Map<String, Object>> laySanPhamCungLoai(int id) {
         List<Map<String, Object>> ds = jdbc.queryForList("""
                 SELECT TOP 4 sp.id, sp.ma_san_pham, sp.ten_san_pham, th.ten_thuong_hieu,
-                       MIN(ct.gia_ban) AS gia_ban,
-                       SUM(ct.so_luong) AS so_luong,
+                       COALESCE(MIN(ct.gia_ban), sp.gia_ban) AS gia_ban,
+                       SUM(ISNULL(ct.so_luong, 0)) AS so_luong,
                        (SELECT TOP 1 a.duong_dan_anh FROM anh_chi_tiet_san_pham a
                         JOIN chi_tiet_san_pham ca ON ca.id = a.id_chi_tiet_san_pham
                         WHERE ca.id_san_pham = sp.id AND ISNULL(a.xoa_mem, 0) = 0
-                          AND ISNULL(ca.xoa_mem, 0) = 0 AND ISNULL(ca.trang_thai, 1) = 1
+                          AND EXISTS (SELECT 1 FROM chi_tiet_san_pham con WHERE con.id_san_pham=ca.id_san_pham
+                              AND con.id_mau_sac=ca.id_mau_sac AND ISNULL(con.xoa_mem,0)=0 AND ISNULL(con.trang_thai,1)=1)
                         ORDER BY a.la_anh_dai_dien DESC, a.id) AS anh
                 FROM san_pham sp
                 JOIN san_pham hien_tai ON hien_tai.id = ?
                 JOIN thuong_hieu th ON th.id = sp.id_thuong_hieu
-                JOIN chi_tiet_san_pham ct ON ct.id_san_pham = sp.id
+                LEFT JOIN (%s) ct ON ct.id_san_pham = sp.id
                 LEFT JOIN vi_tri_thi_dau vt ON vt.id = sp.id_vi_tri_thi_dau
                 LEFT JOIN vi_tri_thi_dau vt_hien_tai ON vt_hien_tai.id = hien_tai.id_vi_tri_thi_dau
                 WHERE sp.id <> hien_tai.id AND ISNULL(sp.xoa_mem, 0) = 0
                   AND ISNULL(sp.trang_thai_kinh_doanh, 1) = 1
                   AND ISNULL(th.xoa_mem, 0) = 0 AND ISNULL(th.trang_thai, 1) = 1
-                  AND ISNULL(ct.xoa_mem, 0) = 0 AND ISNULL(ct.trang_thai, 1) = 1 AND ct.so_luong > 0
                   AND (sp.id_vi_tri_thi_dau = hien_tai.id_vi_tri_thi_dau
                        OR (vt.ten_vi_tri IN (N'Tiền đạo', N'Tiền vệ', N'Hậu vệ', N'Thủ môn')
                            AND vt_hien_tai.ten_vi_tri IN (N'Tiền đạo', N'Tiền vệ', N'Hậu vệ', N'Thủ môn')))
-                GROUP BY sp.id, sp.ma_san_pham, sp.ten_san_pham, th.ten_thuong_hieu
+                GROUP BY sp.id, sp.ma_san_pham, sp.ten_san_pham, sp.gia_ban, th.ten_thuong_hieu
                 ORDER BY sp.id DESC
-                """, id);
-        GiaGiamSanPham.themGiaDanhSach(jdbc, ds, null, null, true);
+                """.formatted(MAU_DANG_BAN), id);
+        GiaGiamSanPham.themGiaDanhSach(jdbc, ds, null, null, false);
         return ds;
     }
 
@@ -169,12 +182,13 @@ public class SanPhamOnlineService {
 
     private String sqlPhienBan() {
         return """
-                SELECT ct.id, ct.id_san_pham, ct.ma_chi_tiet_san_pham, ct.so_luong,
+                SELECT ct.id, ct.id_san_pham, ct.id_mau_sac, ct.ma_chi_tiet_san_pham, ct.so_luong,
                        ct.gia_ban AS gia_ban,
                        sp.ten_san_pham, kt.ten_kich_thuoc, ms.ten_mau_sac, fc.ten_form_chan,
                        (SELECT TOP 1 a.duong_dan_anh FROM anh_chi_tiet_san_pham a
-                        WHERE a.id_chi_tiet_san_pham = ct.id AND ISNULL(a.xoa_mem, 0) = 0
-                        ORDER BY a.la_anh_dai_dien DESC, a.id) AS anh
+                        JOIN chi_tiet_san_pham cung_mau ON cung_mau.id=a.id_chi_tiet_san_pham
+                        WHERE cung_mau.id_san_pham=ct.id_san_pham AND cung_mau.id_mau_sac=ct.id_mau_sac AND ISNULL(a.xoa_mem,0)=0
+                        ORDER BY ISNULL(a.la_anh_dai_dien,0) DESC,a.id) AS anh
                 FROM chi_tiet_san_pham ct JOIN san_pham sp ON sp.id = ct.id_san_pham
                 JOIN thuong_hieu th ON th.id = sp.id_thuong_hieu
                 JOIN kich_thuoc kt ON kt.id = ct.id_kich_thuoc
@@ -340,7 +354,16 @@ public class SanPhamOnlineService {
         Integer idGio=null;
         if(idKhachHang!=null) {
             if(muaNgay) kiemTraKhachHang(idKhachHang,false);
-            else {idGio=layVaKhoaGio(idKhachHang);gio=layGioDaLuu(idKhachHang);}
+            else {
+                idGio=layVaKhoaGio(idKhachHang);
+                var gioDaLuu=layGioDaLuu(idKhachHang);
+                for(var muc:gio.entrySet()) {
+                    if(!gioDaLuu.containsKey(muc.getKey()) || muc.getValue()==null || muc.getValue()<=0
+                            || !java.util.Objects.equals(gioDaLuu.get(muc.getKey()),muc.getValue()))
+                        throw new IllegalArgumentException("Sản phẩm hoặc số lượng trong giỏ đã thay đổi. Vui lòng chọn lại trước khi đặt hàng.");
+                }
+                gio=new LinkedHashMap<>(gio);
+            }
         }
         if (gio.isEmpty()) { throw new IllegalArgumentException("Chưa có sản phẩm để đặt hàng."); }
         List<Map<String, Object>> ds = layGioHang(gio);
@@ -393,9 +416,12 @@ public class SanPhamOnlineService {
             throw new IllegalArgumentException("Số tiền chuyển khoản QR phải là số đồng nguyên và lớn hơn 0. Vui lòng chọn COD.");
         Integer id = jdbc.queryForObject("""
                 INSERT INTO hoa_don (id_khach_hang, loai_don, tong_tien, tong_tien_sau_giam,
-                    ten_khach_hang, so_dien_thoai_khach_hang, dia_chi_khach_hang, trang_thai_hien_tai, ghi_chu)
-                OUTPUT INSERTED.id VALUES (?, 1, ?, ?, ?, ?, ?, 1, ?)
-                """, Integer.class, idKhachHang, tongGoc, tong, ten, sdt, diaChi,
+                    ten_khach_hang, so_dien_thoai_khach_hang, dia_chi_khach_hang, email_khach_hang,
+                    trang_thai_hien_tai, ghi_chu)
+                OUTPUT INSERTED.id
+                SELECT ?, 1, ?, ?, ?, ?, ?,
+                    (SELECT NULLIF(LTRIM(RTRIM(email)), '') FROM khach_hang WHERE id = ?), 1, ?
+                """, Integer.class, idKhachHang, tongGoc, tong, ten, sdt, diaChi, idKhachHang,
                 "QR".equals(phuongThuc) ? "Chuyển khoản QR - chờ kiểm tra thanh toán" : "Thanh toán khi nhận hàng (COD)");
         for (Map<String, Object> dong : ds) {
             jdbc.update("INSERT INTO hoa_don_chi_tiet (id_hoa_don, id_chi_tiet_san_pham, so_luong, don_gia) VALUES (?, ?, ?, ?)",
@@ -425,7 +451,8 @@ public class SanPhamOnlineService {
         }
         if(dungGhn()) giaoHangGhn.luu(id,baoGia);
         // Cùng giao dịch với hóa đơn: đặt hàng lỗi thì giỏ vẫn được giữ nguyên.
-        if(idGio!=null) jdbc.update("UPDATE chi_tiet_gio_hang SET xoa_mem=1 WHERE id_gio_hang=? AND ISNULL(xoa_mem,0)=0",idGio);
+        if(idGio!=null) for(Integer idMau:gio.keySet())
+            jdbc.update("UPDATE chi_tiet_gio_hang SET xoa_mem=1 WHERE id_gio_hang=? AND id_chi_tiet_san_pham=? AND ISNULL(xoa_mem,0)=0",idGio,idMau);
         baoChuong(id);
         return id;
     }

@@ -154,6 +154,7 @@ CREATE TABLE san_pham (
     ma_san_pham AS 'SP' + RIGHT('00000' + CAST(id AS VARCHAR(5)), 5) PERSISTED,
     ten_san_pham NVARCHAR(255) NOT NULL,
     gia_ban DECIMAL(18,2) NULL CHECK (gia_ban>=0),
+    doi_tuong VARCHAR(6) NULL CONSTRAINT CK_san_pham_doi_tuong CHECK (doi_tuong IN ('NAM', 'NU', 'UNISEX')),
     mo_ta_ngan NVARCHAR(500),
     mo_ta_chi_tiet NVARCHAR(MAX),
     trang_thai_kinh_doanh BIT DEFAULT 1,
@@ -281,7 +282,7 @@ CREATE TABLE hoa_don (
     id_nhan_vien INT,
     id_phieu_giam_gia INT,
     ma_hoa_don AS 'HD' + RIGHT('00000' + CAST(id AS VARCHAR(5)), 5) PERSISTED,
-    loai_don TINYINT DEFAULT 0,
+    loai_don TINYINT DEFAULT 0, -- 0: nhận tại quầy, 1: online, 2: tại quầy có giao hàng
     phi_van_chuyen DECIMAL(18,2) DEFAULT 0,
     tong_tien DECIMAL(18,2) NOT NULL,
     tong_tien_sau_giam DECIMAL(18,2) NOT NULL,

@@ -14,9 +14,26 @@ public class GiaoHangGhnService {
     private final GhnService ghn;
     public GiaoHangGhnService(JdbcTemplate jdbc,GhnService ghn){this.jdbc=jdbc;this.ghn=ghn;}
     public boolean dangBat(){return ghn.dangBat();}
+
+    public record KhuVuc(String tinh, String xa) {}
+
+    public KhuVuc layKhuVuc(int tinh, int xa) {
+        return new KhuVuc(timTen(ghn.tinhMoi(), tinh), timTen(ghn.xaMoi(tinh), xa));
+    }
+
+    public void capNhatKichThuocKien(int id, long soDoi) {
+        if (soDoi < 1 || soDoi > 1000) throw new IllegalArgumentException("Số lượng giao hàng phải từ 1 đến 1.000 đôi.");
+        int[] kt = ghn.kichThuoc((int) soDoi);
+        jdbc.update("""
+            UPDATE van_don_ghn SET khoi_luong=?,dai=?,rong=?,cao=?,ngay_cap_nhat=SYSDATETIME()
+            WHERE id_hoa_don=? AND ma_van_don IS NULL
+            """, kt[0], kt[1], kt[2], kt[3], id);
+    }
+
     public BaoGiaGhn baoGia(Map<Integer,Integer> gio,String ten,String sdt,String diaChi,String phuongThuc,
                             BigDecimal tienHang,int tinh,int xa) {
-        String tenTinh=timTen(ghn.tinhMoi(),tinh),tenXa=timTen(ghn.xaMoi(tinh),xa);
+        var khuVuc = layKhuVuc(tinh, xa);
+        String tenTinh=khuVuc.tinh(),tenXa=khuVuc.xa();
         long soDoi=gio.values().stream().mapToLong(Integer::longValue).sum();
         if(soDoi<1 || soDoi>1000) throw new IllegalArgumentException("Số lượng giao hàng không hợp lệ.");
         int[] kt=ghn.kichThuoc((int)soDoi);

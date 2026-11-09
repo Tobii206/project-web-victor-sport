@@ -2,7 +2,7 @@
 .address-list { display: grid; gap: 18px; }
 .address-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 .address-heading h2 { margin: 0; font-size: 20px; overflow-wrap: anywhere; }
-.address-default { background: #e6f5ed; color: #23734e; border-radius: 20px; padding: 6px 12px; font-size: 12px; }
+.address-default { background: #e6f5ed; color: #23734e; border-radius: 20px; padding: 6px 12px; font-size: 14px; }
 .address-card p { line-height: 1.8; overflow-wrap: anywhere; color: #6e7e96; }
 .address-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 20px; padding-top: 16px; border-top: 1px solid #e6ebf3; }
 .address-actions form { margin: 0; }

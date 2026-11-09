@@ -10,6 +10,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class GiaChungSanPhamTests {
+    @Test void khoiDongDongBoGiaMauLechTheoSanPhamVaKhongDoiGiaHoaDon() {
+        var jdbc=mock(JdbcTemplate.class);
+        new com.example.victorsport.Config.GiaChungSanPhamConfig(jdbc).afterPropertiesSet();
+        var sql=org.mockito.ArgumentCaptor.forClass(String.class);verify(jdbc).execute(sql.capture());
+        assertTrue(sql.getValue().contains("UPDATE ct SET gia_ban=sp.gia_ban"));
+        assertTrue(sql.getValue().contains("ct.gia_ban<>sp.gia_ban"));
+        assertTrue(sql.getValue().contains("ISNULL(ct.xoa_mem,0)=0"));
+        assertFalse(sql.getValue().contains("hoa_don"));
+    }
     private JdbcTemplate jdbc() {
         var jdbc = mock(JdbcTemplate.class);
         when(jdbc.queryForList(contains("FROM san_pham WITH"),eq(8))).thenReturn(List.of(Map.of("id",8)));
@@ -38,5 +47,20 @@ class GiaChungSanPhamTests {
         var jdbc=jdbc();
         assertThrows(IllegalArgumentException.class,()->new QuanLySanPhamService(jdbc).luuMau(8,null,Map.of("id_mau_sac","1","id_kich_thuoc","1","id_form_chan","1","so_luong","5","trang_thai","1"),2));
         verify(jdbc,never()).queryForObject(contains("INSERT INTO chi_tiet_san_pham"),eq(Integer.class),any(Object[].class));
+    }
+
+    @Test void themMauTrungCongTonKhoVaoMaMauCu() {
+        var jdbc = jdbc();
+        when(jdbc.queryForObject(contains("SELECT gia_ban FROM san_pham"), eq(BigDecimal.class), eq(8)))
+                .thenReturn(new BigDecimal("2490000"));
+        when(jdbc.queryForObject(startsWith("SELECT COUNT(*) FROM chi_tiet_san_pham"), eq(Integer.class), eq(8), eq(1), eq(2), eq(3), eq(0)))
+                .thenReturn(1);
+        when(jdbc.queryForObject(contains("SELECT id FROM chi_tiet_san_pham"), eq(Integer.class), eq(8), eq(1), eq(2), eq(3)))
+                .thenReturn(15);
+        when(jdbc.update(contains("SET so_luong=so_luong+?"), eq(5), eq(2), eq(15), eq(5))).thenReturn(1);
+        var data = Map.of("id_mau_sac", "1", "id_kich_thuoc", "2", "id_form_chan", "3", "so_luong", "5", "trang_thai", "1");
+        assertEquals(15, new QuanLySanPhamService(jdbc).luuMau(8, null, data, 2));
+        verify(jdbc).update(contains("SET so_luong=so_luong+?"), eq(5), eq(2), eq(15), eq(5));
+        verify(jdbc, never()).queryForObject(contains("INSERT INTO chi_tiet_san_pham"), eq(Integer.class), any(Object[].class));
     }
 }

@@ -21,13 +21,11 @@ class QuanLySanPhamTests {
         var jdbc=mock(org.springframework.jdbc.core.JdbcTemplate.class);
         when(jdbc.queryForList("SELECT id FROM san_pham WITH (UPDLOCK,HOLDLOCK) WHERE id=? AND ISNULL(xoa_mem,0)=0",8))
             .thenReturn(java.util.List.of(Map.of("id",8)));
-        when(jdbc.queryForObject("SELECT COUNT(*) FROM chi_tiet_san_pham WHERE id=? AND id_san_pham=? AND ISNULL(xoa_mem,0)=0",Integer.class,12,8)).thenReturn(1);
-        when(jdbc.queryForList(contains("SELECT id,duong_dan_anh FROM anh_chi_tiet_san_pham"),eq(12)))
+        when(jdbc.queryForList("SELECT id_mau_sac FROM chi_tiet_san_pham WHERE id=? AND id_san_pham=? AND ISNULL(xoa_mem,0)=0",12,8)).thenReturn(java.util.List.of(Map.of("id_mau_sac",3)));
+        when(jdbc.queryForList(contains("SELECT id,duong_dan_anh FROM anh_chi_tiet_san_pham"),eq(8),eq(3)))
             .thenReturn(java.util.List.of(Map.of("id",31,"duong_dan_anh","/image/anh-cu.png")));
         new QuanLySanPhamService(jdbc).themAnh(8,12,"/image/anh-cu.png");
-        verify(jdbc,never()).update(contains("INSERT INTO anh_chi_tiet_san_pham"),any(Object[].class));
-        verify(jdbc).update(contains("id<>?"),eq(12),eq(31));
-        verify(jdbc).update("UPDATE anh_chi_tiet_san_pham SET la_anh_dai_dien=1 WHERE id=?",31);
+        verify(jdbc,never()).update(anyString(),any(Object[].class));
     }
     private byte[] anhThu(int kieu) throws Exception {
         var anh=new java.awt.image.BufferedImage(3,2,kieu);
@@ -45,7 +43,7 @@ class QuanLySanPhamTests {
             try(var tep=java.nio.file.Files.list(tepCu.getParent())) {truoc=tep.count();}
             var upload=new MockMultipartFile("tepAnh","ten-khac.png","image/png",anhThu(java.awt.image.BufferedImage.TYPE_INT_ARGB));
             mvc.perform(multipart("/quan-ly/san-pham/8/anh/them").file(upload).param("idMau","12").session(session()))
-                .andExpect(flash().attribute("success","Đã dùng lại ảnh có sẵn cho mẫu giày."));
+                .andExpect(flash().attribute("success","Đã dùng lại ảnh có sẵn cho tất cả size cùng màu."));
             mvc.perform(multipart("/quan-ly/san-pham/8/anh/them").file(upload).param("idMau","13").session(session()))
                 .andExpect(flash().attributeExists("success"));
             verify(service).themAnh(8,12,"/image/"+tepCu.getFileName());

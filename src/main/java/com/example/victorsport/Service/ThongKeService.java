@@ -16,29 +16,54 @@ public class ThongKeService {
 
     @Transactional(readOnly = true)
     public Map<String, Object> thongKe(LocalDate tuNgay, LocalDate denNgay, String kenh) {
+        return thongKe(tuNgay, denNgay, kenh, null, "");
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> thongKe(LocalDate tuNgay, LocalDate denNgay, String kenh, Integer trangThai, String thanhToan) {
         kiemTraKhoangNgay(tuNgay, denNgay);
         String loaiDon = switch (kenh) {
-            case "online" -> " AND hd.loai_don IN (1,2) ";
-            case "quay" -> " AND hd.loai_don=0 ";
+            case "online" -> " AND hd.loai_don=1 ";
+            case "quay" -> " AND hd.loai_don IN (0,2) ";
+            case "nhan-tai-quay" -> " AND hd.loai_don=0 ";
+            case "quay-giao-hang" -> " AND hd.loai_don=2 ";
             case "tat-ca" -> "";
             default -> throw new IllegalArgumentException("Kênh bán hàng không hợp lệ.");
         };
         // Lọc theo ngày tạo đơn. Chỉ trạng thái 5 được tính vào doanh thu.
         String dieuKien = " WHERE ISNULL(hd.xoa_mem,0)=0 AND hd.ngay_tao>=? AND hd.ngay_tao<? " + loaiDon;
-        Object[] thamSo = {tuNgay.atStartOfDay(), denNgay.plusDays(1).atStartOfDay()};
+        List<Object> thamSoLoc = new ArrayList<>(List.of(tuNgay.atStartOfDay(), denNgay.plusDays(1).atStartOfDay()));
+        if (trangThai != null) {
+            if (trangThai < 0 || trangThai > 6) throw new IllegalArgumentException("Trạng thái đơn không hợp lệ.");
+            dieuKien += " AND hd.trang_thai_hien_tai=? ";
+            thamSoLoc.add(trangThai);
+        }
+        if (!thanhToan.isEmpty()) {
+            String phepSoSanh = switch (thanhToan) {
+                case "da-thanh-toan" -> ">=";
+                case "chua-thanh-toan" -> "<";
+                default -> throw new IllegalArgumentException("Bộ lọc thanh toán không hợp lệ.");
+            };
+            dieuKien += """
+                AND (SELECT ISNULL(SUM(gd.so_tien),0) FROM giao_dich_thanh_toan gd
+                     WHERE gd.id_hoa_don=hd.id AND gd.trang_thai=N'thanh_cong' AND ISNULL(gd.xoa_mem,0)=0)
+                """ + phepSoSanh + " ISNULL(hd.tong_tien_sau_giam,0) ";
+        }
+        Object[] thamSo = thamSoLoc.toArray();
         Map<String,Object> ketQua = new LinkedHashMap<>();
         var tongQuan = new LinkedHashMap<String,Object>(jdbc.queryForMap("""
                 SELECT COUNT(*) AS so_don,
                   ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai=5 THEN hd.tong_tien_sau_giam ELSE 0 END),0) AS doanh_thu,
                   ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai=5 THEN 1 ELSE 0 END),0) AS hoan_tat,
-                  ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai BETWEEN 1 AND 4 THEN 1 ELSE 0 END),0) AS dang_xu_ly,
+                  ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai BETWEEN 0 AND 4 THEN 1 ELSE 0 END),0) AS dang_xu_ly,
+                  ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai=0 THEN 1 ELSE 0 END),0) AS don_cho,
                   ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai=6 THEN 1 ELSE 0 END),0) AS da_huy,
                   ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai=1 THEN 1 ELSE 0 END),0) AS cho_xac_nhan,
                   ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai=2 THEN 1 ELSE 0 END),0) AS da_xac_nhan,
                   ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai=3 THEN 1 ELSE 0 END),0) AS chuan_bi,
                   ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai=4 THEN 1 ELSE 0 END),0) AS van_chuyen
                 FROM hoa_don hd
-                """ + dieuKien + " AND hd.trang_thai_hien_tai BETWEEN 1 AND 6", thamSo));
+                """ + dieuKien + " AND hd.trang_thai_hien_tai BETWEEN 0 AND 6", thamSo));
         BigDecimal tongDoanhThu = so(tongQuan.get("doanh_thu")), hoanTat = so(tongQuan.get("hoan_tat"));
         tongQuan.put("trung_binh_don", hoanTat.signum()==0 ? BigDecimal.ZERO : tongDoanhThu.divide(hoanTat,0,RoundingMode.HALF_UP));
         BigDecimal soDon = so(tongQuan.get("so_don"));
@@ -57,10 +82,10 @@ public class ThongKeService {
                   WHERE gd.id_hoa_don=hd.id AND gd.trang_thai=N'thanh_cong' AND ISNULL(gd.xoa_mem,0)=0) thu
                 """ + dieuKien + " AND hd.trang_thai_hien_tai=5", thamSo));
         ketQua.put("theoKenh", jdbc.queryForList("""
-                SELECT CASE WHEN hd.loai_don=0 THEN N'Tại quầy' ELSE N'Online' END AS kenh,
+                SELECT CASE WHEN hd.loai_don IN (0,2) THEN N'Tại quầy' ELSE N'Online' END AS kenh,
                   COUNT(*) AS so_don, SUM(hd.tong_tien_sau_giam) AS doanh_thu
                 FROM hoa_don hd
-                """ + dieuKien + " AND hd.trang_thai_hien_tai=5 GROUP BY CASE WHEN hd.loai_don=0 THEN N'Tại quầy' ELSE N'Online' END", thamSo));
+                """ + dieuKien + " AND hd.trang_thai_hien_tai=5 GROUP BY CASE WHEN hd.loai_don IN (0,2) THEN N'Tại quầy' ELSE N'Online' END", thamSo));
         ketQua.put("khachHang", jdbc.queryForList("""
                 SELECT TOP 5 hd.id_khach_hang, kh.ten_khach_hang, kh.ma_khach_hang,
                   COUNT(*) AS so_don, SUM(hd.tong_tien_sau_giam) AS chi_tieu

@@ -19,6 +19,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class TrangChuTests {
+    @Test void bannerChiHienUuDaiKhiConDotDangDienRa() throws Exception {
+        var service=mock(TrangChuService.class);var mvc=taoTrang(service);
+        mvc.perform(get("/")).andExpect(model().attribute("coUuDai",false));
+        when(service.layHanUuDai()).thenReturn(System.currentTimeMillis()+60000);
+        mvc.perform(get("/")).andExpect(model().attribute("coUuDai",true));
+        when(service.layHanUuDai()).thenReturn(System.currentTimeMillis()-60000);
+        mvc.perform(get("/")).andExpect(model().attribute("coUuDai",false));
+    }
     @Test
     void dongHoDemDenHetNgayCuoiCuaDotGiamGia() {
         var jdbc = mock(org.springframework.jdbc.core.JdbcTemplate.class);

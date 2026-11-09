@@ -11,7 +11,7 @@ body {
 
 .pos-product-info { display: flex; align-items: center; gap: 12px; }
 .pos-product-image { width: 76px; height: 76px; flex-shrink: 0; object-fit: contain; background: #f5f7fb; border-radius: 8px; }
-.pos-product-no-image { width: 76px; min-height: 76px; flex-shrink: 0; display: grid; place-items: center; padding: 8px; text-align: center; font-size: 12px; color: #64748b; background: #f5f7fb; border-radius: 8px; }
+.pos-product-no-image { width: 76px; min-height: 76px; flex-shrink: 0; display: grid; place-items: center; padding: 8px; text-align: center; font-size: 14px; color: #64748b; background: #f5f7fb; border-radius: 8px; }
 .pos-product-image[hidden], .pos-product-no-image[hidden] { display: none; }
 
 a {
@@ -48,7 +48,7 @@ a {
 .brand-subtitle {
     margin: 6px 0 0;
     color: #64748b;
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .field {
@@ -59,7 +59,7 @@ a {
 
 .field label {
     color: #334155;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
 }
 
@@ -99,7 +99,7 @@ a {
     font-weight: 700;
     text-decoration: none;
     font-family: inherit;
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .button:hover { background: #254878; }
@@ -130,7 +130,7 @@ a {
     margin-bottom: 16px;
     border-radius: 10px;
     padding: 14px 16px;
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .alert.error {
@@ -183,12 +183,12 @@ a {
     align-items: center;
     gap: 8px;
     color: #becde5;
-    font-size: 12px;
+    font-size: 14px;
     margin-top: 14px;
 }
 
 .side-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #ffb47c; }
-.menu-caption { grid-column: 1 / -1; color: #93abd0; font-size: 10px; font-weight: 700; letter-spacing: 1.6px; margin: 16px 12px 8px; }
+.menu-caption { grid-column: 1 / -1; color: #93abd0; font-size: 14px; font-weight: 700; letter-spacing: 1.6px; margin: 16px 12px 8px; }
 .menu-caption:first-child { margin-top: 4px; }
 
 .menu-list {
@@ -203,7 +203,7 @@ a {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     min-height: 48px;
     padding: 12px;
@@ -243,12 +243,12 @@ a {
     align-items: center;
     gap: 12px;
     color: #475569;
-    font-size: 14px;
+    font-size: 15px;
     flex-wrap: wrap;
 }
 
 .topbar-heading { display: flex; align-items: center; gap: 14px; }
-.topbar-heading .muted { margin-top: 3px; font-size: 12px; }
+.topbar-heading .muted { margin-top: 3px; font-size: 14px; }
 .topbar-user > span { padding: 10px 14px; border-radius: 8px; background: #f4f7fc; font-weight: 600; }
 .topbar-user form { margin: 0; }
 .admin-menu-toggle { display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; flex-shrink: 0; border: 1px solid #cbd5e1; border-radius: 8px; background: #f5f7fb; color: #172033; cursor: pointer; }
@@ -345,7 +345,7 @@ a {
 .table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .table th,
@@ -358,15 +358,15 @@ a {
 
 .table th {
     color: #5d6d84;
-    font-size: 12px;
+    font-size: 14px;
     text-transform: uppercase;
     background: #f4f7fc;
     letter-spacing: .3px;
 }
 .table tbody tr:hover { background: #f8faff; }
 .table tbody tr:last-child td { border-bottom: 0; }
-.table .muted { font-size: 12px; margin-top: 5px; line-height: 1.6; }
-.table .button { min-height: 36px; font-size: 13px; padding: 8px 12px; white-space: nowrap; }
+.table .muted { font-size: 14px; margin-top: 5px; line-height: 1.6; }
+.table .button { min-height: 36px; font-size: 15px; padding: 8px 12px; white-space: nowrap; }
 
 .muted {
     color: #64748b;

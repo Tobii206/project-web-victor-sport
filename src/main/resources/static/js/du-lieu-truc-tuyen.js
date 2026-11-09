@@ -67,20 +67,27 @@
         }
         function capNhatSanPham(doc) {
             var form = document.getElementById('formChonGiay'), moi = doc.getElementById('formChonGiay');
-            if (!form) return;
+            if (!form) {
+                if (moi) {
+                    thayCacVung(doc, 'main');
+                    if (window.VictorKhoiTaoSanPham) window.VictorKhoiTaoSanPham();
+                }
+                return;
+            }
             if (!moi) {
-                form.querySelectorAll('button[type="submit"],button[name="thaoTac"]').forEach(function (b) { b.disabled = true; });
-                document.getElementById('tonKho').textContent = 'Sản phẩm đã ngừng bán.';return;
+                form.querySelectorAll('button, input').forEach(function (el) { el.disabled = true; });
+                document.getElementById('tonKho').textContent = 'Sản phẩm hiện không bán.';
+                thayCacVung(doc, 'main');
+                return;
             }
             var chon = form.querySelector('input[name="idPhienBan"]:checked'), id = chon && chon.value;
             var sl = document.getElementById('soLuong').value;
-            thayCacVung(doc, '.online-variants');thayCacVung(doc, '.online-gallery');thayCacVung(doc, '#moTaSanPham');
-            form.querySelectorAll('input[name="idPhienBan"]').forEach(function (r) { r.checked = r.value === id; });
+            thayCacVung(doc, '.online-variants,.online-gallery,#moTaSanPham,.online-product-info .online-price');
+            var cacMau = Array.from(form.querySelectorAll('input[name="idPhienBan"]:not(:disabled)'));
+            var mauChon = cacMau.find(function (r) { return r.value === id; }) || cacMau[0];
+            if (mauChon) mauChon.checked = true;
             document.getElementById('soLuong').value = sl;
             if (window.VictorKhoiTaoSanPham) window.VictorKhoiTaoSanPham();
-            var selected = form.querySelector('input[name="idPhienBan"]:checked');
-            form.querySelectorAll('button[name="thaoTac"]').forEach(function (b) { b.disabled = !selected || selected.disabled; });
-            if (!selected) document.getElementById('tonKho').textContent = 'Vui lòng chọn lại mẫu giày đang bán.';
         }
         function capNhatDiaChi(doc) {
             var select = document.getElementById('diaChiDaLuu'), fresh = doc.getElementById('diaChiDaLuu');
@@ -169,6 +176,7 @@
                         var freshCheckout = doc.querySelector('form[action="/pos/checkout"]');
                         if (checkout && freshCheckout) {
                             checkout.dataset.tongTien = freshCheckout.dataset.tongTien;
+                            checkout.dataset.tienHang = freshCheckout.dataset.tienHang;
                             checkout.querySelectorAll('button[name="hanhDong"]').forEach(function (button) {
                                 var freshButton = freshCheckout.querySelector('button[value="' + button.value + '"]');
                                 if (freshButton) button.disabled = freshButton.disabled;

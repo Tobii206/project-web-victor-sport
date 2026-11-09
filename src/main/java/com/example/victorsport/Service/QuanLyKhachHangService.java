@@ -21,7 +21,7 @@ public class QuanLyKhachHangService {
         List<Object> thamSo=new ArrayList<>();
         String tuKhoa=loc.getOrDefault("tuKhoa","").trim();
         if(!tuKhoa.isEmpty()) {
-            sql+=" AND (ten_khach_hang LIKE ? OR ma_khach_hang LIKE ? OR ten_tai_khoan LIKE ? OR email LIKE ? OR so_dien_thoai LIKE ?)";
+            sql+=" AND (ten_khach_hang COLLATE Vietnamese_100_CI_AI LIKE ? OR ma_khach_hang LIKE ? OR ten_tai_khoan LIKE ? OR email LIKE ? OR so_dien_thoai LIKE ?)";
             for(int i=0;i<5;i++) thamSo.add("%"+tuKhoa+"%");
         }
         String trangThai=loc.get("trangThai");

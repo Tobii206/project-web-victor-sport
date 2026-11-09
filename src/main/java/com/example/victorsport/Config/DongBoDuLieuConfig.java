@@ -13,6 +13,7 @@ public class DongBoDuLieuConfig implements WebMvcConfigurer {
     private final ChuongTrucTuyenService trucTuyen;
     public DongBoDuLieuConfig(ChuongTrucTuyenService trucTuyen) {this.trucTuyen=trucTuyen;}
     public static String nhom(String path) {
+        if(path.startsWith("/pos/giao-hang/")) return "";
         if(path.startsWith("/quan-ly/san-pham")) return "san-pham,ton-kho";
         if(path.startsWith("/quan-ly/dot-giam-gia")) return "uu-dai,san-pham";
         if(path.startsWith("/quan-ly/phieu-giam-gia")) return "uu-dai";

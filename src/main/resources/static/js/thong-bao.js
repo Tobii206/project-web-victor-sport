@@ -49,6 +49,7 @@
         dialog.querySelector('#vsNoticeMessage').textContent = dangMo.noiDung;
         dialog.querySelector('.vs-notice-accept').textContent = dangMo.nhanNut || 'Xác nhận';
         var huy = dialog.querySelector('.vs-notice-cancel');
+        huy.textContent = dangMo.nhanHuy || 'Hủy';
         huy.hidden = !!dangMo.chiThongBao;
         dialog.returnValue = '';
         dialog.showModal();

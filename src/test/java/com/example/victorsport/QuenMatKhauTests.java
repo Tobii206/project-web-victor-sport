@@ -45,7 +45,8 @@ class QuenMatKhauTests {
             assertTrue(service.datLai("user@gmail.com",ma,"moi12345","moi12345"));
             String bang=loai==1?"nhan_vien":"khach_hang";
             var matKhau=ArgumentCaptor.forClass(String.class);
-            verify(jdbc).update(eq("UPDATE "+bang+" SET mat_khau=?,ngay_cap_nhat=SYSDATETIME() WHERE id=?"),matKhau.capture(),eq(7));
+            verify(jdbc).update(eq("UPDATE "+bang+" SET mat_khau=?,ngay_cap_nhat=SYSDATETIME(),nguoi_cap_nhat=? WHERE id=?"),
+                    matKhau.capture(),eq(7),eq(7));
             assertTrue(new BCryptPasswordEncoder().matches("moi12345",matKhau.getValue()));
             String cot=loai==1?"id_nhan_vien":"id_khach_hang";
             verify(jdbc).update(contains("bi_khoa=0,ma_xac_minh_hash=NULL,han_xac_minh=NULL WHERE "+cot),eq(7));

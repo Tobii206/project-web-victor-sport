@@ -4,12 +4,14 @@
 <fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Đơn hàng của tôi — VictorSport</title><link rel="icon" href="/logo/favicon-victorsport.svg">
-<link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1"><link rel="stylesheet" href="/css/don-hang.css?v=20261023-ui-1"><link rel="stylesheet" href="/css/in-hoa-don.css?v=2"><link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2"></head>
+<link rel="stylesheet" href="/css/trang-chu.css?v=20261107-balanced"><link rel="stylesheet" href="/css/don-hang.css?v=20261109-recipient-button"><link rel="stylesheet" href="/css/in-hoa-don.css?v=4"><link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"></head>
 <body class="store-page"><%@ include file="/WEB-INF/view/client/layout/header.jsp" %>
 <main class="store-container online-container">
+<c:set var="coTheSuaNhanHang" value="${not khachVangLai and (don.loai_don == 1 or don.loai_don == 2)
+    and don.trang_thai_hien_tai >= 1 and don.trang_thai_hien_tai <= 3 and empty don.vanDonGhn.ma_van_don}"/>
 <c:if test="${not empty don.vanDonGhn.ma_van_don}"><p class="subtle">Mã vận đơn: <strong><c:out value="${don.vanDonGhn.ma_van_don}"/></strong></p></c:if>
 <div class="invoice-print-brand"><img class="invoice-print-logo" src="/logo/logo-nobackgroud.png" alt="VictorSport" width="210" height="64"><span>Cầu Giấy, Hà Nội · 0325327602</span></div><c:if test="${don.da_thanh_toan}"><p><button class="store-button" type="button" onclick="window.print()">In / Lưu PDF</button></p></c:if>
-<c:if test="${not empty error}"><div class="account-error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
+<c:if test="${not empty error and not (moSuaNhanHang and coTheSuaNhanHang)}"><div class="account-error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
 <c:if test="${not empty success}"><div class="online-success" role="status" data-vs-flash="success"><c:out value="${success}"/></div></c:if>
 <a class="account-back" href="${khachVangLai ? '/tra-cuu-don-hang' : '/don-hang'}">← Quay lại</a>
 <c:if test="${don.trang_thai_hien_tai >= 1 && don.trang_thai_hien_tai <= 3 && don.ghi_chu == 'Chuyển khoản QR - chờ kiểm tra thanh toán'}">
@@ -25,7 +27,32 @@
 <c:if test="${don.trang_thai_hien_tai == 6}"><div class="account-error">Đơn hàng đã được hủy.</div></c:if>
 <div class="don-hang-columns"><section class="account-card"><h2>Thông tin nhận hàng</h2>
 <p><strong>Người nhận:</strong> <c:out value="${don.ten_khach_hang}"/></p><p><strong>Số điện thoại:</strong> <c:out value="${don.so_dien_thoai_khach_hang}"/></p>
-<p><strong>Địa chỉ:</strong> <c:out value="${don.dia_chi_khach_hang}"/></p></section>
+<p><strong>Địa chỉ:</strong> <c:out value="${don.dia_chi_khach_hang}"/></p>
+<c:if test="${coTheSuaNhanHang}">
+    <div class="don-hang-edit-recipient invoice-no-print">
+        <button class="store-button don-hang-button-neutral" type="button" id="moSuaNhanHang" aria-haspopup="dialog" aria-controls="suaNhanHangHoaDon">Sửa thông tin nhận hàng</button>
+    </div>
+    <dialog id="suaNhanHangHoaDon" class="invoice-address-dialog invoice-no-print" aria-labelledby="tieuDeSuaNhanHang" data-mo-khi-tai="${moSuaNhanHang}">
+        <h2 id="tieuDeSuaNhanHang">Sửa thông tin nhận hàng</h2>
+        <c:if test="${moSuaNhanHang and not empty error}"><div class="account-error" role="alert"><c:out value="${error}"/></div></c:if>
+        <form method="post" action="/don-hang/${don.id}/dia-chi" class="account-form">
+            <input type="hidden" name="csrf" value="<c:out value='${sessionScope.csrfSuaNhanHang}'/>">
+            <div><label for="donTenNhan">Người nhận</label><input id="donTenNhan" name="ten" maxlength="100" value="<c:out value='${don.ten_khach_hang}'/>" required autofocus></div>
+            <div><label for="donSdtNhan">Số điện thoại</label><input id="donSdtNhan" name="sdt" type="tel" maxlength="10" pattern="0[0-9]{9}" value="<c:out value='${don.so_dien_thoai_khach_hang}'/>" required></div>
+            <c:if test="${not empty don.vanDonGhn}">
+                <div><label for="hoaDonTinh">Tỉnh / thành phố</label><select id="hoaDonTinh" name="tinh"><option value="">Giữ khu vực hiện tại</option></select></div>
+                <div><label for="hoaDonXa">Phường / xã</label><select id="hoaDonXa" name="xa" disabled><option value="">Chọn phường / xã</option></select></div>
+                <p id="hoaDonDiaChiStatus" class="subtle" role="status"></p>
+            </c:if>
+            <div><label for="donDiaChiNhan">Địa chỉ chi tiết</label><input id="donDiaChiNhan" name="diaChi" maxlength="255" value="<c:out value='${don.dia_chi_chi_tiet}'/>" required></div>
+            <div class="invoice-address-actions">
+                <button class="store-button don-hang-button-neutral" type="button" data-dong-sua-nhan-hang>Đóng</button>
+                <button class="store-button" type="submit">Lưu thông tin</button>
+            </div>
+        </form>
+    </dialog>
+</c:if>
+</section>
 <section class="account-card"><h2>Thanh toán</h2><p>Phương thức: <strong><c:out value="${don.phuong_thuc}"/></strong> · ${don.da_thanh_toan ? 'Đã thanh toán' : 'Chưa thanh toán'}</p><p class="don-hang-row"><span>Tiền hàng</span><strong><fmt:formatNumber value="${don.tong_tien}" maxFractionDigits="0"/> đ</strong></p>
 <p class="don-hang-row"><span>Giảm giá</span><strong><fmt:formatNumber value="${don.tong_tien_giam}" maxFractionDigits="0"/> đ</strong></p>
 <p class="don-hang-row"><span>Phí vận chuyển</span><strong><fmt:formatNumber value="${don.phi_van_chuyen}" maxFractionDigits="0"/> đ</strong></p>
@@ -37,4 +64,4 @@
 <section class="account-card don-hang-card"><h2>Lịch sử đơn hàng</h2><ol class="don-hang-timeline">
 <c:forEach items="${lichSu}" var="buoc"><li><p><strong><fmt:formatDate value="${buoc.thoi_gian}" pattern="dd/MM/yyyy HH:mm"/></strong></p><p><c:out value="${buoc.ghi_chu}"/></p></li></c:forEach>
 </ol><c:if test="${empty lichSu}"><p class="subtle">Chưa có lịch sử đơn hàng.</p></c:if></section>
-</main></body></html>
+</main><script src="/js/in-hoa-don.js?v=20261109-customer-dialog"></script></body></html>

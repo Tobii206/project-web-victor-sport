@@ -15,6 +15,23 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class NhanHangThanhToanCodTests {
+    @Test void dongBoDonCuDaNhanKhongThuLapVaCoLichSu() {
+        var jdbc=jdbc();var service=new HoaDonService(jdbc);
+        when(jdbc.queryForObject(contains("SUM(so_tien)"),eq(BigDecimal.class),eq(10))).thenReturn(BigDecimal.ZERO,new BigDecimal("130000"));
+        assertTrue(service.dongBoCodDonDaNhan(10));assertFalse(service.dongBoCodDonDaNhan(10));
+        verify(jdbc).update(contains("INSERT INTO giao_dich_thanh_toan"),eq(10),eq(4),eq(new BigDecimal("130000")),isNull());
+        verify(jdbc).update(contains("Đồng bộ thanh toán COD"),eq(10));
+        verify(jdbc,never()).update(contains("SET trang_thai_hien_tai=5"),any(Object[].class));
+    }
+    @Test void khoiDongChiDongBoDonCodDaNhanConThieuTien() {
+        var jdbc=mock(JdbcTemplate.class);var service=mock(HoaDonService.class);
+        when(jdbc.queryForList(contains("SELECT hd.id FROM hoa_don"),eq(Integer.class))).thenReturn(List.of(10,11));
+        when(service.dongBoCodDonDaNhan(10)).thenReturn(true);
+        assertEquals(1,new com.example.victorsport.Config.ThanhToanCodDaNhanConfig(jdbc,service).dongBo());
+        verify(jdbc).queryForList(argThat(sql->sql.contains("hd.trang_thai_hien_tai=5") && sql.contains("=N'COD'")
+                && sql.contains("gd.trang_thai=N'thanh_cong'") && sql.contains("<hd.tong_tien_sau_giam")),eq(Integer.class));
+        verify(service).dongBoCodDonDaNhan(10);verify(service).dongBoCodDonDaNhan(11);
+    }
     JdbcTemplate jdbc() {
         var jdbc=mock(JdbcTemplate.class);
         when(jdbc.queryForList(contains("JOIN quyen_han"),eq(2))).thenReturn(List.of(Map.of("id",2)));

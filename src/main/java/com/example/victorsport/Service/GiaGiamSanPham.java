@@ -75,6 +75,10 @@ public class GiaGiamSanPham {
                     sp.put("gia_sau_giam", gia);
                 }
             }
+            if (thapNhat == null && sp.get("gia_ban") instanceof BigDecimal giaBan) {
+                sp.put("gia_goc", giaBan);
+                sp.put("gia_sau_giam", giaBan);
+            }
         }
     }
 }

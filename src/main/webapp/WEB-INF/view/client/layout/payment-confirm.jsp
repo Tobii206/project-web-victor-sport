@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<link rel="stylesheet" href="/css/xac-nhan-thanh-toan.css?v=20261015-5">
+<link rel="stylesheet" href="/css/xac-nhan-thanh-toan.css?v=20261107-balanced">
 <dialog id="xacNhanThanhToan" class="payment-confirm" aria-labelledby="tieuDeXacNhan" aria-describedby="noiDungXacNhan">
     <div class="payment-confirm-icon" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h3M15 15l2 2 4-4"/></svg></div>
     <p class="payment-confirm-eyebrow">VICTORSPORT</p>

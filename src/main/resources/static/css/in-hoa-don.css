@@ -1,11 +1,31 @@
 .invoice-print-brand {display:none;}
+.invoice-address-dialog {
+    box-sizing: border-box;
+    width: min(540px, calc(100% - 32px));
+    max-height: calc(100% - 32px);
+    padding: clamp(16px, 4vw, 28px);
+    border: 1px solid #e4eaf3;
+    border-radius: 16px;
+    background: #fff;
+    color: inherit;
+    box-shadow: 0 16px 48px #14294433;
+    overflow: auto;
+}
+.invoice-address-dialog::backdrop { background: #13253e80; }
+.invoice-address-dialog h2 { margin: 0 0 18px; font-size: 20px; }
+.invoice-address-dialog form,
+.invoice-address-dialog .account-form:not(.checkout-form) { display: grid; gap: 12px; margin: 0; }
+.invoice-address-dialog form .field { display: block; margin: 0; }
+.invoice-address-dialog label { display: block; margin: 0 0 6px; }
+.invoice-address-dialog [role="status"]:empty { display: none; }
+.invoice-address-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
 @media print {
      .invoice-print-brand {display:flex!important;justify-content:space-between;align-items:center;gap:20px;break-inside:avoid;padding:10px 0 20px;border-bottom:1px solid #bbb;}
     .invoice-print-brand .invoice-print-logo {display:block!important;width:210px!important;height:auto!important;max-height:70px;object-fit:contain;}
     .invoice-print-brand > span {text-align:right;font-size:10pt;}
     @page { size:A4; margin:15mm; }
     body { background:white!important;font-size:11pt!important;color:#111!important; }
-    .side-menu,.topbar,.invoice-actions,.invoice-toolbar form,.panel-header>a,.invoice-detail>.alert,.account-back,.store-header,button,script {display:none!important;}
+    .side-menu,.topbar,.invoice-actions,.invoice-toolbar form,.panel-header>a,.invoice-detail>.alert,.account-back,.store-header,.invoice-no-print,.invoice-history,.invoice-delivery-steps,button,script {display:none!important;}
     .app-shell,.main-area,.invoice-detail,.content-layout {display:block!important;width:auto!important;min-width:0!important;margin:0!important;padding:0!important;}
     .panel {box-shadow:none!important;border:0!important;overflow:visible!important;}
     .panel-body,.panel-header{padding:10px 0!important;}
@@ -15,5 +35,6 @@
     th,td {padding:10px 6px!important;overflow-wrap:anywhere;}
     tr {break-inside:avoid;} thead {display:table-header-group;}
     .invoice-table {overflow:visible!important;}
+    .invoice-detail .invoice-bottom {display:flex!important;justify-content:flex-end;}
     a {color:inherit!important;text-decoration:none!important;}
 }

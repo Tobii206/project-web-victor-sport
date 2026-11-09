@@ -8,8 +8,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý hóa đơn - Victor Sport</title>
-    <link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2"></head>
+    <link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced">
+    <link rel="stylesheet" href="/css/loc-hoa-don.css?v=20261107-balanced">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"></head>
 <body>
 <div class="app-shell">
     <jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/>
@@ -42,15 +43,28 @@
                     <c:if test="${not empty success}">
                         <div class="alert success" data-vs-flash="success"><c:out value="${success}"/></div>
                     </c:if>
-                    <form class="search-row" method="get" action="/quan-ly/hoa-don">
-                        <input class="input" name="tuKhoa" value="<c:out value='${tuKhoa}'/>"
-                               placeholder="Tìm mã hóa đơn, tên khách hàng, số điện thoại" aria-label="Tìm hóa đơn">
-                        <button class="button" type="submit">Tìm kiếm</button>
+                    <form class="invoice-filters" method="get" action="/quan-ly/hoa-don">
+                        <div class="invoice-filter-search"><label for="timHoaDon">Tìm kiếm</label><input class="input" id="timHoaDon" name="tuKhoa" value="<c:out value='${tuKhoa}'/>" placeholder="Mã hóa đơn, tên khách hàng, số điện thoại"></div>
+                        <div><label for="locTrangThaiHoaDon">Trạng thái đơn</label><select class="select" id="locTrangThaiHoaDon" name="trangThai">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="0" ${trangThai == 0 and trangThai != null ? 'selected' : ''}>Đơn chờ</option>
+                            <option value="1" ${trangThai == 1 ? 'selected' : ''}>Chờ xác nhận</option>
+                            <option value="2" ${trangThai == 2 ? 'selected' : ''}>Đã xác nhận đơn</option>
+                            <option value="3" ${trangThai == 3 ? 'selected' : ''}>Đang chuẩn bị hàng</option>
+                            <option value="4" ${trangThai == 4 ? 'selected' : ''}>Đang vận chuyển</option>
+                            <option value="5" ${trangThai == 5 ? 'selected' : ''}>Đã nhận hàng / Hoàn tất</option>
+                            <option value="6" ${trangThai == 6 ? 'selected' : ''}>Đã hủy</option>
+                        </select></div>
+                        <div><label for="locLoaiDon">Loại đơn</label><select class="select" id="locLoaiDon" name="loaiDon"><option value="">Online và tại quầy</option><option value="online" ${loaiDon == 'online' ? 'selected' : ''}>Online</option><option value="tai-quay" ${loaiDon == 'tai-quay' ? 'selected' : ''}>Tại quầy</option></select></div>
+                        <div><label for="locThanhToanHoaDon">Thanh toán</label><select class="select" id="locThanhToanHoaDon" name="thanhToan"><option value="">Tất cả</option><option value="da-thanh-toan" ${thanhToan == 'da-thanh-toan' ? 'selected' : ''}>Đã thanh toán</option><option value="chua-thanh-toan" ${thanhToan == 'chua-thanh-toan' ? 'selected' : ''}>Chưa thanh toán đủ</option></select></div>
+                        <div><label for="locTuNgayHoaDon">Ngày tạo từ</label><input class="input" id="locTuNgayHoaDon" type="date" name="tuNgay" value="<c:out value='${tuNgay}'/>"></div>
+                        <div><label for="locDenNgayHoaDon">Đến ngày</label><input class="input" id="locDenNgayHoaDon" type="date" name="denNgay" value="<c:out value='${denNgay}'/>"></div>
+                        <div class="invoice-filter-actions"><button class="button" type="submit">Lọc hóa đơn</button><a class="button secondary" href="/quan-ly/hoa-don">Xóa bộ lọc</a></div>
                     </form>
                     <div class="invoice-table">
                         <table class="table">
                             <thead>
-                            <tr>
+                            <tr><th scope="col" class="table-stt">STT</th>
                                 <th>Mã hóa đơn</th>
                                 <th>Khách hàng</th>
                                 <th>Số điện thoại</th>
@@ -61,8 +75,8 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <c:forEach items="${danhSachHoaDon}" var="hd">
-                                <tr>
+                            <c:forEach items="${danhSachHoaDon}" var="hd" varStatus="st">
+                                <tr><td class="table-stt">${tuDong + st.index}</td>
                                     <td><c:out value="${hd.ma_hoa_don}"/></td>
                                     <td><c:out value="${hd.ten_khach_hang}"/></td>
                                     <td>
@@ -73,7 +87,7 @@
                                     </td>
                                     <td><fmt:formatDate value="${hd.ngay_tao}" pattern="dd/MM/yyyy HH:mm"/></td>
                                     <td class="money"><fmt:formatNumber value="${hd.tong_tien_sau_giam}" groupingUsed="true"/> đ</td>
-                                    <td><c:out value="${hd.ten_trang_thai}"/></td>
+                                    <td><c:out value="${hd.ten_trang_thai}"/><div class="muted">${hd.loai_don == 2 ? 'Tại quầy · Giao hàng' : (hd.loai_don == 0 ? 'Tại quầy' : 'Online')} · ${hd.da_thanh_toan ? 'Đã thanh toán' : 'Chưa thanh toán đủ'}</div></td>
                                     <td><div class="invoice-actions">
                                         <a class="button secondary" href="/quan-ly/hoa-don/${hd.id}">Xem chi tiết</a>
 <c:if test="${currentUser.quanLy and (hd.loai_don == 1 or hd.loai_don == 2) and hd.phuong_thuc == 'COD' and hd.trang_thai_hien_tai == 1}">
@@ -95,10 +109,10 @@
                                                 <input type="hidden" name="quayLai" value="danh-sach"><button class="button danger" type="submit">Hủy hóa đơn</button>
                                             </form>
                                         </c:if>
-                                        <c:if test="${currentUser.quanLy and empty hd.id_khach_hang and (hd.loai_don == 1 or hd.loai_don == 2) and hd.trang_thai_hien_tai == 4}">
-                                            <form method="post" action="/quan-ly/hoa-don/${hd.id}/giao-khach-vang-lai" data-xac-nhan-thanh-toan data-tong-tien="${hd.tong_tien_sau_giam}" data-tieu-de="Xác nhận khách vãng lai đã nhận hàng" data-nhan-xac-nhan="Xác nhận đã nhận hàng" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đã nhận hàng" data-noi-dung="Chỉ xác nhận hộ khi khách vãng lai đã nhận hàng và đã trả đủ tiền nếu thanh toán COD. Xác nhận sẽ đồng thời ghi nhận thanh toán COD."><input type="hidden" name="quayLai" value="danh-sach"><button class="button" type="submit">Xác nhận khách vãng lai đã nhận hàng</button></form>
+                                        <c:if test="${currentUser.quanLy and (empty hd.id_khach_hang or hd.loai_don == 2) and (hd.loai_don == 1 or hd.loai_don == 2) and hd.trang_thai_hien_tai == 4}">
+                                            <form method="post" action="/quan-ly/hoa-don/${hd.id}/giao-khach-vang-lai" data-xac-nhan-thanh-toan data-tong-tien="${hd.tong_tien_sau_giam}" data-tieu-de="Xác nhận khách đã nhận hàng" data-nhan-xac-nhan="Xác nhận đã nhận hàng" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đã nhận hàng" data-noi-dung="Xác nhận khi khách đã nhận đủ hàng. Với đơn COD online, xác nhận đồng thời ghi nhận đã trả đủ tiền."><input type="hidden" name="quayLai" value="danh-sach"><button class="button" type="submit">Xác nhận khách đã nhận hàng</button></form>
                                         </c:if>
-                                        <c:if test="${currentUser.banHangTaiQuay and hd.trang_thai_hien_tai == 0 and hd.loai_don == 0 and hd.id_nhan_vien == currentUser.id}">
+                                        <c:if test="${currentUser.banHangTaiQuay and hd.trang_thai_hien_tai == 0 and (hd.loai_don == 0 or hd.loai_don == 2) and hd.id_nhan_vien == currentUser.id}">
                                             <form method="post" action="/pos/don-cho/mo">
                                                 <input type="hidden" name="idDonCho" value="${hd.id}">
                                                 <button class="button" type="submit">Tiếp tục bán</button>
@@ -113,11 +127,35 @@
                                 </tr>
                             </c:forEach>
                             <c:if test="${empty danhSachHoaDon}">
-                                <tr><td colspan="7" class="muted">Không có hóa đơn phù hợp.</td></tr>
+                                <tr><td colspan="8" class="muted">Không có hóa đơn phù hợp.</td></tr>
                             </c:if>
                             </tbody>
                         </table>
                     </div>
+                        <c:url var="urlPhanTrang" value="/quan-ly/hoa-don">
+                            <c:param name="tuKhoa" value="${tuKhoa}"/><c:param name="trangThai" value="${trangThai}"/>
+                            <c:param name="loaiDon" value="${loaiDon}"/><c:param name="thanhToan" value="${thanhToan}"/>
+                            <c:param name="tuNgay" value="${tuNgay}"/><c:param name="denNgay" value="${denNgay}"/>
+                        </c:url>
+                        <div class="pagination invoice-pagination">
+                            <p><c:choose><c:when test="${tongHoaDon gt 0}">Hiển thị <strong>${tuDong}–${denDong}</strong> / ${tongHoaDon} hóa đơn · Trang ${trang}/${soTrang}</c:when><c:otherwise>0 hóa đơn</c:otherwise></c:choose></p>
+                            <c:if test="${tongHoaDon gt 0}">
+                            <nav class="invoice-page-links" aria-label="Phân trang hóa đơn">
+                                <c:choose><c:when test="${trang gt 1}">
+                                    <a href="<c:out value='${urlPhanTrang}'/>&amp;trang=1" aria-label="Trang đầu">« Đầu</a>
+                                    <a href="<c:out value='${urlPhanTrang}'/>&amp;trang=${trang - 1}" rel="prev">‹ Trước</a>
+                                </c:when><c:otherwise><span aria-disabled="true">« Đầu</span><span aria-disabled="true">‹ Trước</span></c:otherwise></c:choose>
+                                <c:forEach begin="${trangBatDau}" end="${trangKetThuc}" var="so">
+                                    <c:choose><c:when test="${so == trang}"><span aria-current="page" aria-label="Trang ${so}">${so}</span></c:when>
+                                        <c:otherwise><a href="<c:out value='${urlPhanTrang}'/>&amp;trang=${so}" aria-label="Trang ${so}">${so}</a></c:otherwise></c:choose>
+                                </c:forEach>
+                                <c:choose><c:when test="${trang lt soTrang}">
+                                    <a href="<c:out value='${urlPhanTrang}'/>&amp;trang=${trang + 1}" rel="next">Tiếp ›</a>
+                                    <a href="<c:out value='${urlPhanTrang}'/>&amp;trang=${soTrang}" aria-label="Trang cuối">Cuối »</a>
+                                </c:when><c:otherwise><span aria-disabled="true">Tiếp ›</span><span aria-disabled="true">Cuối »</span></c:otherwise></c:choose>
+                            </nav>
+                            </c:if>
+                        </div>
                 </div>
             </section>
         </main>

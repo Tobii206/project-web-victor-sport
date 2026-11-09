@@ -21,6 +21,10 @@ public class GiaChungSanPhamConfig implements InitializingBean {
             EXEC('UPDATE sp SET gia_ban=(SELECT TOP 1 ct.gia_ban FROM chi_tiet_san_pham ct
                 WHERE ct.id_san_pham=sp.id AND ISNULL(ct.xoa_mem,0)=0 ORDER BY ct.id)
                 FROM san_pham sp WHERE sp.gia_ban IS NULL');
+            EXEC('UPDATE ct SET gia_ban=sp.gia_ban,ngay_cap_nhat=SYSDATETIME()
+                FROM chi_tiet_san_pham ct JOIN san_pham sp ON sp.id=ct.id_san_pham
+                WHERE ISNULL(ct.xoa_mem,0)=0 AND ISNULL(sp.xoa_mem,0)=0 AND sp.gia_ban IS NOT NULL
+                  AND (ct.gia_ban IS NULL OR ct.gia_ban<>sp.gia_ban)');
             """);
     }
 }

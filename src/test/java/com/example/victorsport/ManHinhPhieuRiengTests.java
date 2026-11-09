@@ -33,17 +33,17 @@ class ManHinhPhieuRiengTests {
                     .andExpect(model().attribute("duongDanLuu","/quan-ly/phieu-giam-gia/9/"+(ship?"luu-freeship":"luu")));
         }
     }
-    @Test void khongDoiLoaiBangCachSuaTruongAn() throws Exception {
+    @Test void doiLoaiPhieuNgayTrongFormSua() throws Exception {
         for(boolean ship:new boolean[]{false,true}) {
-            var service=mock(QuanLyPhieuGiamGiaService.class);when(service.luu(isNull(),any())).thenReturn(9);
+            var service=mock(QuanLyPhieuGiamGiaService.class);when(service.luu(eq(9),any())).thenReturn(9);
             var mvc=MockMvcBuilders.standaloneSetup(new QuanLyPhieuGiamGiaController(service)).build();
-            mvc.perform(post("/quan-ly/phieu-giam-gia/"+(ship?"luu-freeship":"luu")).session(session("Quản trị viên"))
+            mvc.perform(post("/quan-ly/phieu-giam-gia/9/"+(ship?"luu-freeship":"luu")).session(session("Quản trị viên"))
                     .param("ap_dung_van_chuyen",ship?"0":"1").param("chi_ap_dung_ha_noi","1")
                     .param("ten_phieu_giam_gia","Phiếu A").param("loai_phieu_giam_gia","1").param("gia_tri_giam_gia","30000")
                     .param("ngay_bat_dau","2026-11-01").param("ngay_ket_thuc","2026-12-31").param("so_luong_su_dung","10").param("trang_thai","1"))
                     .andExpect(redirectedUrl("/quan-ly/phieu-giam-gia/9"));
-            var form=org.mockito.ArgumentCaptor.forClass(PhieuGiamGiaForm.class);verify(service).luu(isNull(),form.capture());
-            assertEquals(ship?1:0,form.getValue().getAp_dung_van_chuyen());assertEquals(ship?1:0,form.getValue().getChi_ap_dung_ha_noi());
+            var form=org.mockito.ArgumentCaptor.forClass(PhieuGiamGiaForm.class);verify(service).luu(eq(9),form.capture());
+            assertEquals(ship?0:1,form.getValue().getAp_dung_van_chuyen());assertEquals(ship?0:1,form.getValue().getChi_ap_dung_ha_noi());
         }
     }
     @Test void guiSaiManHinhKhiSuaKhongLamDoiLoaiPhieu() throws Exception {

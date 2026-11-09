@@ -114,6 +114,13 @@
         var nut = form ? Array.from(form.elements).filter(function (el) {
             return el.matches('input,select,textarea,button') && el.type !== 'hidden' && !el.disabled;
         }) : [];
+        var trangThaiAnh = form && form.querySelector('[data-trang-thai-anh]');
+        if (trangThaiAnh) {
+            trangThaiAnh.textContent = 'Đang lưu ảnh…';
+            document.querySelectorAll('[data-tu-luu-anh-mau] input[type="file"]:enabled').forEach(function (input) {
+                if (!nut.includes(input)) nut.push(input);
+            });
+        }
         nut.forEach(function (b) { b.disabled = true; });
         if (vungCu) vungCu.setAttribute('aria-busy', 'true');
         var thanh = document.createElement('div');thanh.className = 'vs-loading-bar';thanh.setAttribute('role', 'status');thanh.setAttribute('aria-label', 'Đang cập nhật');document.body.appendChild(thanh);
@@ -143,11 +150,27 @@
                 : 'Chưa tải được dữ liệu. Bạn có thể thử lại.');
         } finally {
             nut.forEach(function (b) { b.disabled = false; });
+            if (trangThaiAnh && trangThaiAnh.isConnected) {
+                trangThaiAnh.textContent = '';
+                form.elements.namedItem('tepAnh').value = '';
+            }
             if (vungCu) vungCu.removeAttribute('aria-busy');
             var main = document.querySelector('main');if (main) main.removeAttribute('aria-busy');
             thanh.remove();dangGui = false;window.VictorDangThaoTac = false;
         }
     }
+    document.addEventListener('change', function (event) {
+        var input = event.target, form = input.form;
+        if (!form || !form.hasAttribute('data-tu-luu-anh-mau') || input.type !== 'file' || !input.files.length) return;
+        var file = input.files[0], trangThai = form.querySelector('[data-trang-thai-anh]');
+        if (dangGui || !/\.(jpe?g|png)$/i.test(file.name) || !file.size || file.size > 5 * 1024 * 1024) {
+            trangThai.textContent = dangGui ? 'Đang xử lý thao tác khác. Vui lòng chọn lại ảnh sau.'
+                : 'Chọn ảnh JPG hoặc PNG có dung lượng tối đa 5 MB.';
+            input.value = '';
+            return;
+        }
+        form.requestSubmit();
+    });
     // Window nhận sự kiện sau các hộp thoại xác nhận ở document.
     window.addEventListener('submit', function (e) {
         if (e.defaultPrevented || !(e.target instanceof HTMLFormElement)) return;

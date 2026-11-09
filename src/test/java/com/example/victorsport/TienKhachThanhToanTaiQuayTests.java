@@ -36,11 +36,11 @@ class TienKhachThanhToanTaiQuayTests {
         verify(jdbc).update(contains("trang_thai_hien_tai = 5"),eq(10));
         verify(jdbc,times(1)).update(contains("UPDATE chi_tiet_san_pham"),eq(1),eq(2),eq(1));
     }
-    @Test void thieuThuaBoTrongVaSoLeSaiKhongTaoHoaDonHayTruKho() {
-        for(var tien:Arrays.asList(null,new BigDecimal("700000"),new BigDecimal("900000"),new BigDecimal("-1"),new BigDecimal("800000.001"))) {
+    @Test void thieuBoTrongVaSoLeSaiKhongTaoHoaDonHayTruKho() {
+        for(var tien:Arrays.asList(null,new BigDecimal("700000"),new BigDecimal("-1"),new BigDecimal("800000.001"))) {
             var jdbc=mock(JdbcTemplate.class);var service=service(jdbc);
             var error=assertThrows(IllegalArgumentException.class,()->service.thanhToan(gio(),yeuCau(tien),nhanVien(),10));
-            assertTrue(error.getMessage().contains("đúng bằng"));
+            assertTrue(error.getMessage().contains("không được nhỏ hơn"));
             verify(jdbc,never()).update(anyString(),any(Object[].class));
         }
     }
@@ -49,6 +49,21 @@ class TienKhachThanhToanTaiQuayTests {
         doReturn(new TongKetBanHang(new BigDecimal("1000000"),BigDecimal.ZERO,new BigDecimal("1000000"),"Không áp dụng",null))
                 .when(service).tinhTongKet(any(),nullable(Integer.class));
         assertThrows(IllegalArgumentException.class,()->service.thanhToan(gio(),yeuCau(new BigDecimal("800000")),nhanVien(),10));
+        verify(jdbc,never()).update(anyString(),any(Object[].class));
+    }
+    @Test void tienMatDuocDuaThuaNhungChiGhiNhanDungGiaTriHoaDon() {
+        var jdbc=mock(JdbcTemplate.class);var service=service(jdbc);
+        when(jdbc.queryForList(contains("nha_cung_cap=N'POS'"),eq(1))).thenReturn(List.of(Map.of("id",1)));
+        var request=yeuCau(new BigDecimal("1000000"));
+        service.thanhToan(gio(),request,nhanVien(),10);
+        assertEquals(0,new BigDecimal("200000").compareTo(request.getTienThua()));
+        verify(jdbc).update(contains("INSERT INTO giao_dich_thanh_toan"),eq(10),eq(1),eq(new BigDecimal("800000.00")),
+                eq("POS-10"),eq("HD10"),eq(2),argThat((String note)->note.contains("1000000") && note.contains("200000.00")));
+    }
+    @Test void chuyenKhoanKhongDuocTinhTienThuaBangCachGuiSoTienLonHon() {
+        var jdbc=mock(JdbcTemplate.class);var service=service(jdbc);
+        var error=assertThrows(IllegalArgumentException.class,()->service.thanhToan(gio(),yeuCau(new BigDecimal("900000")),nhanVien(),10));
+        assertTrue(error.getMessage().contains("Tiền thừa chỉ áp dụng khi trả tiền mặt"));
         verify(jdbc,never()).update(anyString(),any(Object[].class));
     }
     @Test void formGuiDungTienVaDonChoKhongBatNhapTien() throws Exception {

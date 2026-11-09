@@ -44,12 +44,40 @@ public class DonHangController {
             var don = service.layDonCuaKhach(id,khach);
             if (don == null || don.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Không tìm thấy đơn hàng.");
             model.addAttribute("don",don);
+            if (session.getAttribute("csrfSuaNhanHang") == null) {
+                session.setAttribute("csrfSuaNhanHang", java.util.UUID.randomUUID().toString());
+            }
             model.addAttribute("sanPham",service.laySanPhamTrongHoaDon(id));
             model.addAttribute("lichSu",service.layLichSu(id));
             return "client/order/detail";
         } catch (IllegalArgumentException e) { flash.addFlashAttribute("error",e.getMessage()); }
         catch (DataAccessException e) { flash.addFlashAttribute("error","Chưa tải được chi tiết đơn hàng. Vui lòng thử lại."); }
         return "redirect:/don-hang";
+    }
+
+    @PostMapping("/{id}/dia-chi")
+    public String suaDiaChi(@PathVariable int id, @RequestParam String ten, @RequestParam String sdt,
+                            @RequestParam String diaChi, @RequestParam(required = false) Integer tinh,
+                            @RequestParam(required = false) Integer xa, @RequestParam(required = false) String csrf,
+                            HttpSession session, RedirectAttributes flash) {
+        Integer khach = khachHang(session);
+        if (khach == null) return "redirect:/login";
+        if (csrf == null || !csrf.equals(session.getAttribute("csrfSuaNhanHang"))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+        try {
+            service.suaDiaChiCuaKhach(id, khach, ten, sdt, diaChi, tinh, xa);
+            flash.addFlashAttribute("success", "Đã cập nhật thông tin nhận hàng.");
+            return "redirect:/don-hang/" + id;
+        } catch (IllegalArgumentException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+        } catch (IllegalStateException e) {
+            flash.addFlashAttribute("error", "Chưa kiểm tra được khu vực giao hàng. Vui lòng thử lại hoặc liên hệ cửa hàng.");
+        } catch (DataAccessException e) {
+            flash.addFlashAttribute("error", "Chưa lưu được thông tin nhận hàng. Vui lòng thử lại.");
+        }
+        flash.addFlashAttribute("moSuaNhanHang", true);
+        return "redirect:/don-hang/" + id;
     }
 
     @PostMapping("/{id}/da-nhan-hang")

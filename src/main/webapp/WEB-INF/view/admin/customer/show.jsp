@@ -2,8 +2,8 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html><html lang="vi"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quản lý khách hàng — VictorSport</title>
-<link rel="icon" href="/logo/favicon-victorsport.svg"><link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=admin-20261014">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
+<link rel="icon" href="/logo/favicon-victorsport.svg"><link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=20261107-balanced">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
 <%@ include file="/WEB-INF/view/admin/layout/customer-header.jsp" %>
 <main class="content-layout"><section class="panel">
 <div class="panel-header"><h2>Danh sách khách hàng</h2><c:if test="${currentUser.quanLy}"><a class="button" href="/quan-ly/khach-hang/them">+ Thêm khách hàng</a></c:if></div><div class="panel-body">
@@ -15,13 +15,13 @@
     <div class="field"><label for="sapXep">Sắp xếp</label><select class="select" id="sapXep" name="sapXep"><option value="moi">Mới nhất</option><option value="ten" ${loc.sapXep == 'ten' ? 'selected' : ''}>Tên A–Z</option></select></div>
     <div class="product-admin-actions"><button class="button">Tìm kiếm / Lọc</button><a class="button secondary" href="/quan-ly/khach-hang">Xóa bộ lọc</a></div>
 </form>
-<div class="product-admin-table"><table class="table"><thead><tr><th>Mã khách hàng</th><th>Họ tên</th><th>Tài khoản</th><th>Liên hệ</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>
-<c:forEach items="${khachHang}" var="kh"><tr>
+<div class="product-admin-table"><table class="table"><thead><tr><th scope="col" class="table-stt">STT</th><th>Mã khách hàng</th><th>Họ tên</th><th>Tài khoản</th><th>Liên hệ</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>
+<c:forEach items="${khachHang}" var="kh" varStatus="st"><tr><td class="table-stt">${st.count}</td>
     <td><c:out value="${kh.ma_khach_hang}"/></td><td><strong><c:out value="${kh.ten_khach_hang}"/></strong></td><td><c:out value="${kh.ten_tai_khoan}"/></td>
     <td><c:out value="${empty kh.email ? 'Không có email' : kh.email}"/><div class="muted"><c:out value="${empty kh.so_dien_thoai ? 'Không có số điện thoại' : kh.so_dien_thoai}"/></div></td>
     <td><span class="product-admin-tag ${kh.trang_thai ? '' : 'off'}">${kh.trang_thai ? 'Đang hoạt động' : 'Không hoạt động'}</span><c:if test="${kh.bi_khoa}"><span class="product-admin-tag off">Khóa đăng nhập</span></c:if></td>
     <td><div class="product-admin-actions"><c:if test="${currentUser.quanLy and kh.bi_khoa}"><form method="post" action="/quan-ly/khach-hang/${kh.id}/mo-khoa"><button class="button secondary">Mở khóa đăng nhập</button></form></c:if><a class="button secondary" href="/quan-ly/khach-hang/${kh.id}">${currentUser.quanLy ? 'Chi tiết / Sửa' : 'Chi tiết'}</a>
         <c:if test="${currentUser.quanLy and kh.trang_thai}"><form method="post" action="/quan-ly/khach-hang/${kh.id}/ngung-hoat-dong" data-vs-confirm="Khách hàng sẽ không thể đăng nhập sau khi ngừng hoạt động. Thông tin và hóa đơn đã lưu vẫn được giữ lại." data-vs-title="Ngừng hoạt động khách hàng" data-vs-button="Ngừng hoạt động" data-vs-tone="danger"><button class="button danger">Ngừng hoạt động</button></form></c:if>
     </div></td>
-</tr></c:forEach><c:if test="${empty khachHang}"><tr><td colspan="6">Không có khách hàng phù hợp.</td></tr></c:if>
+</tr></c:forEach><c:if test="${empty khachHang}"><tr><td colspan="7">Không có khách hàng phù hợp.</td></tr></c:if>
 </tbody></table></div></div></section></main></div></div></body></html>

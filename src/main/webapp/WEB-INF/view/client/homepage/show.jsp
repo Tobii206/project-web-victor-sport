@@ -14,8 +14,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1">
-    <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2">
+    <link rel="stylesheet" href="/css/trang-chu.css?v=20261107-balanced">
+    <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable">
 </head>
 <body class="store-page">
 
@@ -160,11 +160,11 @@
 
     <!-- 5. Flash Sale Live Countdown Banner -->
     <section id="flash-sale" class="store-container">
-        <div class="flash-sale-section">
+        <c:if test="${coUuDai}"><div class="flash-sale-section" id="bannerUuDai">
             <div class="flash-sale-title">
                 <span class="flash-sale-icon">🔥</span>
                 <div class="flash-sale-text">
-                    <h3>FLASH SALE HÔM NAY — GIẢM ĐẾN 40%</h3>
+                    <h3>ƯU ĐÃI ĐANG DIỄN RA</h3>
                     <p>Cơ hội sở hữu giày thể thao đỉnh cao với giá ưu đãi có hạn!</p>
                 </div>
             </div>
@@ -175,6 +175,13 @@
                 <span class="countdown-colon">:</span>
                 <div class="countdown-box"><span class="num" id="fsSeconds">--</span><span class="label">Giây</span></div>
             </div>
+        </div></c:if>
+        <div id="bannerKhongUuDai" class="flash-sale-section catalogue-banner ${coUuDai ? 'is-hidden' : ''}">
+            <div class="flash-sale-title">
+                <span class="catalogue-banner-icon" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 7h14l1 14H4L5 7ZM8 7V5a4 4 0 0 1 8 0v2"/></svg></span>
+                <div class="flash-sale-text"><h3>TÌM ĐÔI GIÀY PHÙ HỢP VỚI BẠN</h3><p>Khám phá các mẫu giày dành cho thể thao và phong cách mỗi ngày.</p></div>
+            </div>
+            <a class="store-button" href="#san-pham">Khám phá sản phẩm →</a>
         </div>
     </section>
 
@@ -258,6 +265,13 @@
 
             <!-- Detailed Advanced Filters (Collapsible) -->
             <div>
+                <label for="doiTuong">Giới tính</label>
+                <select id="doiTuong" name="doiTuong">
+                    <option value="">Tất cả</option>
+                    <c:forEach items="${cacDoiTuong}" var="loai"><option value="${loai.ma}" ${doiTuongDangChon == loai.ma ? 'selected' : ''}><c:out value="${loai.ten}"/></option></c:forEach>
+                </select>
+            </div>
+            <div>
                 <label for="kichThuoc">Kích thước</label>
                 <select id="kichThuoc" name="kichThuoc">
                     <option value="">Tất cả kích thước</option>
@@ -322,7 +336,7 @@
                         <span class="stock-label ${sp.so_luong <= 0 ? 'sold-out' : ''}">
                             <c:choose>
                                 <c:when test="${sp.so_luong > 0}">Còn hàng</c:when>
-                                <c:otherwise>Tạm hết hàng</c:otherwise>
+                                <c:otherwise>Hết hàng</c:otherwise>
                             </c:choose>
                         </span>
 
@@ -342,6 +356,7 @@
                         <h3><a href="/san-pham/${sp.id}"><c:out value="${sp.ten_san_pham}"/></a></h3>
 
                         <div class="shop-product-tags">
+                            <c:forEach items="${cacDoiTuong}" var="loai"><c:if test="${sp.doi_tuong == loai.ma}"><span><c:out value="${loai.ten}"/></span></c:if></c:forEach>
                             <c:if test="${not empty sp.ten_vi_tri}"><span><c:out value="${sp.ten_vi_tri}"/></span></c:if>
                             <c:if test="${not empty sp.ten_chat_lieu}"><span><c:out value="${sp.ten_chat_lieu}"/></span></c:if>
                         </div>
@@ -350,7 +365,10 @@
 
                         <p class="product-price">
                             <small>Từ</small>
-                            <fmt:formatNumber value="${sp.gia_sau_giam}" maxFractionDigits="0" groupingUsed="true"/> đ
+                            <c:choose>
+                                <c:when test="${not empty sp.gia_sau_giam}"><fmt:formatNumber value="${sp.gia_sau_giam}" maxFractionDigits="0" groupingUsed="true"/> đ</c:when>
+                                <c:otherwise>Chưa có giá</c:otherwise>
+                            </c:choose>
                             <c:if test="${sp.gia_sau_giam lt sp.gia_goc}">
                                 <del class="gia-goc"><fmt:formatNumber value="${sp.gia_goc}"/> đ</del>
                             </c:if>
@@ -453,6 +471,6 @@
 <!-- 10. Floating Back to Top Button -->
 <button type="button" class="back-to-top" id="backToTopBtn" aria-label="Lên đầu trang">↑</button>
 
-<script src="/js/victor-modern.js?v=20261023-slider-2"></script>
+<script src="/js/victor-modern.js?v=20261102-banner-state"></script>
 </body>
 </html>

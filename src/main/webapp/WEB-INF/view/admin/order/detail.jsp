@@ -8,9 +8,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý hóa đơn - Victor Sport</title>
-    <link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014">
-    <link rel="stylesheet" href="/css/chi-tiet-hoa-don.css?v=20261023-ui-1">
-<link rel="stylesheet" href="/css/in-hoa-don.css?v=2"><link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2"></head>
+    <link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced">
+    <link rel="stylesheet" href="/css/chi-tiet-hoa-don.css?v=20261109-customer-dialog">
+<link rel="stylesheet" href="/css/in-hoa-don.css?v=4"><link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"></head>
 <body>
 <div class="app-shell">
     <jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/>
@@ -31,7 +31,7 @@
                 </form>
             </div>
         </header>
-        <main class="content-layout invoice-detail"><div class="invoice-print-brand"><img class="invoice-print-logo" src="/logo/logo-nobackgroud.png" alt="VictorSport" width="210" height="64"><span>Cầu Giấy, Hà Nội · 0325327602</span></div>
+        <main class="content-layout invoice-detail" data-hoa-don-da-thanh-toan="${hoaDon.da_thanh_toan}" data-ma-hoa-don="${hoaDon.id}"><div class="invoice-print-brand"><img class="invoice-print-logo" src="/logo/logo-nobackgroud.png" alt="VictorSport" width="210" height="64"><span>Cầu Giấy, Hà Nội · 0325327602</span></div>
             <section class="panel">
                 <div class="panel-header">
                     <div><span class="invoice-caption">CHI TIẾT HÓA ĐƠN</span><h2><c:out value="${hoaDon.ma_hoa_don}"/></h2></div>
@@ -65,15 +65,15 @@
                             <button class="button danger" type="submit">Hủy hóa đơn</button>
                         </form>
                     </c:if>
-                        <c:if test="${currentUser.quanLy and empty hoaDon.id_khach_hang and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 4}">
-                            <form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/giao-khach-vang-lai" data-xac-nhan-thanh-toan data-tong-tien="${hoaDon.tong_tien_sau_giam}" data-tieu-de="Xác nhận khách vãng lai đã nhận hàng" data-nhan-xac-nhan="Xác nhận đã nhận hàng" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đã nhận hàng" data-noi-dung="Chỉ xác nhận hộ khi khách vãng lai đã nhận hàng và đã trả đủ tiền nếu thanh toán COD. Xác nhận sẽ đồng thời ghi nhận thanh toán COD."><button class="button" type="submit">Xác nhận khách vãng lai đã nhận hàng</button></form>
+                        <c:if test="${currentUser.quanLy and (empty hoaDon.id_khach_hang or hoaDon.loai_don == 2) and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 4}">
+                            <form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/giao-khach-vang-lai" data-xac-nhan-thanh-toan data-tong-tien="${hoaDon.tong_tien_sau_giam}" data-tieu-de="Xác nhận khách đã nhận hàng" data-nhan-xac-nhan="Xác nhận đã nhận hàng" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đã nhận hàng" data-noi-dung="Xác nhận khi khách đã nhận đủ hàng. Với đơn COD online, xác nhận đồng thời ghi nhận đã trả đủ tiền."><button class="button" type="submit">Xác nhận khách đã nhận hàng</button></form>
                         </c:if>
                         </div>
                     </div>
                     <c:if test="${(hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 5}">
                         <div class="alert success">Đơn đã giao thành công. Trạng thái đơn hàng đã được khóa.</div>
                     </c:if>
-                    <c:if test="${currentUser.banHangTaiQuay and hoaDon.trang_thai_hien_tai == 0 and hoaDon.loai_don == 0 and hoaDon.id_nhan_vien == currentUser.id}">
+                    <c:if test="${currentUser.banHangTaiQuay and hoaDon.trang_thai_hien_tai == 0 and (hoaDon.loai_don == 0 or hoaDon.loai_don == 2) and hoaDon.id_nhan_vien == currentUser.id}">
                         <div class="invoice-actions">
                             <form method="post" action="/pos/don-cho/mo">
                                 <input type="hidden" name="idDonCho" value="${hoaDon.id}">
@@ -100,11 +100,35 @@
                             </p>
                             <p><strong>Email:</strong>
                                 <c:choose>
-                                    <c:when test="${empty hoaDon.email_khach_hang or hoaDon.email_khach_hang == 'khachvanglai@gmail.com'}">Không có</c:when>
-                                    <c:otherwise><c:out value="${hoaDon.email_khach_hang}"/></c:otherwise>
+                                    <c:when test="${empty hoaDon.email_hien_thi or hoaDon.email_hien_thi == 'khachvanglai@gmail.com'}">Không có</c:when>
+                                    <c:otherwise><c:out value="${hoaDon.email_hien_thi}"/></c:otherwise>
                                 </c:choose>
                             </p>
                             <p><strong>Địa chỉ:</strong> <c:out value="${hoaDon.dia_chi_khach_hang}"/></p>
+                            <c:if test="${currentUser.quanLy and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai ge 1 and hoaDon.trang_thai_hien_tai lt 4 and empty hoaDon.vanDonGhn.ma_van_don}">
+                                <div class="invoice-edit-address invoice-no-print">
+                                    <button class="button secondary" type="button" id="moSuaNhanHang" aria-haspopup="dialog" aria-controls="suaNhanHangHoaDon">Sửa thông tin nhận hàng</button>
+                                </div>
+                                <dialog id="suaNhanHangHoaDon" class="invoice-address-dialog invoice-no-print" aria-labelledby="tieuDeSuaNhanHang">
+                                    <h2 id="tieuDeSuaNhanHang">Sửa thông tin nhận hàng</h2>
+                                    <form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/dia-chi">
+                                        <div class="field"><label for="hoaDonTenNhan">Người nhận</label><input class="input" id="hoaDonTenNhan" name="ten" maxlength="100" value="<c:out value='${hoaDon.ten_khach_hang}'/>" required autofocus></div>
+                                        <div class="field"><label for="hoaDonSdtNhan">Điện thoại</label><input class="input" id="hoaDonSdtNhan" name="sdt" type="tel" maxlength="10" pattern="0[0-9]{9}" value="<c:out value='${hoaDon.so_dien_thoai_khach_hang}'/>" required></div>
+                                        <c:if test="${not empty hoaDon.vanDonGhn}">
+                                            <p class="muted">Khu vực hiện tại: <c:out value="${hoaDon.vanDonGhn.ten_xa}"/>, <c:out value="${hoaDon.vanDonGhn.ten_tinh}"/></p>
+                                            <div class="field"><label for="hoaDonTinh">Đổi tỉnh / thành phố</label><select class="select" id="hoaDonTinh" name="tinh"><option value="">Giữ khu vực hiện tại</option></select></div>
+                                            <div class="field"><label for="hoaDonXa">Phường / xã</label><select class="select" id="hoaDonXa" name="xa" disabled><option value="">Chọn phường / xã</option></select></div>
+                                            <p id="hoaDonDiaChiStatus" class="muted" role="status"></p>
+                                        </c:if>
+                                        <div class="field"><label for="hoaDonDiaChi">Địa chỉ chi tiết</label><input class="input" id="hoaDonDiaChi" name="diaChi" maxlength="255" value="<c:out value='${hoaDon.dia_chi_chi_tiet}'/>" required></div>
+                                        <p class="muted">Số tiền đã chốt trên hóa đơn được giữ khi đổi địa chỉ.</p>
+                                        <div class="invoice-address-actions">
+                                            <button class="button secondary" type="button" data-dong-sua-nhan-hang>Đóng</button>
+                                            <button class="button" type="submit">Lưu thông tin</button>
+                                        </div>
+                                    </form>
+                                </dialog>
+                            </c:if>
                         </div>
                         <div class="invoice-info-card">
                             <h3>Thông tin hóa đơn</h3>
@@ -120,6 +144,12 @@
                         </div>
                     </div>
                     <p class="invoice-note"><strong>Ghi chú:</strong> <c:out value="${hoaDon.ghi_chu}" default="Không có"/></p>
+                    <c:if test="${hoaDon.trang_thai_hien_tai == 0 and hoaDon.id_nhan_vien == currentUser.id}">
+                        <form method="post" action="/pos/don-cho/mo" class="invoice-no-print">
+                            <input type="hidden" name="idDonCho" value="${hoaDon.id}">
+                            <button class="button secondary" type="submit">Sửa đơn chờ tại quầy</button>
+                        </form>
+                    </c:if>
                     <h3 class="invoice-section-title">Sản phẩm trong đơn <span>${danhSachSanPham.size()} sản phẩm</span></h3>
                     <div class="invoice-table">
                         <table class="table">
@@ -142,7 +172,22 @@
                                     </td>
                                     <td><c:out value="${sp.ten_mau_sac}"/></td>
                                     <td><c:out value="${sp.ten_kich_thuoc}"/></td>
-                                    <td><c:out value="${sp.so_luong}"/></td>
+                                    <td>
+                                        <c:out value="${sp.so_luong}"/>
+                                        <c:if test="${currentUser.quanLy and hoaDon.loai_don == 1 and hoaDon.phuong_thuc == 'COD'
+                                            and not hoaDon.co_thanh_toan and empty hoaDon.id_phieu_giam_gia and hoaDon.tong_tien_giam == 0
+                                            and hoaDon.trang_thai_hien_tai ge 1 and hoaDon.trang_thai_hien_tai lt 4 and empty hoaDon.vanDonGhn.ma_van_don}">
+                                            <details class="invoice-quantity-edit invoice-no-print">
+                                                <summary>Sửa</summary>
+                                                <form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/so-luong">
+                                                    <input type="hidden" name="idDong" value="${sp.id_dong}">
+                                                    <input type="hidden" name="soLuongCu" value="${sp.so_luong}">
+                                                    <input class="input" type="number" name="soLuong" min="1" step="1" max="2147483647" value="${sp.so_luong}" required aria-label="Số lượng mới">
+                                                    <button class="button secondary" type="submit">Lưu</button>
+                                                </form>
+                                            </details>
+                                        </c:if>
+                                    </td>
                                     <td class="money"><fmt:formatNumber value="${sp.don_gia}" groupingUsed="true"/> đ</td>
                                     <td class="money"><fmt:formatNumber value="${sp.thanh_tien}" groupingUsed="true"/> đ</td>
                                 </tr>
@@ -183,6 +228,8 @@
                         <div class="summary-row"><span>Giảm giá</span><strong><fmt:formatNumber value="${hoaDon.tong_tien_giam}" groupingUsed="true"/> đ</strong></div>
                         <div class="summary-row"><span>Phí vận chuyển</span><strong><fmt:formatNumber value="${hoaDon.phi_van_chuyen}" groupingUsed="true"/> đ</strong></div>
                         <div class="summary-row total"><span>Tổng thanh toán</span><strong><fmt:formatNumber value="${hoaDon.tong_tien_sau_giam}" groupingUsed="true"/> đ</strong></div>
+                        <div class="summary-row"><span>Đã thu</span><strong><fmt:formatNumber value="${hoaDon.da_thu}" groupingUsed="true"/> đ</strong></div>
+                        <c:if test="${not empty hoaDon.ghi_chu_tien_mat}"><p><c:out value="${hoaDon.ghi_chu_tien_mat}"/></p></c:if>
                     </div>
                     </div>
                 </div>
@@ -191,5 +238,6 @@
     </div>
 </div>
 <%@ include file="/WEB-INF/view/client/layout/payment-confirm.jsp" %>
+<script src="/js/in-hoa-don.js?v=20261109-customer-dialog"></script>
 </body>
 </html>

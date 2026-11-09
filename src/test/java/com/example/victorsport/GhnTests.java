@@ -62,6 +62,16 @@ class GhnTests {
         var loi=assertThrows(IllegalStateException.class,()->new GhnService(config(),builder).tinh());
         assertFalse(loi.getMessage().contains("token-kiem-tra")); server.verify();
     }
+    @Test void xungDotDiaChiGoiYKiemTraSoNhaTenDuongVaPhuong() {
+        var builder=RestClient.builder(); var server=MockRestServiceServer.bindTo(builder).build();
+        server.expect(requestTo(URL+"/v2/shipping-order/preview"))
+                .andRespond(withBadRequest().body("{\"code_message\":\"TO_ADDRESS_CONFLICT\"}")
+                        .contentType(MediaType.APPLICATION_JSON));
+        var loi=assertThrows(IllegalStateException.class,()->new GhnService(config(),builder).xemTruoc(java.util.Map.of()));
+        assertTrue(loi.getMessage().contains("số nhà hoặc tên đường"));
+        assertTrue(loi.getMessage().contains("phường/xã"));
+        server.verify();
+    }
     @Test void phiAmBiTuChoi() {
         var builder=RestClient.builder(); var server=MockRestServiceServer.bindTo(builder).build();
         diaChiHopLe(server);

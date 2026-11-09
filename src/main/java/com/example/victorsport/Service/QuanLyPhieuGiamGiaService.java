@@ -5,6 +5,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 @Service
 public class QuanLyPhieuGiamGiaService {
@@ -15,18 +17,37 @@ public class QuanLyPhieuGiamGiaService {
         return tim(tuKhoa,trangThai,"");
     }
     public List<Map<String,Object>> tim(String tuKhoa, String trangThai,String loai) {
-        String sql = "SELECT * FROM phieu_giam_gia WHERE ISNULL(xoa_mem,0)=0 AND (ten_phieu_giam_gia LIKE ? OR ma_phieu_giam_gia LIKE ?)";
+        String sql = "SELECT * FROM phieu_giam_gia WHERE ISNULL(xoa_mem,0)=0 AND (ten_phieu_giam_gia COLLATE Vietnamese_100_CI_AI LIKE ? OR ma_phieu_giam_gia LIKE ?)";
         List<Object> args = new ArrayList<>();
         args.add("%" + tuKhoa.trim() + "%"); args.add("%" + tuKhoa.trim() + "%");
-        if ("0".equals(trangThai) || "1".equals(trangThai)) { sql += " AND trang_thai=?"; args.add(Integer.valueOf(trangThai)); }
+        var homNay=LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        if ("0".equals(trangThai) || "1".equals(trangThai)) {
+            sql += " AND trang_thai=? AND ngay_ket_thuc>=?";
+            args.add(Integer.valueOf(trangThai));args.add(homNay);
+            if("1".equals(trangThai)) {sql+=" AND ngay_bat_dau<=?";args.add(homNay);}
+        } else if("2".equals(trangThai)) {sql+=" AND ngay_ket_thuc<?";args.add(homNay);}
+        else if("3".equals(trangThai)) {
+            sql+=" AND trang_thai=1 AND ngay_bat_dau>? AND ngay_ket_thuc>=?";
+            args.add(homNay);args.add(homNay);
+        }
         if ("0".equals(loai) || "1".equals(loai)) {sql+=" AND ap_dung_van_chuyen=?";args.add(Integer.valueOf(loai));}
-        return jdbc.queryForList(sql + " ORDER BY id DESC", args.toArray());
+        return jdbc.queryForList(sql + " ORDER BY id DESC", args.toArray()).stream()
+                .map(d->themTrangThai(d,homNay)).toList();
+    }
+
+    private Map<String,Object> themTrangThai(Map<String,Object> data,LocalDate homNay) {
+        var result=new LinkedHashMap<>(data);
+        String ten=QuanLyDotGiamGiaService.tenTrangThai(data,homNay);
+        result.put("ten_trang_thai",ten);
+        result.put("het_han","Hết hạn".equals(ten));
+        result.put("sap_mo","Sắp mở".equals(ten));
+        return result;
     }
 
     public Map<String,Object> lay(int id) {
         var ds = jdbc.queryForList("SELECT * FROM phieu_giam_gia WHERE id=? AND ISNULL(xoa_mem,0)=0", id);
         if (ds.isEmpty()) throw new IllegalArgumentException("Không tìm thấy phiếu giảm giá.");
-        return ds.get(0);
+        return themTrangThai(ds.get(0),LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh")));
     }
 
     @Transactional

@@ -23,17 +23,39 @@ public class QuanLyDotGiamGiaService {
     }
 
     public List<Map<String,Object>> tim(String tuKhoa, String trangThai) {
-        String sql = "SELECT d.*, (SELECT COUNT(*) FROM chi_tiet_dot_giam_gia ct WHERE ct.id_dot_giam_gia=d.id AND ISNULL(ct.xoa_mem,0)=0 AND ct.trang_thai=1) AS so_mau FROM dot_giam_gia d WHERE ISNULL(d.xoa_mem,0)=0 AND (d.ten_dot_giam_gia LIKE ? OR d.ma_dot_giam_gia LIKE ?)";
+        String sql = "SELECT d.*, (SELECT COUNT(*) FROM chi_tiet_dot_giam_gia ct WHERE ct.id_dot_giam_gia=d.id AND ISNULL(ct.xoa_mem,0)=0 AND ct.trang_thai=1) AS so_mau FROM dot_giam_gia d WHERE ISNULL(d.xoa_mem,0)=0 AND (d.ten_dot_giam_gia COLLATE Vietnamese_100_CI_AI LIKE ? OR d.ma_dot_giam_gia LIKE ?)";
         List<Object> args = new ArrayList<>();
         args.add("%" + tuKhoa.trim() + "%"); args.add("%" + tuKhoa.trim() + "%");
-        if ("0".equals(trangThai) || "1".equals(trangThai)) { sql += " AND d.trang_thai=?"; args.add(Integer.valueOf(trangThai)); }
-        return jdbc.queryForList(sql + " ORDER BY d.id DESC", args.toArray());
+        var homNay=LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        if ("0".equals(trangThai) || "1".equals(trangThai)) {
+            sql += " AND d.trang_thai=? AND d.ngay_ket_thuc>=?";args.add(Integer.valueOf(trangThai));args.add(homNay);
+            if("1".equals(trangThai)) {sql+=" AND d.ngay_bat_dau<=?";args.add(homNay);}
+        } else if("2".equals(trangThai)) {sql+=" AND d.ngay_ket_thuc<?";args.add(homNay);}
+        else if("3".equals(trangThai)) {
+            sql+=" AND d.trang_thai=1 AND d.ngay_bat_dau>? AND d.ngay_ket_thuc>=?";args.add(homNay);args.add(homNay);
+        }
+        return jdbc.queryForList(sql + " ORDER BY d.id DESC", args.toArray()).stream().map(d->themTrangThai(d,homNay)).toList();
+    }
+
+    public static String tenTrangThai(Map<String,Object> data,LocalDate homNay) {
+        Object ngay=data.get("ngay_ket_thuc");
+        if(ngay!=null && LocalDate.parse(ngay.toString().substring(0,10)).isBefore(homNay)) return "Hết hạn";
+        Object trangThai=data.get("trang_thai");
+        boolean bat=Boolean.TRUE.equals(trangThai) || trangThai instanceof Number n && n.intValue()==1;
+        if(!bat) return "Ngừng áp dụng";
+        Object batDau=data.get("ngay_bat_dau");
+        if(batDau!=null && LocalDate.parse(batDau.toString().substring(0,10)).isAfter(homNay)) return "Sắp mở";
+        return "Cho phép áp dụng";
+    }
+    private Map<String,Object> themTrangThai(Map<String,Object> data,LocalDate homNay) {
+        var result=new LinkedHashMap<>(data);String ten=tenTrangThai(data,homNay);
+        result.put("ten_trang_thai",ten);result.put("het_han","Hết hạn".equals(ten));result.put("sap_mo","Sắp mở".equals(ten));return result;
     }
 
     public Map<String,Object> lay(int id) {
         var ds = jdbc.queryForList("SELECT * FROM dot_giam_gia WHERE id=? AND ISNULL(xoa_mem,0)=0", id);
         if (ds.isEmpty()) throw new IllegalArgumentException("Không tìm thấy đợt giảm giá.");
-        return ds.get(0);
+        return themTrangThai(ds.get(0),LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh")));
     }
 
     @Transactional

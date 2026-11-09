@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<link rel="stylesheet" href="/css/menu-tai-khoan.css?v=20261102-1">
+<link rel="stylesheet" href="/css/menu-tai-khoan.css?v=20261107-balanced">
 <div class="account-menu" id="menuTaiKhoan">
     <button class="account-link" type="button" id="nutMenuTaiKhoan" aria-label="Menu tài khoản" title="Menu tài khoản" aria-controls="cacMucTaiKhoan" aria-expanded="false">
         <img src="/images/nguoi-dung.svg" alt="" width="24" height="24">

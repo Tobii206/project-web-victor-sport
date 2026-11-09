@@ -15,6 +15,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class DonHangTests {
+    @Test void suaThongTinNhanHangDungChuDonVaMaPhien() throws Exception {
+        var service = mock(HoaDonService.class);
+        var mvc = MockMvcBuilders.standaloneSetup(new DonHangController(service)).build();
+        var session = khach();
+        session.setAttribute("csrfSuaNhanHang", "ma-dung");
+        mvc.perform(post("/don-hang/10/dia-chi").session(session)
+                .param("ten", "Người nhận").param("sdt", "0912345678").param("diaChi", "12 Phố Mới"))
+                .andExpect(status().isForbidden());
+        verifyNoInteractions(service);
+        mvc.perform(post("/don-hang/10/dia-chi").session(session).param("csrf", "ma-dung")
+                .param("idKhachHang", "99").param("ten", "Người nhận").param("sdt", "0912345678").param("diaChi", "12 Phố Mới"))
+                .andExpect(redirectedUrl("/don-hang/10")).andExpect(flash().attributeExists("success"));
+        verify(service).suaDiaChiCuaKhach(10, 7, "Người nhận", "0912345678", "12 Phố Mới", null, null);
+    }
+
     @Test void khachDangNhapTimTheoMaVanDonCuaMinh() throws Exception {
         var service=mock(HoaDonService.class);
         MockMvcBuilders.standaloneSetup(new DonHangController(service)).build()
@@ -32,6 +47,16 @@ class DonHangTests {
         verify(jdbc).queryForList(argThat(sql -> sql.contains("id_khach_hang=?") && sql.contains("loai_don IN (1,2)") && sql.contains("vd.ma_van_don=?") && sql.contains("ISNULL(xoa_mem,0)=0")),eq(7),eq("GHN123"),eq("GHN123"));
         assertEquals(10,service.traCuuDon(" ghn123 ","0325327602"));
         verify(jdbc).queryForList(argThat(sql -> sql.contains("id_khach_hang IS NULL") && sql.contains("so_dien_thoai_khach_hang=?") && sql.contains("vd.ma_van_don=?")),eq("GHN123"),eq("GHN123"),eq("0325327602"));
+    }
+
+    @Test void danhSachDonCuaKhachUuTienDonVuaThanhToan() {
+        var jdbc = mock(JdbcTemplate.class);
+        when(jdbc.queryForList(contains("FROM khach_hang"), eq(7))).thenReturn(List.of(Map.of("id", 7)));
+
+        new HoaDonService(jdbc).layDonCuaKhach(7);
+
+        verify(jdbc).queryForList(argThat(sql -> sql.contains("id_khach_hang=? AND loai_don IN (1,2)")
+                && sql.endsWith("ORDER BY COALESCE(ngay_thanh_toan, ngay_tao) DESC, id DESC")), eq(7));
     }
     @Test void khachVangLaiNhapMaVanDonCanDungSoDienThoai() throws Exception {
         var service=mock(HoaDonService.class);when(service.traCuuDon("GHN123","0325327602")).thenReturn(10);

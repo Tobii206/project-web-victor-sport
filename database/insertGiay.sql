@@ -95,7 +95,7 @@ INSERT INTO dia_chi_khach_hang (
 ) VALUES
 (1, N'Nhà riêng', N'Hà Nội', N'Cầu Giấy', N'Dịch Vọng', N'Số 10 ngõ 68 Trần Thái Tông', 1),
 (2, N'Ký túc xá', N'Hà Nội', N'Thanh Xuân', N'Thanh Xuân Bắc', N'Phòng 501 nhà B', 1),
-(3, N'Nhà riêng', N'Hải Phòng', N'Lê Chân', N'Dư Hàng Kênh', N'22 Nguyễn Văn Linh', 1),
+(3, N'Nhà riêng', N'Hải Phòng', NULL, N'Phường Lê Chân', N'22 Nguyễn Văn Linh', 1),
 (4, N'Công ty', N'Đà Nẵng', N'Hải Châu', N'Bình Hiên', N'15 Nguyễn Văn Linh', 1),
 (5, N'Căn hộ', N'Hồ Chí Minh', N'Quận 1', N'Bến Nghé', N'68 Lê Lợi', 1);
 
@@ -259,5 +259,14 @@ SET a.xoa_mem = 1, a.la_anh_dai_dien = 0
 FROM anh_chi_tiet_san_pham a
 JOIN AnhXepHang xep ON xep.id = a.id
 WHERE xep.thu_tu > 1;
+
+-- Mỗi sản phẩm dùng một giá bán chung cho toàn bộ mẫu đang sử dụng.
+UPDATE sp SET gia_ban=(SELECT TOP 1 ct.gia_ban FROM chi_tiet_san_pham ct
+    WHERE ct.id_san_pham=sp.id AND ISNULL(ct.xoa_mem,0)=0 ORDER BY ct.id)
+FROM san_pham sp WHERE sp.gia_ban IS NULL;
+UPDATE ct SET gia_ban=sp.gia_ban
+FROM chi_tiet_san_pham ct JOIN san_pham sp ON sp.id=ct.id_san_pham
+WHERE ISNULL(ct.xoa_mem,0)=0 AND ISNULL(sp.xoa_mem,0)=0 AND sp.gia_ban IS NOT NULL
+    AND ct.gia_ban<>sp.gia_ban;
 
 COMMIT TRANSACTION;

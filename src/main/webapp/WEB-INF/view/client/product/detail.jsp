@@ -10,9 +10,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1">
-    <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2">
-    <link rel="stylesheet" href="/css/chi-tiet-san-pham.css?v=20261023-1">
+    <link rel="stylesheet" href="/css/trang-chu.css?v=20261107-balanced">
+    <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable">
+    <link rel="stylesheet" href="/css/chi-tiet-san-pham.css?v=20261108-size-guide">
 </head>
 <body><%@ include file="/WEB-INF/view/client/layout/header.jsp" %>
 <main class="store-container online-container">
@@ -23,13 +23,20 @@
     <div class="online-detail">
         <section class="online-gallery account-card">
             <img id="anhChinh" class="online-main-image" src="/images/giay-mac-dinh.svg" alt="<c:out value='${sanPham.ten_san_pham}'/>" onerror="this.onerror=null;this.src='/images/giay-mac-dinh.svg';">
+            <div class="online-gallery-thumbs" aria-label="Ảnh của màu đang chọn">
+                <c:forEach items="${boAnh}" var="anh" varStatus="st">
+                    <button type="button" data-anh-mau="${anh.id_mau_sac}" aria-label="Xem ảnh ${st.count}" aria-pressed="false" hidden>
+                        <img src="<c:out value='${anh.duong_dan_anh}'/>" alt="" loading="lazy">
+                    </button>
+                </c:forEach>
+            </div>
         </section>
         <section class="account-card online-product-info">
-            <p class="eyebrow"><c:out value="${sanPham.ten_thuong_hieu}"/></p>
+            <p class="eyebrow"><c:out value="${sanPham.ten_thuong_hieu}"/><c:forEach items="${cacDoiTuong}" var="loai"><c:if test="${sanPham.doi_tuong == loai.ma}"> · <c:out value="${loai.ten}"/></c:if></c:forEach></p>
             <h1><c:out value="${sanPham.ten_san_pham}"/></h1>
             <p class="subtle">Mã sản phẩm: <c:out value="${sanPham.ma_san_pham}"/></p>
-            <p class="online-price"><span id="giaBan">Chọn mẫu giày</span> <del id="giaGoc" hidden></del></p>
-            <p id="tonKho" class="subtle">Chọn kích thước và màu để xem tồn kho.</p>
+            <p class="online-price"><span id="giaBan"><c:choose><c:when test="${not empty sanPham.gia_ban}"><fmt:formatNumber value="${sanPham.gia_ban}"/> đ</c:when><c:otherwise>Chưa có giá</c:otherwise></c:choose></span> <del id="giaGoc" hidden></del></p>
+            <p id="tonKho" class="subtle">${tongTonKho > 0 ? 'Chọn kích thước và màu để xem tồn kho.' : 'Hết hàng'}</p>
             <form method="post" action="/san-pham/${sanPham.id}/chon" id="formChonGiay">
                 <fieldset class="online-variants"><legend><span>Kích thước · Màu sắc · Dáng giày</span>
                     <button type="button" id="moHuongDanSize" class="size-guide-button" aria-haspopup="dialog" aria-controls="huongDanSize">Hướng dẫn chọn size</button>
@@ -41,7 +48,7 @@
                         <c:if test="${empty anhMau}"><c:set var="anhMau" value="/images/giay-mac-dinh.svg"/></c:if>
                         <c:if test="${not fn:startsWith(anhMau, '/') and not fn:startsWith(anhMau, 'http')}"><c:set var="anhMau" value="/${anhMau}"/></c:if>
                         <label class="online-variant">
-                            <input type="radio" name="idPhienBan" value="${pb.id}" data-gia="${pb.gia_sau_giam}" data-gia-goc="${pb.gia_goc}" data-ton="${pb.so_luong}" data-anh="<c:out value='${anhMau}'/>" required
+                            <input type="radio" name="idPhienBan" value="${pb.id}" data-gia="${pb.gia_sau_giam}" data-gia-goc="${pb.gia_goc}" data-ton="${pb.so_luong}" data-anh="<c:out value='${anhMau}'/>" data-mau="${pb.id_mau_sac}" required
                                 <c:if test="${pb.so_luong <= 0}">disabled</c:if>
                                 <c:if test="${pb.so_luong > 0 and not daChon}">checked<c:set var="daChon" value="true"/></c:if>>
                             <span><strong><c:out value="${pb.ten_kich_thuoc}"/></strong><small><c:out value="${pb.ten_mau_sac}"/> · <c:out value="${pb.ten_form_chan}"/></small><c:if test="${pb.so_luong <= 0}"><small>Hết hàng</small></c:if></span>
@@ -51,7 +58,7 @@
                 </fieldset>
                 <c:if test="${empty phienBan}"><p>Sản phẩm hiện chưa có mẫu để chọn.</p></c:if>
                 <div class="online-purchase">
-                    <div class="online-quantity"><button type="button" id="giamSoLuong" aria-label="Giảm số lượng">−</button><input type="number" id="soLuong" name="soLuong" value="1" min="1" aria-label="Số lượng" required><button type="button" id="tangSoLuong" aria-label="Tăng số lượng">+</button></div>
+                    <div class="online-quantity"><button type="button" id="giamSoLuong" aria-label="Giảm số lượng" ${not daChon ? 'disabled' : ''}>−</button><input type="number" id="soLuong" name="soLuong" value="1" min="1" aria-label="Số lượng" ${not daChon ? 'disabled' : ''} required><button type="button" id="tangSoLuong" aria-label="Tăng số lượng" ${not daChon ? 'disabled' : ''}>+</button></div>
                     <button class="store-button" name="thaoTac" value="them" <c:if test="${not daChon}">disabled</c:if>>Thêm vào giỏ</button>
                     <button class="store-button online-buy-now" name="thaoTac" value="mua" <c:if test="${not daChon}">disabled</c:if>>Mua ngay</button>
                 </div>
@@ -123,7 +130,7 @@
             <c:forEach items="${sanPhamCungLoai}" var="sp">
                 <article class="product-card">
                     <a class="product-picture" href="/san-pham/${sp.id}">
-                        <span class="stock-label">Còn hàng</span>
+                        <span class="stock-label ${sp.so_luong <= 0 ? 'sold-out' : ''}">${sp.so_luong > 0 ? 'Còn hàng' : 'Hết hàng'}</span>
                         <c:set var="anhGoiY" value="${sp.anh}"/>
                         <c:if test="${empty anhGoiY}"><c:set var="anhGoiY" value="/images/giay-mac-dinh.svg"/></c:if>
                         <c:if test="${not fn:startsWith(anhGoiY, '/') and not fn:startsWith(anhGoiY, 'http')}"><c:set var="anhGoiY" value="/${anhGoiY}"/></c:if>
@@ -132,49 +139,82 @@
                     <div class="product-content">
                         <p class="product-brand"><c:out value="${sp.ten_thuong_hieu}"/> <span>· <c:out value="${sp.ma_san_pham}"/></span></p>
                         <h3><a href="/san-pham/${sp.id}"><c:out value="${sp.ten_san_pham}"/></a></h3>
-                        <p class="product-price"><small>Từ</small> <fmt:formatNumber value="${sp.gia_sau_giam}" groupingUsed="true"/> đ <c:if test="${sp.gia_sau_giam lt sp.gia_goc}"><del class="gia-goc"><fmt:formatNumber value="${sp.gia_goc}"/> đ</del></c:if></p>
-                        <a class="online-detail-link" href="/san-pham/${sp.id}">Chọn size và mua hàng →</a>
+                        <p class="product-price"><c:choose><c:when test="${not empty sp.gia_sau_giam}"><small>Từ</small> <fmt:formatNumber value="${sp.gia_sau_giam}" groupingUsed="true"/> đ</c:when><c:otherwise>Chưa có giá</c:otherwise></c:choose> <c:if test="${sp.gia_sau_giam lt sp.gia_goc}"><del class="gia-goc"><fmt:formatNumber value="${sp.gia_goc}"/> đ</del></c:if></p>
+                        <a class="online-detail-link" href="/san-pham/${sp.id}">${sp.so_luong > 0 ? 'Chọn size và mua hàng' : 'Xem chi tiết'} →</a>
                     </div>
                 </article>
             </c:forEach>
         </div>
         <c:if test="${not empty loiGoiY}"><p class="subtle"><c:out value="${loiGoiY}"/></p></c:if>
-        <c:if test="${empty sanPhamCungLoai and empty loiGoiY}"><p class="subtle">Chưa có sản phẩm cùng loại còn hàng.</p></c:if>
+        <c:if test="${empty sanPhamCungLoai and empty loiGoiY}"><p class="subtle">Chưa có sản phẩm cùng loại.</p></c:if>
     </section>
     </c:if>
 </main>
 
-<dialog id="huongDanSize" class="size-modal">
+<dialog id="huongDanSize" class="size-modal" aria-labelledby="tieuDeBangSize">
     <div class="size-modal-card">
         <div class="size-modal-header">
-            <h3>Bảng quy đổi kích thước giày (Size Guide)</h3>
+            <h3 id="tieuDeBangSize">Hướng dẫn chọn size giày</h3>
             <button type="button" id="dongHuongDanSize" class="size-modal-close" aria-label="Đóng bảng size">✕</button>
         </div>
         <div class="size-modal-body">
-            <p style="margin-bottom: 16px; color: #475569;">Để chọn size chính xác nhất, bạn hãy đo chiều dài bàn chân từ gót đến ngón dài nhất.</p>
-            <div class="size-table-wrapper">
-                <table class="size-table">
-                    <thead>
-                        <tr>
-                            <th>Size VN/EU</th>
-                            <th>Chiều dài chân (cm)</th>
-                            <th>Size US</th>
-                            <th>Form chân khuyến nghị</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td><strong>38</strong></td><td>23.5 - 24.0</td><td>6.0</td><td>Thon / Chuẩn</td></tr>
-                        <tr><td><strong>39</strong></td><td>24.0 - 24.5</td><td>6.5</td><td>Thon / Chuẩn</td></tr>
-                        <tr><td><strong>40</strong></td><td>24.5 - 25.0</td><td>7.0</td><td>Chuẩn</td></tr>
-                        <tr><td><strong>41</strong></td><td>25.0 - 25.5</td><td>8.0</td><td>Chuẩn / Bè nhẹ</td></tr>
-                        <tr><td><strong>42</strong></td><td>25.5 - 26.0</td><td>8.5</td><td>Chuẩn / Bè vừa</td></tr>
-                        <tr><td><strong>43</strong></td><td>26.0 - 26.5</td><td>9.5</td><td>Bè to / Dày chân</td></tr>
-                        <tr><td><strong>44</strong></td><td>26.5 - 27.0</td><td>10.0</td><td>Bè to / Dày chân</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <p class="size-guide-intro">Đo cả hai bàn chân từ gót đến ngón dài nhất. Dùng số đo của bàn chân dài hơn để tra bảng.</p>
+            <p class="size-guide-intro">Hai bảng dùng số đo tham khảo của Nike. Với hãng khác, hãy đối chiếu bảng size của hãng đó.</p>
+            <fieldset class="size-guide-switch">
+                <legend>Chọn bảng size</legend>
+                <input type="radio" id="bangSizeNam" name="bangSize" aria-controls="bangSizeNamNoiDung" ${sanPham.doi_tuong != 'NU' ? 'checked' : ''}>
+                <label for="bangSizeNam">Size nam</label>
+                <input type="radio" id="bangSizeNu" name="bangSize" aria-controls="bangSizeNuNoiDung" ${sanPham.doi_tuong == 'NU' ? 'checked' : ''}>
+                <label for="bangSizeNu">Size nữ</label>
+                <section id="bangSizeNamNoiDung" class="size-guide-panel" aria-label="Bảng size nam">
+                    <div class="size-table-wrapper">
+                        <table class="size-table" aria-label="Bảng quy đổi size giày nam">
+                            <thead><tr><th scope="col">Size EU</th><th scope="col">Chiều dài chân (cm)</th><th scope="col">US Nam</th></tr></thead>
+                            <tbody>
+                                <tr><th scope="row">38</th><td>23,3</td><td>5,5</td></tr>
+                                <tr><th scope="row">38,5</th><td>23,7</td><td>6</td></tr>
+                                <tr><th scope="row">39</th><td>24,1</td><td>6,5</td></tr>
+                                <tr><th scope="row">40</th><td>24,6</td><td>7</td></tr>
+                                <tr><th scope="row">40,5</th><td>24,9</td><td>7,5</td></tr>
+                                <tr><th scope="row">41</th><td>25,4</td><td>8</td></tr>
+                                <tr><th scope="row">42</th><td>25,9</td><td>8,5</td></tr>
+                                <tr><th scope="row">42,5</th><td>26,2</td><td>9</td></tr>
+                                <tr><th scope="row">43</th><td>26,7</td><td>9,5</td></tr>
+                                <tr><th scope="row">44</th><td>27,1</td><td>10</td></tr>
+                                <tr><th scope="row">45</th><td>27,9</td><td>11</td></tr>
+                                <tr><th scope="row">46</th><td>28,7</td><td>12</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="size-guide-source"><a href="https://www.nike.com/size-fit/mens-footwear" target="_blank" rel="noopener">Xem bảng size nam đầy đủ của Nike ↗</a></p>
+                </section>
+                <section id="bangSizeNuNoiDung" class="size-guide-panel" aria-label="Bảng size nữ">
+                    <div class="size-table-wrapper">
+                        <table class="size-table" aria-label="Bảng quy đổi size giày nữ">
+                            <thead><tr><th scope="col">Size EU</th><th scope="col">Chiều dài chân (cm)</th><th scope="col">US Nữ</th></tr></thead>
+                            <tbody>
+                                <tr><th scope="row">35,5</th><td>22,1</td><td>5</td></tr>
+                                <tr><th scope="row">36</th><td>22,4</td><td>5,5</td></tr>
+                                <tr><th scope="row">36,5</th><td>22,9</td><td>6</td></tr>
+                                <tr><th scope="row">37,5</th><td>23,3</td><td>6,5</td></tr>
+                                <tr><th scope="row">38</th><td>23,7</td><td>7</td></tr>
+                                <tr><th scope="row">38,5</th><td>24,1</td><td>7,5</td></tr>
+                                <tr><th scope="row">39</th><td>24,6</td><td>8</td></tr>
+                                <tr><th scope="row">40</th><td>24,9</td><td>8,5</td></tr>
+                                <tr><th scope="row">40,5</th><td>25,4</td><td>9</td></tr>
+                                <tr><th scope="row">41</th><td>25,9</td><td>9,5</td></tr>
+                                <tr><th scope="row">42</th><td>26,2</td><td>10</td></tr>
+                                <tr><th scope="row">42,5</th><td>26,7</td><td>10,5</td></tr>
+                                <tr><th scope="row">43</th><td>27,1</td><td>11</td></tr>
+                                <tr><th scope="row">44</th><td>27,5</td><td>11,5</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="size-guide-source"><a href="https://www.nike.com/size-fit/womens-footwear" target="_blank" rel="noopener">Xem bảng size nữ đầy đủ của Nike ↗</a></p>
+                </section>
+            </fieldset>
             <div class="size-tip">
-                💡 <strong>Mẹo chuyên gia:</strong> Nếu mu bàn chân dày hoặc bề ngang bè, bạn nên tăng thêm <strong>0.5 đến 1 size</strong> so với giày đi làm/giày sneaker thông thường để thi đấu đạt hiệu suất cao nhất và không bị tức mũi.
+                Chọn form chân theo bề ngang và độ ôm bạn muốn.
             </div>
         </div>
     </div>
@@ -223,6 +263,6 @@
     </div>
 </footer>
 <button type="button" class="back-to-top" id="backToTopBtn" aria-label="Lên đầu trang">↑</button>
-<script src="/js/san-pham-online.js?v=20261019-single-product-image"></script>
+<script src="/js/san-pham-online.js?v=20261108-show-sold-out"></script>
 <script src="/js/victor-modern.js?v=20261023-slider-2"></script>
 </body></html>

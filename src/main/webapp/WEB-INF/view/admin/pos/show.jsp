@@ -9,9 +9,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bán hàng tại quầy - Victor Sport</title>
-    <link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014">
-    <link rel="stylesheet" href="/css/pos-gio-hang.css?v=1">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2"></head>
+    <link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced">
+    <link rel="stylesheet" href="/css/in-hoa-don.css?v=3" media="print">
+    <link rel="stylesheet" href="/css/pos-gio-hang.css?v=20261107-pos-payment">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"></head>
 <body>
 <div class="app-shell">
     <jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/>
@@ -43,10 +44,10 @@
                 <div class="muted">Tạo hoặc lưu đơn chờ bằng nút bên dưới thông tin khách hàng. Đơn chờ chưa trừ tồn kho.</div>
                 <div class="invoice-table">
                     <table class="table">
-                        <thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Tạm tính sau giảm</th><th>Thao tác</th></tr></thead>
+                        <thead><tr><th scope="col" class="table-stt">STT</th><th>Mã đơn</th><th>Khách hàng</th><th>Tạm tính sau giảm</th><th>Thao tác</th></tr></thead>
                         <tbody>
-                        <c:forEach items="${danhSachDonCho}" var="don">
-                            <tr>
+                        <c:forEach items="${danhSachDonCho}" var="don" varStatus="st">
+                            <tr><td class="table-stt">${st.count}</td>
                                 <td><c:out value="${don.ma_hoa_don}"/></td>
                                 <td><c:out value="${don.ten_khach_hang}"/></td>
                                 <td class="money"><fmt:formatNumber value="${don.tong_tien_sau_giam}" groupingUsed="true"/> đ</td>
@@ -64,7 +65,7 @@
                                 </div></td>
                             </tr>
                         </c:forEach>
-                        <c:if test="${empty danhSachDonCho}"><tr><td colspan="4" class="muted">Chưa có đơn chờ.</td></tr></c:if>
+                        <c:if test="${empty danhSachDonCho}"><tr><td colspan="5" class="muted">Chưa có đơn chờ.</td></tr></c:if>
                         </tbody>
                     </table>
                 </div>
@@ -72,6 +73,15 @@
         </div>
     </section>
     <main class="pos-layout">
+        <c:if test="${not empty hoaDonVuaTao}">
+            <div class="pos-receipt-result">
+                <p><strong><c:out value="${success}"/></strong></p>
+                <div class="product-admin-actions">
+                    <a class="button" data-in-hoa-don-vua-tao data-in-nhanh-hoa-don data-thong-bao="<c:out value='${success}'/>" href="/quan-ly/hoa-don/${hoaDonVuaTao}">In ngay</a>
+                    <a class="button secondary" href="/quan-ly/hoa-don/${hoaDonVuaTao}">Xem hóa đơn</a>
+                </div>
+            </div>
+        </c:if>
         <section class="panel">
             <div class="panel-header">
                 <h2>Sản phẩm</h2>
@@ -80,20 +90,19 @@
                 <c:if test="${not empty error}">
                     <div class="alert error" data-vs-flash="error">${error}</div>
                 </c:if>
-                <c:if test="${not empty success}">
-                    <div class="alert success" data-vs-flash="success">${success}</div>
-                    <c:if test="${not empty hoaDonVuaTao}"><a class="button secondary" href="/quan-ly/hoa-don/${hoaDonVuaTao}">Xem / In hóa đơn / Lưu PDF</a></c:if>
+                <c:if test="${not empty success and empty hoaDonVuaTao}">
+                    <div class="alert success" data-vs-flash="success"><c:out value="${success}"/></div>
                 </c:if>
 
                 <form class="search-row" method="get" action="/pos">
-                    <input class="input" name="keyword" value="${keyword}" placeholder="Tìm mã, tên sản phẩm, thương hiệu">
+                    <input class="input" name="keyword" value="<c:out value='${keyword}'/>" placeholder="Tìm tên, mã sản phẩm, mã mẫu, hãng" aria-label="Tìm sản phẩm">
                     <button class="button" type="submit">Tìm kiếm</button>
                 </form>
 
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>Sản phẩm</th>
+                        <th scope="col" class="table-stt">STT</th><th>Sản phẩm</th>
                         <th>Phân loại</th>
                         <th>Tồn</th>
                         <th>Giá</th>
@@ -101,8 +110,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <c:forEach items="${products}" var="product">
-                        <tr>
+                    <c:forEach items="${products}" var="product" varStatus="st">
+                        <tr><td class="table-stt">${st.count}</td>
                             <td>
                                 <div class="pos-product-info">
                                     <c:set var="anhMauTaiQuay" value="${product.anhDaiDien}"/>
@@ -126,7 +135,7 @@
                     </c:forEach>
                     <c:if test="${empty products}">
                         <tr>
-                            <td colspan="5" class="muted">Không có sản phẩm phù hợp. Hãy thử từ khóa khác.</td>
+                            <td colspan="6" class="muted">Không có sản phẩm phù hợp. Hãy thử từ khóa khác.</td>
                         </tr>
                     </c:if>
                     </tbody>
@@ -178,9 +187,10 @@
                         <strong><fmt:formatNumber value="${summary.tienGiam}" type="number" groupingUsed="true"/> đ</strong>
                     </div>
                     <div class="pos-cart-discount-note"><c:out value="${summary.tenUuDai}"/></div>
+                    <div class="summary-row pos-phi-giao-hang" hidden><span>Phí giao hàng GHN</span><strong id="posPhiGiaoHang">Đang tính phí</strong></div>
                     <div class="summary-row total">
                         <span>Cần thanh toán</span>
-                        <span><fmt:formatNumber value="${summary.tongThanhToan}" type="number" groupingUsed="true"/> đ</span>
+                        <span id="posTongThanhToan"><fmt:formatNumber value="${summary.tongThanhToan}" type="number" groupingUsed="true"/> đ</span>
                     </div>
                 </div>
 
@@ -227,22 +237,47 @@
                     </div>
                     <button class="button secondary" type="button" onclick="document.getElementById('themKhachHang').showModal()">+ Thêm khách</button>
                 </form>
-                <form class="checkout-grid" method="post" action="/pos/checkout" data-xac-nhan-thanh-toan data-tong-tien="${summary.tongThanhToan}">
+                <form class="checkout-grid" method="post" action="/pos/checkout" data-xac-nhan-thanh-toan data-tong-tien="${summary.tongThanhToan}" data-tien-hang="${summary.tongThanhToan}" data-pos-giao-hang data-khach-hang-id="<c:out value='${khachHangDangChon.id}'/>" data-khach-vua-doi="${khachHangVuaDoi}"
+                    data-nguoi-nhan="<c:out value='${thongTinNhanHang.ten}'/>" data-sdt-nhan="<c:out value='${thongTinNhanHang.sdt}'/>"
+                    data-dia-chi-nhan="<c:out value='${thongTinNhanHang.diaChi}'/>" data-tinh-nhan="<c:out value='${thongTinNhanHang.tenTinh}'/>" data-xa-nhan="<c:out value='${thongTinNhanHang.tenXa}'/>">
                     <input type="hidden" name="customerId" value="${khachHangDangChon.id}">
-                    <input type="hidden" name="customerAddress" value="<c:out value='${donChoDangChon.dia_chi_khach_hang}'/>">
+
+                    <input type="hidden" name="csrfPos" value="<c:out value='${sessionScope.csrfGiaoHangTaiQuay}'/>">
+                    <input type="hidden" name="maBaoGia" value="">
+                    <c:set var="chonGiaoHang" value="${giaoHangDaChon or not empty giaoHangTaiQuay or donChoDangChon.loai_don == 2}"/>
+                    <fieldset class="pos-nhan-hang">
+                        <legend>Hình thức nhận hàng</legend>
+                        <label><input type="radio" name="giaoHang" value="false" ${not chonGiaoHang ? 'checked' : ''}> Nhận tại quầy</label>
+                        <label><input type="radio" name="giaoHang" value="true" ${chonGiaoHang ? 'checked' : ''}> Giao hàng tận nơi</label>
+                    </fieldset>
+                    <fieldset class="pos-giao-hang" hidden>
+                        <legend>Thông tin nhận hàng</legend>
+                        <div class="field"><label for="posTenNguoiNhan">Tên người nhận *</label><input class="input" id="posTenNguoiNhan" name="customerName" maxlength="100" value="<c:out value='${thongTinNhanHang.ten}'/>"></div>
+                        <div class="field"><label for="posSdtNguoiNhan">Số điện thoại *</label><input class="input" id="posSdtNguoiNhan" name="customerPhone" type="tel" pattern="0[0-9]{9}" maxlength="10" value="<c:out value='${thongTinNhanHang.sdt}'/>"></div>
+                        <div class="field"><label for="posTinhGhn">Tỉnh / Thành phố *</label><select class="select" id="posTinhGhn" name="tinh" data-ten-da-luu="<c:out value='${thongTinNhanHang.tenTinh}'/>"><option value="">Chọn tỉnh / thành phố</option></select></div>
+                        <div class="field"><label for="posXaGhn">Phường / Xã *</label><select class="select" id="posXaGhn" name="xa" data-ten-da-luu="<c:out value='${thongTinNhanHang.tenXa}'/>"><option value="">Chọn phường / xã</option></select></div>
+                        <div class="field pos-giao-hang-wide"><label for="posDiaChiGhn">Địa chỉ chi tiết *</label><input class="input" id="posDiaChiGhn" name="customerAddress" maxlength="200" placeholder="Số nhà, ngõ, tên đường" value="<c:out value='${thongTinNhanHang.diaChi}'/>"></div>
+                        <p class="muted pos-giao-hang-wide" id="posTrangThaiPhi" role="status" aria-live="polite">Phí giao hàng tự tính khi nhập đủ thông tin nhận hàng.</p>
+                        <button class="button secondary pos-giao-hang-wide" type="button" id="posThuLaiPhi" hidden>Thử lại phí giao hàng</button>
+                    </fieldset>
                     <div class="field">
                         <label for="paymentMethodId">Phương thức thanh toán</label>
                         <select class="select" id="paymentMethodId" name="paymentMethodId">
                             <c:forEach items="${paymentMethods}" var="method">
-                                <option value="${method.id}">${method.tenPhuongThuc} - ${method.nhaCungCap}</option>
+                                <c:if test="${method.nhaCungCap != 'COD'}"><option value="${method.id}" data-tien-mat="${method.nhaCungCap == 'POS'}" ${paymentMethodIdDaChon == method.id ? 'selected' : ''}><c:out value="${method.tenPhuongThuc}"/></option></c:if>
                             </c:forEach>
                         </select>
                     </div>
                     <div class="field">
-                        <label for="paidAmount">Tiền khách đã thanh toán (đ) *</label>
-                        <input class="input" type="number" id="paidAmount" name="paidAmount" min="0" max="9999999999999999.99" step="0.01" inputmode="decimal" autocomplete="off" value="<c:out value='${paidAmount}'/>" placeholder="Nhập số tiền đã nhận" aria-describedby="paidAmountHelp" required>
-                        <small class="muted" id="paidAmountHelp">Nhập đúng tổng tiền cần thu sau ưu đãi. Với chuyển khoản, kiểm tra tiền đã vào tài khoản trước khi xác nhận.</small>
+                        <label for="paidAmount" id="paidAmountLabel">Tiền khách đưa (đ) *</label>
+                        <div class="pos-paid-entry">
+                            <input class="input" type="number" id="paidAmount" name="paidAmount" min="0" max="9999999999999999.99" step="0.01" inputmode="decimal" autocomplete="off" value="<c:out value='${paidAmount}'/>" placeholder="Nhập số tiền đã nhận" aria-describedby="paidAmountHelp" required>
+                            <button type="button" class="button secondary" id="posNhapDuTien">Điền đủ</button>
+                        </div>
+                        <small class="muted" id="paidAmountHelp">Tiền mặt: nhập số tiền khách đưa để tính tiền thừa. Chuyển khoản: nhập đúng số tiền cần thu.</small>
                     </div>
+                    <div class="summary-row pos-tien-thua" id="posDongTienThua" role="status" aria-live="polite"><span>Tiền thừa trả khách</span><strong id="posTienThua">—</strong></div>
+                    <small class="muted" id="posTienConThieu" role="status" aria-live="polite" hidden></small>
                     <details class="pos-cart-note" ${not empty donChoDangChon.ghi_chu ? 'open' : ''}><summary>Ghi chú đơn hàng</summary><label class="pos-cart-sr-only" for="note">Ghi chú đơn hàng</label><textarea class="textarea" id="note" name="note" rows="2"><c:out value="${donChoDangChon.ghi_chu}"/></textarea></details>
                     <div class="pos-cart-checkout-actions">
                     <button class="button secondary full" type="submit" name="hanhDong" value="luu-don-cho" formnovalidate
@@ -284,7 +319,7 @@
 <c:if test="${not empty loiThemKhachHang}">
     <script>document.getElementById('themKhachHang').showModal();</script>
 </c:if>
-<script src="/js/thanh-toan-tai-quay.js?v=20261102-paid-amount"></script>
+<script src="/js/ban-hang-tai-quay.js?v=20261109-ghn-address"></script>
 <%@ include file="/WEB-INF/view/client/layout/payment-confirm.jsp" %>
 </body>
 </html>

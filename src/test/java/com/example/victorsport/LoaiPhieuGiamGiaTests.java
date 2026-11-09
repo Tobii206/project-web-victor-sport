@@ -39,7 +39,7 @@ class LoaiPhieuGiamGiaTests {
     }
     @Test void locLoaiPhieuBangGiaTriRieng() {
         var jdbc=mock(JdbcTemplate.class);new QuanLyPhieuGiamGiaService(jdbc).tim("a","1","1");
-        verify(jdbc).queryForList(contains("ap_dung_van_chuyen=?"),eq("%a%"),eq("%a%"),eq(1),eq(1));
+        verify(jdbc).queryForList(contains("ap_dung_van_chuyen=?"),eq("%a%"),eq("%a%"),eq(1),any(LocalDate.class),any(LocalDate.class),eq(1));
     }
     @Test void chanLoaiKhongHopLeTruocKhiGhi() {
         var jdbc=mock(JdbcTemplate.class);var service=new QuanLyPhieuGiamGiaService(jdbc);

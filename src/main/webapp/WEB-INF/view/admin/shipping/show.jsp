@@ -4,8 +4,8 @@
 <fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Quản lý vận chuyển — VictorSport</title><link rel="icon" href="/logo/favicon-victorsport.svg">
-<link rel="stylesheet" href="/css/victorsport.css?v=admin-20261014"><link rel="stylesheet" href="/css/tong-quan.css?v=20261023-ui-1">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
+<link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced"><link rel="stylesheet" href="/css/tong-quan.css?v=20261107-balanced">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
 <%@ include file="/WEB-INF/view/admin/layout/dashboard-header.jsp" %>
 <main class="content-layout overview-page">
 <section class="overview-intro"><div><p class="overview-eyebrow">ĐƠN HÀNG ONLINE</p><h2>Theo dõi vận chuyển</h2><p class="muted">Theo dõi phí giao hàng, mã vận đơn và trạng thái. GHN được xử lý tự động.</p></div></section>
@@ -21,8 +21,8 @@
 <article class="overview-card featured"><span>Đang vận chuyển</span><strong>${tongQuan.dang_giao}</strong><small>Shipper đã lấy hàng</small></article>
 <article class="overview-card"><span>Đã nhận hàng</span><strong>${tongQuan.da_nhan}</strong><small>Đơn đã giao thành công</small></article>
 <article class="overview-card"><span>Đã hủy</span><strong>${tongQuan.da_huy}</strong><small>Theo bộ lọc hiện tại</small></article></div>
-<section class="panel"><div class="panel-header"><h2>Danh sách đơn giao hàng</h2><span class="overview-pill">${tongQuan.so_don} đơn</span></div><div class="panel-body"><div class="overview-table"><table class="table shipping-table"><thead><tr><th>Đơn hàng</th><th>Người nhận</th><th>Địa chỉ nhận hàng</th><th>Phí khách trả</th><th>Phí GHN</th><th>Trạng thái / Mã vận đơn</th><th>Chi tiết</th></tr></thead><tbody>
-<c:forEach items="${donHang}" var="hd"><tr>
+<section class="panel"><div class="panel-header"><h2>Danh sách đơn giao hàng</h2><span class="overview-pill">${tongQuan.so_don} đơn</span></div><div class="panel-body"><div class="overview-table"><table class="table shipping-table"><thead><tr><th scope="col" class="table-stt">STT</th><th>Đơn hàng</th><th>Người nhận</th><th>Địa chỉ nhận hàng</th><th>Phí khách trả</th><th>Phí GHN</th><th>Trạng thái / Mã vận đơn</th><th>Chi tiết</th></tr></thead><tbody>
+<c:forEach items="${donHang}" var="hd" varStatus="st"><tr><td class="table-stt">${(trang - 1) * 20 + st.count}</td>
 <td><strong><c:out value="${hd.ma_hoa_don}"/></strong><div class="muted"><fmt:formatDate value="${hd.ngay_tao}" pattern="dd/MM/yyyy HH:mm"/></div></td>
 <td><c:out value="${hd.ten_khach_hang}"/><div class="muted"><c:out value="${hd.so_dien_thoai_khach_hang}"/></div></td>
 <td class="shipping-address"><c:out value="${hd.dia_chi_khach_hang}"/></td>
@@ -30,7 +30,7 @@
 <td class="money"><c:choose><c:when test="${hd.phi_thuc_te != null}"><fmt:formatNumber value="${hd.phi_thuc_te}" maxFractionDigits="0"/> đ</c:when><c:otherwise><span class="muted">Chưa có vận đơn</span></c:otherwise></c:choose></td>
 <td><span class="shipping-state state-${hd.trang_thai_hien_tai}"><c:out value="${hd.ten_trang_thai}"/></span><c:if test="${not empty hd.ma_van_don}"><div class="muted">Mã vận đơn: <c:out value="${hd.ma_van_don}"/></div></c:if></td>
 <td><a class="button secondary" href="/quan-ly/hoa-don/${hd.id}">Xem đơn</a></td></tr></c:forEach>
-<c:if test="${empty donHang}"><tr><td colspan="7" class="overview-empty">Không có đơn hàng phù hợp.</td></tr></c:if>
+<c:if test="${empty donHang}"><tr><td colspan="8" class="overview-empty">Không có đơn hàng phù hợp.</td></tr></c:if>
 </tbody></table></div><div class="overview-pagination">
 <c:if test="${trang > 1}"><c:url var="trangTruoc" value="/quan-ly/van-chuyen"><c:param name="tuKhoa" value="${tuKhoa}"/><c:param name="trangThai" value="${trangThai}"/><c:param name="trang" value="${trang - 1}"/></c:url><a class="button secondary" href="<c:out value='${trangTruoc}'/>">← Trang trước</a></c:if>
 <span>Trang ${trang} / ${soTrang}</span>

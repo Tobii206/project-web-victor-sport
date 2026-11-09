@@ -8,6 +8,12 @@ import java.util.*;
 
 @Service
 public class QuanLySanPhamService {
+    public static final List<Map<String, String>> DOI_TUONG =
+            List.of(Map.of("ma", "NAM", "ten", "Nam"), Map.of("ma", "NU", "ten", "Nữ"), Map.of("ma", "UNISEX", "ten", "Unisex"));
+
+    public static boolean doiTuongHopLe(String ma) {
+        return DOI_TUONG.stream().anyMatch(muc -> muc.get("ma").equals(ma));
+    }
     private final JdbcTemplate jdbc;
     // Tên bảng và cột cố định, không lấy tên bảng từ dữ liệu người nhập.
     private static final String[][] DANH_MUC = {
@@ -38,7 +44,9 @@ public class QuanLySanPhamService {
                 ISNULL(t.ton,0) AS ton_kho, ISNULL(t.so_mau,0) AS so_mau, t.gia,
                 (SELECT TOP 1 a.duong_dan_anh FROM anh_chi_tiet_san_pham a
                  JOIN chi_tiet_san_pham ct ON ct.id=a.id_chi_tiet_san_pham
-                 WHERE ct.id_san_pham=sp.id AND ISNULL(ct.xoa_mem,0)=0 AND ISNULL(a.xoa_mem,0)=0
+                 WHERE ct.id_san_pham=sp.id AND ISNULL(a.xoa_mem,0)=0
+                   AND EXISTS (SELECT 1 FROM chi_tiet_san_pham con WHERE con.id_san_pham=ct.id_san_pham
+                     AND con.id_mau_sac=ct.id_mau_sac AND ISNULL(con.xoa_mem,0)=0)
                  ORDER BY a.la_anh_dai_dien DESC,a.id) AS anh
             FROM san_pham sp JOIN thuong_hieu th ON th.id=sp.id_thuong_hieu
             LEFT JOIN chat_lieu cl ON cl.id=sp.id_chat_lieu
@@ -50,14 +58,26 @@ public class QuanLySanPhamService {
         List<Object> args = new ArrayList<>();
         String tu = loc.getOrDefault("tuKhoa", "").trim();
         if (!tu.isEmpty()) {
-            sql += " AND (sp.ten_san_pham LIKE ? OR sp.ma_san_pham LIKE ?)";
-            args.add("%" + tu + "%"); args.add("%" + tu + "%");
+            sql += """
+                AND (sp.ten_san_pham COLLATE Vietnamese_100_CI_AI LIKE ? OR sp.ma_san_pham LIKE ?
+                    OR EXISTS (SELECT 1 FROM chi_tiet_san_pham ct WHERE ct.id_san_pham=sp.id
+                        AND ISNULL(ct.xoa_mem,0)=0 AND ct.ma_chi_tiet_san_pham = ?))
+                """;
+            args.add("%" + tu + "%");
+            args.add("%" + tu + "%");
+            args.add(tu);
         }
         for (String ten : new String[]{"id_thuong_hieu", "id_chat_lieu", "id_vi_tri_thi_dau"}) {
             Integer id = soNguyen(loc.get(ten), "Bộ lọc", false);
             if (id != null) { sql += " AND sp." + ten + "=?"; args.add(id); }
         }
         String trangThai = loc.getOrDefault("trang_thai_kinh_doanh", "");
+        String doiTuong = loc.get("doi_tuong");
+        if ("chua-phan-loai".equals(doiTuong)) sql += " AND sp.doi_tuong IS NULL";
+        else if (doiTuongHopLe(doiTuong)) {
+            sql += " AND sp.doi_tuong=?";
+            args.add(doiTuong);
+        }
         if (trangThai.equals("0") || trangThai.equals("1")) { sql += " AND sp.trang_thai_kinh_doanh=?"; args.add(Integer.valueOf(trangThai)); }
         if ("het".equals(loc.get("tonKho"))) sql += " AND ISNULL(t.ton,0)=0";
         if ("con".equals(loc.get("tonKho"))) sql += " AND ISNULL(t.ton,0)>0";
@@ -83,16 +103,41 @@ public class QuanLySanPhamService {
             """, id);
     }
     public List<Map<String, Object>> layAnh(int id) {
+        return layAnhTheoMau(jdbc, id);
+    }
+
+    static List<Map<String, Object>> layAnhTheoMau(JdbcTemplate jdbc, int id) {
         return jdbc.queryForList("""
-            WITH AnhXepHang AS (
-                SELECT a.*, ct.ma_chi_tiet_san_pham,
-                       ROW_NUMBER() OVER (PARTITION BY ct.id ORDER BY ISNULL(a.la_anh_dai_dien,0) DESC, a.id) AS thu_tu
-                FROM anh_chi_tiet_san_pham a
-                JOIN chi_tiet_san_pham ct ON ct.id=a.id_chi_tiet_san_pham
-                WHERE ct.id_san_pham=? AND ISNULL(ct.xoa_mem,0)=0 AND ISNULL(a.xoa_mem,0)=0
-            )
-            SELECT * FROM AnhXepHang WHERE thu_tu=1 ORDER BY ma_chi_tiet_san_pham
+            SELECT a.*, ct.id_mau_sac
+            FROM anh_chi_tiet_san_pham a
+            JOIN chi_tiet_san_pham ct ON ct.id=a.id_chi_tiet_san_pham
+            WHERE ct.id_san_pham=? AND ISNULL(a.xoa_mem,0)=0
+            ORDER BY ct.id_mau_sac, ISNULL(a.la_anh_dai_dien,0) DESC, a.id
             """, id);
+    }
+    public static List<Map<String,Object>> nhomTheoMau(List<Map<String,Object>> cacMau,List<Map<String,Object>> cacAnh) {
+        var nhom=new LinkedHashMap<Integer,Map<String,Object>>();
+        for(var mau:cacMau) {
+            if(!(mau.get("id_mau_sac") instanceof Number soMau)) continue;
+            int idMau=soMau.intValue();
+            var n=nhom.computeIfAbsent(idMau,key->{
+                var moi=new LinkedHashMap<String,Object>();moi.put("id_mau_sac",key);moi.put("ten_mau_sac",mau.get("ten_mau_sac"));
+                moi.put("idMau",mau.get("id"));moi.put("cacMau",new ArrayList<Map<String,Object>>());
+                moi.put("cacAnh", new ArrayList<Map<String,Object>>());
+                return moi;
+            });
+            @SuppressWarnings("unchecked") var sizes=(List<Map<String,Object>>)n.get("cacMau");sizes.add(mau);
+            if(((Number)mau.get("id")).intValue()<((Number)n.get("idMau")).intValue()) n.put("idMau",mau.get("id"));
+        }
+        for (var anh : cacAnh) {
+            if (!(anh.get("id_mau_sac") instanceof Number id) || !nhom.containsKey(id.intValue())) continue;
+            var nhomMau = nhom.get(id.intValue());
+            nhomMau.putIfAbsent("anh", anh);
+            @SuppressWarnings("unchecked")
+            var anhCungMau = (List<Map<String, Object>>) nhomMau.get("cacAnh");
+            anhCungMau.add(anh);
+        }
+        return new ArrayList<>(nhom.values());
     }
     private void khoaSanPham(int id) {
         if (jdbc.queryForList("SELECT id FROM san_pham WITH (UPDLOCK,HOLDLOCK) WHERE id=? AND ISNULL(xoa_mem,0)=0", id).isEmpty())
@@ -111,21 +156,31 @@ public class QuanLySanPhamService {
         String ngan = chu(d.get("mo_ta_ngan"), "Mô tả ngắn", 500, false);
         String chiTiet = chu(d.get("mo_ta_chi_tiet"), "Mô tả chi tiết", 20000, false);
         BigDecimal giaChung = tien(d.get("gia_ban"), "Giá sản phẩm", true);
+        String doiTuong = chu(d.get("doi_tuong"), "Giới tính", 6, false);
+        if (!doiTuong.isEmpty() && !doiTuongHopLe(doiTuong))
+            throw new IllegalArgumentException("Giới tính sản phẩm không hợp lệ.");
+        String maDoiTuong = doiTuong.isEmpty() ? null : doiTuong;
         List<Object> args = new ArrayList<>();
         for (int i=0;i<6;i++) args.add(chonDanhMuc(d, i, i==0));
         args.add(ten); args.add(ngan); args.add(chiTiet); args.add(trangThai(d.get("trang_thai_kinh_doanh"))); args.add(nhanVien);
         if (id == null) {
             args.add(giaChung);
+            args.add(maDoiTuong);
             return jdbc.queryForObject("""
                 INSERT INTO san_pham (id_thuong_hieu,id_xuat_xu,id_vi_tri_thi_dau,id_phong_cach_choi,id_co_giay,id_chat_lieu,
-                    ten_san_pham,mo_ta_ngan,mo_ta_chi_tiet,trang_thai_kinh_doanh,nguoi_tao,gia_ban)
-                OUTPUT INSERTED.id VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+                    ten_san_pham,mo_ta_ngan,mo_ta_chi_tiet,trang_thai_kinh_doanh,nguoi_tao,gia_ban,doi_tuong)
+                OUTPUT INSERTED.id VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """, Integer.class, args.toArray());
         }
-        khoaSanPham(id); args.add(giaChung); args.add(id);
+        khoaSanPham(id);
+        args.add(giaChung);
+        args.add(d.containsKey("doi_tuong") ? 1 : 0);
+        args.add(maDoiTuong);
+        args.add(id);
         jdbc.update("""
             UPDATE san_pham SET id_thuong_hieu=?,id_xuat_xu=?,id_vi_tri_thi_dau=?,id_phong_cach_choi=?,id_co_giay=?,id_chat_lieu=?,
-                ten_san_pham=?,mo_ta_ngan=?,mo_ta_chi_tiet=?,trang_thai_kinh_doanh=?,nguoi_cap_nhat=?,gia_ban=?,ngay_cap_nhat=SYSDATETIME() WHERE id=?
+                ten_san_pham=?,mo_ta_ngan=?,mo_ta_chi_tiet=?,trang_thai_kinh_doanh=?,nguoi_cap_nhat=?,gia_ban=?,
+                doi_tuong=CASE WHEN ?=1 THEN ? ELSE doi_tuong END,ngay_cap_nhat=SYSDATETIME() WHERE id=?
             """, args.toArray());
         jdbc.update("UPDATE chi_tiet_san_pham SET gia_ban=?,nguoi_cap_nhat=?,ngay_cap_nhat=SYSDATETIME() WHERE id_san_pham=? AND ISNULL(xoa_mem,0)=0", giaChung, nhanVien, id);
         return id;
@@ -143,8 +198,22 @@ public class QuanLySanPhamService {
         if (ton<0) throw new IllegalArgumentException("Tồn kho không được âm.");
         BigDecimal gia = jdbc.queryForObject("SELECT gia_ban FROM san_pham WHERE id=? AND ISNULL(xoa_mem,0)=0", BigDecimal.class, sanPham);
         if (gia == null) throw new IllegalArgumentException("Vui lòng lưu giá trong Thông tin sản phẩm trước khi thêm mẫu.");
-        if (jdbc.queryForObject("SELECT COUNT(*) FROM chi_tiet_san_pham WHERE id_san_pham=? AND id_mau_sac=? AND id_kich_thuoc=? AND id_form_chan=? AND ISNULL(xoa_mem,0)=0 AND id<>?", Integer.class,sanPham,mau,size,form,id==null?0:id)>0)
-            throw new IllegalArgumentException("Mẫu size, màu và form chân này đã tồn tại.");
+        int soMauTrung = jdbc.queryForObject("SELECT COUNT(*) FROM chi_tiet_san_pham WHERE id_san_pham=? AND id_mau_sac=? AND id_kich_thuoc=? AND id_form_chan=? AND ISNULL(xoa_mem,0)=0 AND id<>?", Integer.class,sanPham,mau,size,form,id==null?0:id);
+        if (soMauTrung > 0) {
+            if (id != null || soMauTrung > 1)
+                throw new IllegalArgumentException("Mẫu có cùng màu, size và form chân đã tồn tại.");
+            int idMau = jdbc.queryForObject("""
+                SELECT id FROM chi_tiet_san_pham
+                WHERE id_san_pham=? AND id_mau_sac=? AND id_kich_thuoc=? AND id_form_chan=? AND ISNULL(xoa_mem,0)=0
+                """, Integer.class, sanPham, mau, size, form);
+            int soDong = jdbc.update("""
+                UPDATE chi_tiet_san_pham
+                SET so_luong=so_luong+?,nguoi_cap_nhat=?,ngay_cap_nhat=SYSDATETIME()
+                WHERE id=? AND CAST(so_luong AS BIGINT)+?<=2147483647
+                """, ton, nhanVien, idMau, ton);
+            if (soDong != 1) throw new IllegalArgumentException("Số lượng nhập vượt giới hạn tồn kho.");
+            return idMau;
+        }
         String ghiChu = chu(d.get("ghi_chu"),"Ghi chú",255,false);
         int trangThai = trangThai(d.get("trang_thai"));
         if (id==null) return jdbc.queryForObject("""
@@ -152,6 +221,7 @@ public class QuanLySanPhamService {
             OUTPUT INSERTED.id VALUES (?,?,?,?,?,?,?,?,?)
             """,Integer.class,sanPham,mau,size,form,ton,gia,trangThai,ghiChu,nhanVien);
         int tonCu = soNguyen(d.get("so_luong_cu"),"Tồn kho trước khi sửa",true);
+        giuAnhKhiDoiMau(sanPham,id,mau);
         int soDong = jdbc.update("""
             UPDATE chi_tiet_san_pham SET id_mau_sac=?,id_kich_thuoc=?,id_form_chan=?,so_luong=?,gia_ban=?,trang_thai=?,ghi_chu=?,nguoi_cap_nhat=?,ngay_cap_nhat=SYSDATETIME()
             WHERE id=? AND id_san_pham=? AND ISNULL(xoa_mem,0)=0 AND so_luong=?
@@ -160,38 +230,57 @@ public class QuanLySanPhamService {
         return id;
     }
     @Transactional
+    public int themNhanhMau(int sanPham, List<Integer> sizes, Map<String, String> duLieu, int nhanVien) {
+        if (sizes == null || sizes.isEmpty() || sizes.size() > 30 || sizes.stream().anyMatch(size -> size == null || size <= 0))
+            throw new IllegalArgumentException("Vui lòng chọn từ 1 đến 30 size hợp lệ.");
+        Map<String, String> mau = new HashMap<>(duLieu);
+        var sizeKhongTrung = new LinkedHashSet<>(sizes);
+        for (Integer size : sizeKhongTrung) {
+            mau.put("id_kich_thuoc", size.toString());
+            luuMau(sanPham, null, mau, nhanVien);
+        }
+        return sizeKhongTrung.size();
+    }
+
+    @Transactional
     public void xoaMau(int sanPham,int id,int nhanVien) {
         khoaSanPham(sanPham);
         if (jdbc.update("UPDATE chi_tiet_san_pham SET xoa_mem=1,trang_thai=0,nguoi_cap_nhat=?,ngay_cap_nhat=SYSDATETIME() WHERE id=? AND id_san_pham=? AND ISNULL(xoa_mem,0)=0",nhanVien,id,sanPham)!=1)
             throw new IllegalArgumentException("Không tìm thấy mẫu giày.");
     }
+    private void giuAnhKhiDoiMau(int sanPham,int id,int mauMoi) {
+        var cu=jdbc.queryForList("SELECT id_mau_sac FROM chi_tiet_san_pham WHERE id=? AND id_san_pham=? AND ISNULL(xoa_mem,0)=0",id,sanPham);
+        if(cu.isEmpty() || ((Number)cu.get(0).get("id_mau_sac")).intValue()==mauMoi) return;
+        int mauCu=((Number)cu.get(0).get("id_mau_sac")).intValue();
+        var khac=jdbc.queryForList("SELECT TOP 1 id FROM chi_tiet_san_pham WHERE id_san_pham=? AND id_mau_sac=? AND id<>? ORDER BY ISNULL(xoa_mem,0),id",sanPham,mauCu,id);
+        if(khac.isEmpty()) jdbc.update("UPDATE anh_chi_tiet_san_pham SET xoa_mem=1,la_anh_dai_dien=0 WHERE id_chi_tiet_san_pham=? AND ISNULL(xoa_mem,0)=0",id);
+        else jdbc.update("UPDATE anh_chi_tiet_san_pham SET id_chi_tiet_san_pham=? WHERE id_chi_tiet_san_pham=? AND ISNULL(xoa_mem,0)=0",khac.get(0).get("id"),id);
+    }
+    private static final String ANH_CUNG_MAU="id_chi_tiet_san_pham IN (SELECT id FROM chi_tiet_san_pham WHERE id_san_pham=? AND id_mau_sac=?) AND ISNULL(xoa_mem,0)=0";
+
     @Transactional
     public void themAnh(int sanPham,int mau,String duongDan) {
         khoaSanPham(sanPham);
-        if (jdbc.queryForObject("SELECT COUNT(*) FROM chi_tiet_san_pham WHERE id=? AND id_san_pham=? AND ISNULL(xoa_mem,0)=0",Integer.class,mau,sanPham)==0)
+        var ds=jdbc.queryForList("SELECT id_mau_sac FROM chi_tiet_san_pham WHERE id=? AND id_san_pham=? AND ISNULL(xoa_mem,0)=0",mau,sanPham);
+        if (ds.isEmpty())
             throw new IllegalArgumentException("Không tìm thấy mẫu giày để thêm ảnh.");
-        var hienTai=jdbc.queryForList("SELECT id,duong_dan_anh FROM anh_chi_tiet_san_pham WHERE id_chi_tiet_san_pham=? AND ISNULL(xoa_mem,0)=0 ORDER BY ISNULL(la_anh_dai_dien,0) DESC,id",mau);
-        for (var anh : hienTai) {
-            if (duongDan.equals(anh.get("duong_dan_anh"))) {
-                int id=((Number)anh.get("id")).intValue();
-                jdbc.update("UPDATE anh_chi_tiet_san_pham SET xoa_mem=1,la_anh_dai_dien=0 WHERE id_chi_tiet_san_pham=? AND id<>? AND ISNULL(xoa_mem,0)=0",mau,id);
-                jdbc.update("UPDATE anh_chi_tiet_san_pham SET la_anh_dai_dien=1 WHERE id=?",id);
-                return;
-            }
-        }
-        jdbc.update("UPDATE anh_chi_tiet_san_pham SET xoa_mem=1,la_anh_dai_dien=0 WHERE id_chi_tiet_san_pham=? AND ISNULL(xoa_mem,0)=0",mau);
-        jdbc.update("INSERT INTO anh_chi_tiet_san_pham (id_chi_tiet_san_pham,duong_dan_anh,la_anh_dai_dien) VALUES (?,?,1)",mau,duongDan);
+        int mauSac=((Number)ds.get(0).get("id_mau_sac")).intValue();
+        var hienTai=jdbc.queryForList("SELECT id,duong_dan_anh FROM anh_chi_tiet_san_pham WHERE "+ANH_CUNG_MAU+" ORDER BY ISNULL(la_anh_dai_dien,0) DESC,id",sanPham,mauSac);
+        if (hienTai.stream().anyMatch(anh -> duongDan.equals(anh.get("duong_dan_anh")))) return;
+        if (hienTai.size() >= 12) throw new IllegalArgumentException("Mỗi màu lưu tối đa 12 ảnh.");
+        jdbc.update("INSERT INTO anh_chi_tiet_san_pham (id_chi_tiet_san_pham,duong_dan_anh,la_anh_dai_dien) VALUES (?,?,?)",
+                mau, duongDan, hienTai.isEmpty() ? 1 : 0);
     }
     @Transactional
     public void suaAnh(int sanPham,int id,boolean xoa) {
         khoaSanPham(sanPham);
-        var ds = jdbc.queryForList("SELECT a.* FROM anh_chi_tiet_san_pham a JOIN chi_tiet_san_pham ct ON ct.id=a.id_chi_tiet_san_pham WHERE a.id=? AND ct.id_san_pham=? AND ISNULL(ct.xoa_mem,0)=0 AND ISNULL(a.xoa_mem,0)=0",id,sanPham);
+        var ds = jdbc.queryForList("SELECT a.*,ct.id_mau_sac FROM anh_chi_tiet_san_pham a JOIN chi_tiet_san_pham ct ON ct.id=a.id_chi_tiet_san_pham WHERE a.id=? AND ct.id_san_pham=? AND ISNULL(a.xoa_mem,0)=0 AND EXISTS (SELECT 1 FROM chi_tiet_san_pham con WHERE con.id_san_pham=ct.id_san_pham AND con.id_mau_sac=ct.id_mau_sac AND ISNULL(con.xoa_mem,0)=0)",id,sanPham);
         if (ds.isEmpty()) throw new IllegalArgumentException("Không tìm thấy ảnh.");
-        int mau = ((Number)ds.get(0).get("id_chi_tiet_san_pham")).intValue();
+        int mau = ((Number)ds.get(0).get("id_mau_sac")).intValue();
         if (xoa) {
             jdbc.update("UPDATE anh_chi_tiet_san_pham SET xoa_mem=1,la_anh_dai_dien=0 WHERE id=?",id);
         } else {
-            jdbc.update("UPDATE anh_chi_tiet_san_pham SET la_anh_dai_dien=0 WHERE id_chi_tiet_san_pham=?",mau);
+            jdbc.update("UPDATE anh_chi_tiet_san_pham SET la_anh_dai_dien=0 WHERE "+ANH_CUNG_MAU+" AND id<>?",sanPham,mau,id);
             jdbc.update("UPDATE anh_chi_tiet_san_pham SET la_anh_dai_dien=1 WHERE id=?",id);
         }
     }

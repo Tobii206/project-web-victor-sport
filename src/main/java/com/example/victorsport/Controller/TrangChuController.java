@@ -1,6 +1,7 @@
 package com.example.victorsport.Controller;
 
 import com.example.victorsport.Service.TrangChuService;
+import com.example.victorsport.Service.QuanLySanPhamService;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,6 +26,7 @@ public class TrangChuController {
                                   @RequestParam(required = false) Integer xuatXu,
                                   @RequestParam(required = false) Integer kichThuoc,
                                   @RequestParam(required = false) Integer mauSac,
+                                  @RequestParam(required = false) String doiTuong,
                                   @RequestParam(defaultValue = "false") boolean conHang,
                                   @RequestParam(value = "sapXep", defaultValue = "moi-nhat") String sapXep,
                                   Model model) {
@@ -37,11 +39,18 @@ public class TrangChuController {
         model.addAttribute("kichThuocDangChon", kichThuoc);
         model.addAttribute("mauSacDangChon", mauSac);
         model.addAttribute("conHang", conHang);
+        String gioiTinh = QuanLySanPhamService.doiTuongHopLe(doiTuong) ? doiTuong : null;
+        model.addAttribute("cacDoiTuong", QuanLySanPhamService.DOI_TUONG);
+        model.addAttribute("doiTuongDangChon", gioiTinh);
         try {
             model.addAttribute("thuongHieu", trangChuService.layThuongHieu());
             model.addAttribute("boLoc", trangChuService.layBoLoc());
-            model.addAttribute("hanUuDai", trangChuService.layHanUuDai());
-            model.addAttribute("sanPham", trangChuService.timSanPham(tuKhoa, thuongHieu, nhuCau, chatLieu, xuatXu, kichThuoc, mauSac, conHang, sapXep));
+            Long han=trangChuService.layHanUuDai();
+            model.addAttribute("hanUuDai",han);
+            model.addAttribute("coUuDai",han!=null && han>System.currentTimeMillis());
+            model.addAttribute("sanPham", gioiTinh == null
+                    ? trangChuService.timSanPham(tuKhoa, thuongHieu, nhuCau, chatLieu, xuatXu, kichThuoc, mauSac, conHang, sapXep)
+                    : trangChuService.timSanPham(tuKhoa, thuongHieu, nhuCau, chatLieu, xuatXu, kichThuoc, mauSac, conHang, sapXep, gioiTinh));
         } catch (DataAccessException loi) {
             model.addAttribute("thuongHieu", Collections.emptyList());
             model.addAttribute("sanPham", Collections.emptyList());

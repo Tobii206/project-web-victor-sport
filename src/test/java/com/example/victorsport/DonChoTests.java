@@ -43,7 +43,7 @@ class DonChoTests {
         IllegalArgumentException loi = assertThrows(IllegalArgumentException.class,
                 () -> service.luuDonCho(gioHang, yeuCau, nhanVien, null));
         assertEquals("Thêm tối đa 10 hóa đơn chờ", loi.getMessage());
-        verify(jdbc, never()).queryForObject(contains("INSERT INTO hoa_don"), eq(Integer.class), eq(2), eq(2));
+        verify(jdbc, never()).queryForObject(contains("INSERT INTO hoa_don"), eq(Integer.class), eq(2), anyString(), eq(2));
         verify(jdbc, never()).update(anyString(), any(Object[].class));
     }
 
@@ -51,7 +51,7 @@ class DonChoTests {
     void taoDuocDonThuMuoiVaChoPhepDonTrong() {
         when(jdbc.queryForObject(contains("FROM nhan_vien"), eq(Integer.class), eq(2))).thenReturn(2);
         when(jdbc.queryForObject(contains("COUNT(*)"), eq(Integer.class), eq(2))).thenReturn(9);
-        when(jdbc.queryForObject(contains("INSERT INTO hoa_don"), eq(Integer.class), eq(2), eq(2))).thenReturn(20);
+        when(jdbc.queryForObject(contains("INSERT INTO hoa_don"), eq(Integer.class), eq(2), eq("Cửa hàng Victor Sport, Hà Nội"), eq(2))).thenReturn(20);
 
         assertEquals(20, service.luuDonCho(gioHang, yeuCau, nhanVien, null).intValue());
         verify(jdbc, never()).update(contains("UPDATE chi_tiet_san_pham"), any(Object[].class));
@@ -100,7 +100,7 @@ class DonChoTests {
         assertEquals(20, service.thanhToan(gioHang, yeuCau, nhanVien, 20).intValue());
         verify(jdbc).update(contains("trang_thai_hien_tai = 5"), eq(20));
         verify(jdbc, times(1)).update(contains("UPDATE chi_tiet_san_pham"), eq(2), eq(2), eq(1));
-        verify(jdbc, never()).queryForObject(contains("INSERT INTO hoa_don"), eq(Integer.class), eq(2), eq(2));
+        verify(jdbc, never()).queryForObject(contains("INSERT INTO hoa_don"), eq(Integer.class), eq(2), anyString(), eq(2));
     }
 
     @Test

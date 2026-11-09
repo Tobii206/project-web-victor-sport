@@ -8,6 +8,14 @@ window.VictorKhoiTaoModern = function () {
         countdown.dataset.modernReady = 'true';
         var deadline = Number(countdown.dataset.han);
         function tick() {
+            if (!countdown.isConnected) return false;
+            if (!Number.isFinite(deadline) || deadline <= Date.now()) {
+                var sale = document.getElementById('bannerUuDai');
+                var catalogue = document.getElementById('bannerKhongUuDai');
+                if (sale) sale.classList.add('is-hidden');
+                if (catalogue) catalogue.classList.remove('is-hidden');
+                return false;
+            }
             var seconds = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
             var values = [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60];
             ['fsHours', 'fsMinutes', 'fsSeconds'].forEach(function (id, index) {
@@ -18,7 +26,6 @@ window.VictorKhoiTaoModern = function () {
         if (tick()) {
             var timer = setInterval(function () { if (!tick()) clearInterval(timer); }, 1000);
         }
-        if (!deadline) countdown.setAttribute('aria-label', 'Chưa có đợt giảm giá đang diễn ra');
     }
     // Hero showcase
     function initHeroShowcase() {

@@ -24,7 +24,7 @@ class ThongKeVanChuyenTests {
         var tong=(Map<?,?>)kq.get("tongQuan");
         assertEquals(new BigDecimal("100000"),tong.get("trung_binh_don"));
         assertEquals(new BigDecimal("20.0"),tong.get("ty_le_huy"));
-        verify(jdbc).queryForList(argThat(sql -> sql.contains("GROUP BY CASE WHEN hd.loai_don") && sql.contains("hd.loai_don IN (1,2)") && sql.contains("hd.trang_thai_hien_tai=5")),eq(ngay.atStartOfDay()),eq(ngay.plusDays(1).atStartOfDay()));
+        verify(jdbc).queryForList(argThat(sql -> sql.contains("GROUP BY CASE WHEN hd.loai_don") && sql.contains("hd.loai_don=1") && sql.contains("hd.trang_thai_hien_tai=5")),eq(ngay.atStartOfDay()),eq(ngay.plusDays(1).atStartOfDay()));
         verify(jdbc).queryForMap(argThat(sql -> sql.contains("AS da_thu") && sql.contains("gd.trang_thai=N'thanh_cong'") && sql.contains("hd.trang_thai_hien_tai=5")),eq(ngay.atStartOfDay()),eq(ngay.plusDays(1).atStartOfDay()));
     }
 

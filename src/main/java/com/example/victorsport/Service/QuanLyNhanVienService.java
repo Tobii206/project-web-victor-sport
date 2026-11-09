@@ -31,7 +31,7 @@ public class QuanLyNhanVienService {
         List<Object> thamSo = new ArrayList<>();
         String tuKhoa = loc.getOrDefault("tuKhoa", "").trim();
         if (!tuKhoa.isEmpty()) {
-            sql += " AND (nv.ten_nhan_vien LIKE ? OR nv.ma_nhan_vien LIKE ? OR nv.email LIKE ? OR nv.so_dien_thoai LIKE ?)";
+            sql += " AND (nv.ten_nhan_vien COLLATE Vietnamese_100_CI_AI LIKE ? OR nv.ma_nhan_vien LIKE ? OR nv.email LIKE ? OR nv.so_dien_thoai LIKE ?)";
             for (int i=0; i<4; i++) thamSo.add("%" + tuKhoa + "%");
         }
         String trangThai = loc.get("trangThai");

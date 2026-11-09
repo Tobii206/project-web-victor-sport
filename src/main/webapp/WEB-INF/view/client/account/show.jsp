@@ -8,8 +8,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thông tin tài khoản — VictorSport</title>
-    <link rel="stylesheet" href="/css/trang-chu.css?v=20261023-ui-1">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261023-type-2"><link rel="stylesheet" href="/css/anh-dai-dien.css?v=20261102-2"></head>
+    <link rel="stylesheet" href="/css/trang-chu.css?v=20261107-balanced">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"><link rel="stylesheet" href="/css/anh-dai-dien.css?v=20261107-balanced"></head>
 <body class="store-page">
 <%@ include file="/WEB-INF/view/client/layout/header.jsp" %>
 <main class="account-container store-container">

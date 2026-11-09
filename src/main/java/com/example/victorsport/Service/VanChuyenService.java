@@ -19,7 +19,7 @@ public class VanChuyenService {
         List<Object> thamSo = new ArrayList<>();
         if (tuKhoa != null && !tuKhoa.isBlank()) {
             if (tuKhoa.length()>100) throw new IllegalArgumentException("Từ khóa tối đa 100 ký tự.");
-            loc += " AND (ma_hoa_don LIKE ? OR ten_khach_hang LIKE ? OR so_dien_thoai_khach_hang LIKE ?) ";
+            loc += " AND (ma_hoa_don LIKE ? OR ten_khach_hang COLLATE Vietnamese_100_CI_AI LIKE ? OR so_dien_thoai_khach_hang LIKE ?) ";
             for (int i=0;i<3;i++) thamSo.add("%"+tuKhoa.trim()+"%");
         }
         if (trangThai != null) { loc += " AND trang_thai_hien_tai=? "; thamSo.add(trangThai); }

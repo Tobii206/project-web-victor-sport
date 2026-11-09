@@ -14,21 +14,53 @@ if (moHuongDanSize) {
 }
 var soLuong = document.getElementById('soLuong');
 var cacMau = document.querySelectorAll('input[name="idPhienBan"]');
+var cacAnhMau = document.querySelectorAll('[data-anh-mau]');
+var mauDangXem;
+
+function hienAnh(src, nutAnh) {
+    anhChinh.onerror = function () { this.onerror = null; this.src = '/images/giay-mac-dinh.svg'; };
+    anhChinh.src = src;
+    cacAnhMau.forEach(function (nut) { nut.setAttribute('aria-pressed', String(nut === nutAnh)); });
+}
+
+cacAnhMau.forEach(function (nut) {
+    nut.onclick = function () { hienAnh(nut.querySelector('img').src, nut); };
+});
 
 function hienThiMau() {
-    var mau = document.querySelector('input[name="idPhienBan"]:checked');
-    if (!mau) { return; }
+    var dangChon = document.querySelector('input[name="idPhienBan"]:checked:not(:disabled)');
+    var mau = dangChon || cacMau[0];
+    document.getElementById('tonKho').textContent = dangChon ? 'Còn ' + dangChon.dataset.ton + ' sản phẩm' : 'Hết hàng';
+    document.querySelectorAll('#formChonGiay .online-purchase button, #soLuong').forEach(function (el) {
+        el.disabled = !dangChon;
+    });
+    if (!mau) {
+        var anhDau = cacAnhMau[0];
+        if (anhDau) {
+            cacAnhMau.forEach(function (nut) { nut.hidden = nut.dataset.anhMau !== anhDau.dataset.anhMau; });
+            hienAnh(anhDau.querySelector('img').src, anhDau);
+        }
+        return;
+    }
     var gia = Number(mau.dataset.gia);
     document.getElementById('giaBan').textContent = gia.toLocaleString('vi-VN') + ' đ';
     var giaGoc = document.getElementById('giaGoc');
     giaGoc.hidden = Number(mau.dataset.giaGoc) <= gia;
     giaGoc.textContent = Number(mau.dataset.giaGoc).toLocaleString('vi-VN') + ' đ';
-    document.getElementById('tonKho').textContent = 'Còn ' + mau.dataset.ton + ' sản phẩm';
-    soLuong.max = mau.dataset.ton;
-    if (Number(mau.dataset.ton) > 0 && Number(soLuong.value) < 1) soLuong.value = 1;
-    if (Number(soLuong.value) > Number(mau.dataset.ton)) { soLuong.value = mau.dataset.ton; }
-    anhChinh.onerror = function () { this.onerror = null; this.src = '/images/giay-mac-dinh.svg'; };
-    anhChinh.src = mau.dataset.anh;
+    if (dangChon) {
+        soLuong.max = dangChon.dataset.ton;
+        if (Number(soLuong.value) < 1) soLuong.value = 1;
+        if (Number(soLuong.value) > Number(dangChon.dataset.ton)) soLuong.value = dangChon.dataset.ton;
+    }
+    if (mauDangXem !== mau.dataset.mau) {
+        mauDangXem = mau.dataset.mau;
+        var anhBia = null;
+        cacAnhMau.forEach(function (nut) {
+            nut.hidden = nut.dataset.anhMau !== mauDangXem;
+            if (!nut.hidden && !anhBia) anhBia = nut;
+        });
+        hienAnh(mau.dataset.anh, anhBia);
+    }
 }
 
 for (var i = 0; i < cacMau.length; i++) { cacMau[i].onchange = hienThiMau; }

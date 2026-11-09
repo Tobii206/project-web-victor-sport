@@ -1,0 +1,18 @@
+.invoice-filters { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; margin-bottom: 24px; padding: 20px; border: 1px solid #e3eaf4; border-radius: 16px; background: #f8fafd; }
+.invoice-filters > div { display: grid; align-content: end; gap: 8px; min-width: 0; }
+.invoice-filters label { color: #526780; font-size: 15px; font-weight: 600; }
+.invoice-filters .input, .invoice-filters .select { width: 100%; min-width: 0; min-height: 44px; box-sizing: border-box; }
+.invoice-filter-search { grid-column: span 2; }
+.invoice-filters .invoice-filter-actions { display: flex; align-items: end; flex-wrap: wrap; gap: 8px; }
+.invoice-filter-actions .button { justify-content: center; flex: 1 1 auto; min-height: 44px; white-space: nowrap; }
+@media(max-width:1100px) { .invoice-filters { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:600px) { .invoice-filters { grid-template-columns: minmax(0,1fr); padding: 14px; } .invoice-filter-search { grid-column: auto; } }
+.invoice-pagination { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-top: 24px; padding-top: 20px; border-top: 1px solid #e3eaf4; }
+.invoice-pagination > p { margin: 0; color: #526780; font-size: 15px; }
+.invoice-page-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.invoice-pagination .invoice-page-links > :is(a,span) { display: inline-flex; justify-content: center; align-items: center; min-width: 42px; min-height: 44px; padding: 8px 12px; border: 1px solid #dce4ef; border-radius: 10px; background: #fff; color: #284366; text-decoration: none; font-size: 15px; font-weight: 600; }
+.invoice-pagination .invoice-page-links > a:hover { border-color: #ffb17c; background: #fff2e9; }
+.invoice-pagination .invoice-page-links > [aria-current="page"] { background: #142b52; border-color: #142b52; color: #fff; }
+.invoice-pagination .invoice-page-links > [aria-disabled="true"] { color: #8a97a9; background: #f6f8fb; }
+.invoice-page-links a:focus-visible { outline: 3px solid #ffb17c; outline-offset: 3px; }
+@media(max-width:600px) { .invoice-page-links { gap: 6px; } .invoice-pagination .invoice-page-links > :is(a,span) { min-width: 38px; padding: 8px 10px; } }

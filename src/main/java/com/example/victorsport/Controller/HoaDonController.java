@@ -25,13 +25,25 @@ public class HoaDonController {
 
     @GetMapping("/quan-ly/hoa-don")
     public String hienThiDanhSach(@RequestParam(value = "tuKhoa", required = false) String tuKhoa,
+                                  @RequestParam(required=false) Integer trangThai,
+                                  @RequestParam(defaultValue="") String loaiDon,
+                                  @RequestParam(defaultValue="") String thanhToan,
+                                  @RequestParam(defaultValue="1") int trang,
+                                  @RequestParam(required=false) @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate tuNgay,
+                                  @RequestParam(required=false) @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate denNgay,
                                   HttpSession phienDangNhap, Model model) {
         if (DangNhapController.layNguoiDungDangNhap(phienDangNhap, model) == null) {
             return "redirect:/login";
         }
         model.addAttribute("activeMenu", "hoa-don");
         model.addAttribute("tuKhoa", tuKhoa);
-        model.addAttribute("danhSachHoaDon", hoaDonService.layDanhSachHoaDon(tuKhoa));
+        model.addAttribute("trangThai",trangThai);model.addAttribute("loaiDon",loaiDon);model.addAttribute("thanhToan",thanhToan);
+        model.addAttribute("tuNgay",tuNgay);model.addAttribute("denNgay",denNgay);
+        model.addAllAttributes(Map.of("danhSachHoaDon",java.util.List.of(),"trang",1,"soTrang",1,"tongHoaDon",0,
+                "tuDong",0,"denDong",0,"trangBatDau",1,"trangKetThuc",1));
+        try {model.addAllAttributes(hoaDonService.layTrangHoaDon(tuKhoa,trangThai,loaiDon,thanhToan,tuNgay,denNgay,trang));}
+        catch(IllegalArgumentException ex) {model.addAttribute("error",ex.getMessage());model.addAttribute("danhSachHoaDon",java.util.List.of());}
+        catch(DataAccessException ex) {model.addAttribute("error","Chưa tải được hóa đơn. Vui lòng thử lại.");model.addAttribute("danhSachHoaDon",java.util.List.of());}
         return "admin/order/show";
     }
 
@@ -68,6 +80,25 @@ public class HoaDonController {
         return "redirect:/quan-ly/hoa-don/" + id;
     }
 
+    @PostMapping("/quan-ly/hoa-don/{id}/dia-chi")
+    public String suaDiaChi(@PathVariable int id, @RequestParam String ten, @RequestParam String sdt,
+                            @RequestParam String diaChi, @RequestParam(required = false) Integer tinh,
+                            @RequestParam(required = false) Integer xa, HttpSession session, Model model,
+                            RedirectAttributes flash) {
+        var user = DangNhapController.layNguoiDungDangNhap(session, model);
+        if (user == null) return "redirect:/login";
+        if (!user.isQuanLy()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        try {
+            hoaDonService.suaDiaChiGiaoHang(id, user.getId(), ten, sdt, diaChi, tinh, xa);
+            flash.addFlashAttribute("success", "Đã cập nhật thông tin nhận hàng.");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+        } catch (DataAccessException e) {
+            flash.addFlashAttribute("error", "Chưa lưu được địa chỉ giao hàng. Vui lòng thử lại.");
+        }
+        return "redirect:/quan-ly/hoa-don/" + id;
+    }
+
     @PostMapping("/quan-ly/hoa-don/{id}/xac-nhan-thanh-toan")
     public String xacNhanThanhToan(@PathVariable int id,
                                   @RequestParam(defaultValue="chi-tiet") String quayLai,
@@ -82,6 +113,23 @@ public class HoaDonController {
         catch (DataAccessException e) { thongBao.addFlashAttribute("error","Chưa xác nhận được thanh toán. Vui lòng thử lại."); }
         if ("van-chuyen".equals(quayLai)) return "redirect:/quan-ly/van-chuyen";
         if ("danh-sach".equals(quayLai)) return "redirect:/quan-ly/hoa-don";
+        return "redirect:/quan-ly/hoa-don/" + id;
+    }
+
+    @PostMapping("/quan-ly/hoa-don/{id}/so-luong")
+    public String suaSoLuong(@PathVariable int id, @RequestParam int idDong, @RequestParam int soLuongCu,
+                             @RequestParam int soLuong, HttpSession session, Model model, RedirectAttributes flash) {
+        var user = DangNhapController.layNguoiDungDangNhap(session, model);
+        if (user == null) return "redirect:/login";
+        if (!user.isQuanLy()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        try {
+            hoaDonService.suaSoLuongDonCod(id, idDong, soLuongCu, soLuong, user.getId());
+            flash.addFlashAttribute("success", "Đã cập nhật số lượng, tồn kho và tổng thanh toán.");
+        } catch (IllegalArgumentException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+        } catch (DataAccessException e) {
+            flash.addFlashAttribute("error", "Chưa cập nhật được số lượng. Vui lòng tải lại hóa đơn.");
+        }
         return "redirect:/quan-ly/hoa-don/" + id;
     }
 

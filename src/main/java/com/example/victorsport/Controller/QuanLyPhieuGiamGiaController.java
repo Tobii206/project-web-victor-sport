@@ -86,13 +86,15 @@ public class QuanLyPhieuGiamGiaController {
                       @Valid @ModelAttribute PhieuGiamGiaForm form, BindingResult loiForm,
                       @RequestParam Map<String,String> data, HttpSession session, Model model, RedirectAttributes flash,jakarta.servlet.http.HttpServletRequest request) {
         if (quanLy(session, model) == null) return "redirect:/login";
-        boolean freeship=request.getRequestURI().endsWith("/luu-freeship");
-        form.setAp_dung_van_chuyen(freeship?1:0);
+        boolean duongDanVanChuyen = request.getRequestURI().endsWith("/luu-freeship");
+        boolean freeship = data.containsKey("ap_dung_van_chuyen")
+                ? Integer.valueOf(1).equals(form.getAp_dung_van_chuyen()) : duongDanVanChuyen;
+        if (!data.containsKey("ap_dung_van_chuyen")) form.setAp_dung_van_chuyen(freeship ? 1 : 0);
         if(!freeship) form.setChi_ap_dung_ha_noi(0);
         try {
             KiemTraForm.kiemTra(loiForm);
-            if(id!=null && laFreeship(service.lay(id))!=freeship)
-                throw new IllegalArgumentException("Vui lòng mở đúng màn hình của loại phiếu cần sửa.");
+            if (id != null && !data.containsKey("ap_dung_van_chuyen") && laFreeship(service.lay(id)) != duongDanVanChuyen)
+                throw new IllegalArgumentException("Vui lòng chọn loại phiếu trước khi lưu.");
             int ketQua = service.luu(id, form);
             flash.addFlashAttribute("success", freeship?"Đã lưu phiếu giảm giá vận chuyển.":"Đã lưu phiếu giảm tiền hàng.");
             return "redirect:/quan-ly/phieu-giam-gia/" + ketQua;

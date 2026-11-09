@@ -59,7 +59,9 @@ public class GhnService {
             log.warn("GHN {}: HTTP {}, code {}",duongDan,e.getStatusCode().value(),maLoi);
             if(e.getResponseBodyAsString().contains("FROM_ADDRESS_CONVERT_FAIL"))
                 throw new IllegalStateException("Địa chỉ kho gửi chưa hợp lệ trên GHN. Vui lòng liên hệ cửa hàng.");
-            if(e.getResponseBodyAsString().contains("TO_ADDRESS_CONVERT_FAIL") || e.getResponseBodyAsString().contains("TO_ADDRESS_CONFLICT"))
+            if(e.getResponseBodyAsString().contains("TO_ADDRESS_CONFLICT"))
+                throw new IllegalStateException("GHN báo số nhà hoặc tên đường không khớp với phường/xã đã chọn. Vui lòng kiểm tra địa chỉ chi tiết và phường/xã.");
+            if(e.getResponseBodyAsString().contains("TO_ADDRESS_CONVERT_FAIL"))
                 throw new IllegalStateException("Địa chỉ nhận chưa khớp danh mục GHN. Vui lòng chọn lại tỉnh và phường/xã.");
             if(e.getStatusCode().value()==401 || e.getStatusCode().value()==403)
                 throw new IllegalStateException("GHN chưa chấp nhận thông tin cửa hàng. Vui lòng liên hệ cửa hàng để kiểm tra kết nối.");
