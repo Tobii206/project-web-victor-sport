@@ -74,3 +74,25 @@
     .product-color-photo-editor[open] { flex-basis: 100%; }
     .product-color-sizes .table th, .product-color-sizes .table td { padding-inline: 9px; }
 }
+
+.variant-gender-group + .variant-gender-group { border-top: 1px solid #e1e8f2; }
+.variant-gender-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 0; padding: 14px 18px; background: #f8fafc; color: #294765; font-weight: 700; cursor: pointer; list-style: none; }
+.variant-gender-heading::-webkit-details-marker { display: none; }
+.variant-gender-heading::marker { content: ''; }
+.variant-gender-heading:hover { background: #f0f5fb; }
+.variant-gender-heading:focus-visible { outline: 2px solid #edaa79; outline-offset: -3px; }
+.variant-gender-arrow { width: 20px; height: 20px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; transition: transform .18s ease; }
+.variant-gender-group[open] > .variant-gender-heading { border-bottom: 1px solid #e7edf4; }
+.variant-gender-group[open] > .variant-gender-heading .variant-gender-arrow { transform: rotate(180deg); }
+.variant-gender-table { overflow-x: auto; }
+@media (prefers-reduced-motion: reduce) { .variant-gender-arrow { transition: none; } }
+
+#form-mau-giay { scroll-margin-top: 140px; }
+
+.quick-variant-size { display: flex; flex-direction: column; gap: 10px; padding: 10px; min-width: 105px; max-width: 175px; flex: 1 1 125px; align-self: start; border: 1px solid #dce6f3; border-radius: 10px; background: #fff; }
+.quick-variant-sizes .quick-variant-choice { margin: 0; border: 0; padding: 3px; font-weight: 600; }
+.quick-variant-size:has(input[name="sizes"]:checked) { border-color: #efa36c; background: #fffaf5; }
+.quick-variant-stock { display: grid; gap: 7px; }
+.quick-variant-stock[hidden] { display: none; }
+.quick-variant-sizes .quick-variant-stock label { display: block; padding: 0; border: 0; background: transparent; color: #60748d; }
+.quick-variant-stock .input { min-width: 0; }

@@ -23,7 +23,7 @@ public class ThanhToanForm {
     private Integer idDiaChi;
     public Integer getIdDiaChi(){return idDiaChi;}
     public void setIdDiaChi(Integer idDiaChi){this.idDiaChi=idDiaChi;}
-    @Pattern(regexp = "COD|QR", message = "Vui lòng chọn phương thức thanh toán hợp lệ.")
+    @Pattern(regexp = "COD|QR|VNPAY|QR_DEMO", message = "Vui lòng chọn phương thức thanh toán hợp lệ.")
     @NotBlank(message = "Vui lòng chọn phương thức thanh toán.")
     private String phuongThuc = "COD";
 

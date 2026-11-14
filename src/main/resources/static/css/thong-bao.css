@@ -28,3 +28,7 @@
 
 .vs-live-status { position: fixed; bottom: 18px; left: 18px; z-index: 1600; margin: 0; max-width: min(440px,calc(100vw - 36px)); padding: 12px 16px; border: 1px solid #f2d5b8; border-radius: 10px; background: #fff6ed; color: #8c4d21; font-size: 15px; box-shadow: 0 8px 28px #142b5212; }
 .vs-live-status[hidden] { display: none; }
+.vs-field-error { display: block; width: 100%; margin: 5px 0 0; color: #b42332; font-size: 13px; line-height: 1.5; font-weight: 500; overflow-wrap: anywhere; }
+.vs-field-error[hidden] { display: none; }
+input.vs-field-invalid, select.vs-field-invalid, textarea.vs-field-invalid { border-color: #d14343 !important; }
+input.vs-field-invalid:focus, select.vs-field-invalid:focus, textarea.vs-field-invalid:focus { box-shadow: 0 0 0 3px #d143431a !important; }

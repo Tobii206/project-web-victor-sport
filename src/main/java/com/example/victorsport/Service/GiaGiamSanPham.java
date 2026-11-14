@@ -52,6 +52,10 @@ public class GiaGiamSanPham {
 
     public static void themGiaDanhSach(JdbcTemplate jdbc, List<Map<String,Object>> ds,
                                       Integer kichThuoc, Integer mauSac, boolean conHang) {
+        themGiaDanhSach(jdbc,ds,kichThuoc,mauSac,conHang,null);
+    }
+    public static void themGiaDanhSach(JdbcTemplate jdbc, List<Map<String,Object>> ds,
+                                      Integer kichThuoc, Integer mauSac, boolean conHang,String doiTuong) {
         for (var sp : ds) {
             String sql = """
                     SELECT ct.id,ct.gia_ban FROM chi_tiet_san_pham ct
@@ -65,6 +69,9 @@ public class GiaGiamSanPham {
             if (kichThuoc != null) { sql += " AND ct.id_kich_thuoc=?"; args.add(kichThuoc); }
             if (mauSac != null) { sql += " AND ct.id_mau_sac=?"; args.add(mauSac); }
             if (conHang) sql += " AND ct.so_luong>0";
+            if(QuanLySanPhamService.doiTuongHopLe(doiTuong)) {
+                sql += " AND (ct.doi_tuong=? OR ct.doi_tuong='UNISEX')"; args.add(doiTuong);
+            }
             BigDecimal thapNhat = null;
             for (var mau : jdbc.queryForList(sql + " ORDER BY ct.id", args.toArray())) {
                 themGia(jdbc, mau);

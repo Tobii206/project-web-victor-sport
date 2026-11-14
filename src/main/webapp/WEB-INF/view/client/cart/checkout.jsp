@@ -63,10 +63,12 @@
                 <div class="checkout-field">
                     <label class="checkout-sr-only" for="paymentMethodId">Phương thức thanh toán</label>
                     <select id="paymentMethodId" name="phuongThuc" required>
-                        <option value="COD" ${phuongThucDaChon != 'QR' ? 'selected' : ''}>Thanh toán khi nhận hàng (COD)</option>
-                        <option value="QR" ${phuongThucDaChon == 'QR' ? 'selected' : ''}>Chuyển khoản QR</option>
+                        <option value="COD" ${phuongThucDaChon != 'QR' and phuongThucDaChon != 'VNPAY' and phuongThucDaChon != 'QR_DEMO' ? 'selected' : ''}>Thanh toán khi nhận hàng (COD)</option>
+                        <c:if test="${qrDemoDangBat}"><option value="QR_DEMO" ${phuongThucDaChon == 'QR_DEMO' ? 'selected' : ''}>Thanh toán QR</option></c:if>
+                        <c:if test="${not qrDemoDangBat}"><option value="QR" ${phuongThucDaChon == 'QR' ? 'selected' : ''}>Chuyển khoản QR</option></c:if>
+                        <c:if test="${vnpaySanSang}"><option value="VNPAY" ${phuongThucDaChon == 'VNPAY' ? 'selected' : ''}>VNPAY Sandbox — thanh toán thử nghiệm</option></c:if>
                     </select>
-                    <p class="checkout-payment-note">Với QR, mã chuyển khoản sẽ hiển thị sau khi xác nhận đặt hàng.</p>
+                    <c:if test="${not qrDemoDangBat}"><p class="checkout-payment-note">Với QR, mã chuyển khoản hiển thị sau khi đặt hàng.</p></c:if>
                 </div>
                 <div class="checkout-submit-row"><button class="store-button" type="submit" id="nutDatHangOnline" ${dungGhn and empty baoGiaGhn ? 'disabled' : ''}>Xác nhận đặt hàng <span aria-hidden="true">→</span></button><p>Vui lòng kiểm tra đúng số điện thoại và địa chỉ nhận hàng.</p></div>
             </form>
@@ -80,7 +82,7 @@
                             <c:when test="${not empty dong.anh}"><img class="checkout-product-image" src="<c:out value='${dong.anh}'/>" alt="<c:out value='${dong.ten_san_pham}'/>" onerror="this.hidden=true; this.nextElementSibling.hidden=false;"><span class="checkout-no-image" hidden>Chưa có ảnh</span></c:when>
                             <c:otherwise><span class="checkout-no-image">Chưa có ảnh</span></c:otherwise>
                         </c:choose>
-                        <div class="checkout-product-info"><h3><c:out value="${dong.ten_san_pham}"/></h3><p><c:out value="${dong.ten_kich_thuoc}"/> · <c:out value="${dong.ten_mau_sac}"/> · <c:out value="${dong.ten_form_chan}"/></p><div class="checkout-product-price"><span>SL: ${dong.so_luong_mua}</span><strong><fmt:formatNumber value="${dong.thanh_tien_goc}"/> đ</strong></div></div>
+                        <div class="checkout-product-info"><h3><c:out value="${dong.ten_san_pham}"/></h3><p><c:out value="${dong.ten_gioi_tinh}"/> · <c:out value="${dong.ten_kich_thuoc}"/> · <c:out value="${dong.ten_mau_sac}"/> · <c:out value="${dong.ten_form_chan}"/></p><div class="checkout-product-price"><span>SL: ${dong.so_luong_mua}</span><strong><fmt:formatNumber value="${dong.thanh_tien_goc}"/> đ</strong></div></div>
                     </article>
                 </c:forEach>
             </div>

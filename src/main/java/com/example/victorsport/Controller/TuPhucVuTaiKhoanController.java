@@ -58,15 +58,47 @@ public class TuPhucVuTaiKhoanController {
         f.addFlashAttribute("duLieu",form);return "redirect:/tai-khoan/chinh-sua";
     }
     @GetMapping("/tai-khoan/doi-mat-khau")
-    public String doi(HttpSession s,HttpServletResponse r,Model m) {
-        if(khach(s)==null)return "redirect:/login";return trang("doi-mat-khau","Đổi mật khẩu",s,r,m);
+    public String doi(@RequestParam(defaultValue="false") boolean nhapLai, HttpSession s,HttpServletResponse r,Model m) {
+        if(idDoiMatKhau(s)==null)return "redirect:/login";
+        if(nhapLai) s.removeAttribute("doiMatKhauCho");
+        var cho=yeuCauDoi(s);
+        m.addAttribute("dangXacNhanDoiMatKhau",cho!=null);
+        m.addAttribute("emailDoiMatKhau",cho==null?"":cho.email());
+        m.addAttribute("guiEmailSanSang",datLai.sanSang());
+        return trang("doi-mat-khau","Đổi mật khẩu",s,r,m);
+    }
+    private Integer idDoiMatKhau(HttpSession s) {
+        return s.getAttribute(DangNhapController.KHOA_NGUOI_DUNG_DANG_NHAP) instanceof com.example.victorsport.Dto.NguoiDungDangNhap nv?nv.getId():khach(s);
+    }
+    private boolean laNhanVien(HttpSession s) {
+        return s.getAttribute(DangNhapController.KHOA_NGUOI_DUNG_DANG_NHAP) instanceof com.example.victorsport.Dto.NguoiDungDangNhap;
+    }
+    private DatLaiMatKhauService.YeuCauDoiMatKhau yeuCauDoi(HttpSession s) {
+        if (s.getAttribute("doiMatKhauCho") instanceof DatLaiMatKhauService.YeuCauDoiMatKhau cho
+                && Objects.equals(idDoiMatKhau(s),cho.id()) && laNhanVien(s)==cho.nhanVien()) return cho;
+        return null;
     }
     @PostMapping("/tai-khoan/doi-mat-khau")
     public String doi(@RequestParam String matKhauCu,@RequestParam String matKhau,@RequestParam String nhapLai,
                       @RequestParam(required=false) String csrfTaiKhoan,HttpSession s,RedirectAttributes f) {
-        Integer id=khach(s);if(id==null)return "redirect:/login";kiemTraToken(s,csrfTaiKhoan);
-        try {service.doiMatKhau(id,matKhauCu,matKhau,nhapLai);s.invalidate();f.addFlashAttribute("success","Đã đổi mật khẩu. Vui lòng đăng nhập lại.");return "redirect:/login";}
+        Integer id=idDoiMatKhau(s);if(id==null)return "redirect:/login";kiemTraToken(s,csrfTaiKhoan);
+        try {
+            s.setAttribute("doiMatKhauCho",datLai.guiMaDoiMatKhau(id,laNhanVien(s),matKhauCu,matKhau,nhapLai));
+            f.addFlashAttribute("success","Đã gửi mã xác nhận đổi mật khẩu tới email của tài khoản. Mã có hiệu lực 10 phút.");
+        }
         catch(IllegalArgumentException e) {f.addFlashAttribute("error",e.getMessage());}
+        catch(DataAccessException e) {f.addFlashAttribute("error","Chưa đổi được mật khẩu. Vui lòng thử lại.");}
+        return "redirect:/tai-khoan/doi-mat-khau";
+    }
+    @PostMapping("/tai-khoan/doi-mat-khau/xac-nhan")
+    public String xacNhanDoi(@RequestParam String ma,@RequestParam(required=false) String csrfTaiKhoan,HttpSession s,RedirectAttributes f) {
+        if(idDoiMatKhau(s)==null)return "redirect:/login";
+        kiemTraToken(s,csrfTaiKhoan);
+        try {
+            if(!datLai.xacNhanDoiMatKhau(yeuCauDoi(s),ma)) throw new IllegalArgumentException("Mã không đúng, đã hết hạn hoặc yêu cầu đổi mật khẩu không còn hiệu lực.");
+            s.invalidate();f.addFlashAttribute("success","Đã xác nhận email và đổi mật khẩu. Vui lòng đăng nhập lại.");
+            return "redirect:/login";
+        } catch(IllegalArgumentException e) {f.addFlashAttribute("error",e.getMessage());}
         catch(DataAccessException e) {f.addFlashAttribute("error","Chưa đổi được mật khẩu. Vui lòng thử lại.");}
         return "redirect:/tai-khoan/doi-mat-khau";
     }

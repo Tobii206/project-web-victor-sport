@@ -65,10 +65,13 @@ public class BanHangTaiQuayService {
                 "QR",tinhTongKet(gio,phieu).getTongThanhToan(),f.tinh(),f.xa());
     }
 
-    public List<LuaChonSanPham> timSanPham(String tuKhoa) {
+    public List<LuaChonSanPham> timSanPham(String tuKhoa) { return timSanPham(tuKhoa,null); }
+
+    public List<LuaChonSanPham> timSanPham(String tuKhoa,String doiTuong) {
+        if(doiTuong!=null && !QuanLySanPhamService.doiTuongHopLe(doiTuong))throw new IllegalArgumentException("Giới tính không hợp lệ.");
         String tuKhoaTimKiem = "%" + (tuKhoa == null ? "" : tuKhoa.trim()) + "%";
         String cauLenhSql = """
-                SELECT TOP 50 ct.id AS id_chi_tiet_san_pham, sp.ma_san_pham, sp.ten_san_pham, th.ten_thuong_hieu,
+                SELECT TOP 50 ct.doi_tuong, ct.id AS id_chi_tiet_san_pham, sp.ma_san_pham, sp.ten_san_pham, th.ten_thuong_hieu,
                        ms.ten_mau_sac, kt.ten_kich_thuoc, ISNULL(ct.so_luong, 0) AS so_luong,
                        ct.gia_ban AS gia_ban,
                        (SELECT TOP 1 a.duong_dan_anh FROM anh_chi_tiet_san_pham a
@@ -86,7 +89,8 @@ public class BanHangTaiQuayService {
                   AND ISNULL(sp.trang_thai_kinh_doanh, 1) = 1
                   AND (sp.ten_san_pham COLLATE Vietnamese_100_CI_AI LIKE ? OR sp.ma_san_pham LIKE ?
                        OR th.ten_thuong_hieu COLLATE Vietnamese_100_CI_AI LIKE ? OR ct.ma_chi_tiet_san_pham = ?)
-                ORDER BY sp.ten_san_pham, kt.gia_tri_kich_thuoc
+                AND (?='' OR ct.doi_tuong=?)
+                ORDER BY sp.ten_san_pham, ct.doi_tuong, kt.gia_tri_kich_thuoc
                 """;
         var ds = jdbcTemplate.query(cauLenhSql, (ketQua, soDong) -> new LuaChonSanPham(
                 ketQua.getInt("id_chi_tiet_san_pham"),
@@ -98,14 +102,14 @@ public class BanHangTaiQuayService {
                 ketQua.getInt("so_luong"),
                 ketQua.getBigDecimal("gia_ban"),
                 ketQua.getString("anh_dai_dien")
-        ), tuKhoaTimKiem, tuKhoaTimKiem, tuKhoaTimKiem, tuKhoa == null ? "" : tuKhoa.trim());
+        ).voiDoiTuong(ketQua.getString("doi_tuong")), tuKhoaTimKiem, tuKhoaTimKiem, tuKhoaTimKiem, tuKhoa == null ? "" : tuKhoa.trim(),java.util.Objects.toString(doiTuong,""),java.util.Objects.toString(doiTuong,""));
         for (var mau : ds) mau.setGiaSauGiam(GiaGiamSanPham.giaSauGiam(jdbcTemplate, mau.getIdChiTietSanPham(), mau.getGiaBan()));
         return ds;
     }
 
     public SanPhamTrongGio taoSanPhamTrongGio(Integer idChiTietSanPham, Integer soLuong) {
         String cauLenhSql = """
-                SELECT ct.id AS id_chi_tiet_san_pham, sp.ma_san_pham, sp.ten_san_pham, ms.ten_mau_sac,
+                SELECT ct.doi_tuong, ct.id AS id_chi_tiet_san_pham, sp.ma_san_pham, sp.ten_san_pham, ms.ten_mau_sac,
                        kt.ten_kich_thuoc, ISNULL(ct.so_luong, 0) AS so_luong,
                        ct.gia_ban AS gia_ban
                 FROM chi_tiet_san_pham ct
@@ -132,7 +136,7 @@ public class BanHangTaiQuayService {
                     soLuongHopLe,
                     soLuongTon,
                     ketQua.getBigDecimal("gia_ban")
-            );
+            ).voiDoiTuong(ketQua.getString("doi_tuong"));
         }, idChiTietSanPham);
         if (danhSach.isEmpty()) {
             return null;
@@ -537,7 +541,7 @@ public class BanHangTaiQuayService {
     public GioHangTaiQuay layGioHangDonCho(Integer idDonCho, Integer idNhanVien) {
         layDonCho(idDonCho, idNhanVien);
         List<SanPhamTrongGio> danhSach = jdbcTemplate.query("""
-                SELECT ct.id, sp.ma_san_pham, sp.ten_san_pham, ms.ten_mau_sac, kt.ten_kich_thuoc,
+                SELECT ct.id, ct.doi_tuong, sp.ma_san_pham, sp.ten_san_pham, ms.ten_mau_sac, kt.ten_kich_thuoc,
                        hdct.so_luong, ISNULL(ct.so_luong, 0) AS so_luong_ton, hdct.don_gia
                 FROM hoa_don_chi_tiet hdct
                 JOIN chi_tiet_san_pham ct ON ct.id = hdct.id_chi_tiet_san_pham
@@ -550,7 +554,7 @@ public class BanHangTaiQuayService {
                 ketQua.getInt("id"), ketQua.getString("ma_san_pham"), ketQua.getString("ten_san_pham"),
                 ketQua.getString("ten_mau_sac"), ketQua.getString("ten_kich_thuoc"),
                 ketQua.getInt("so_luong"), ketQua.getInt("so_luong_ton"), ketQua.getBigDecimal("don_gia")
-        ), idDonCho);
+        ).voiDoiTuong(ketQua.getString("doi_tuong")), idDonCho);
         GioHangTaiQuay gioHang = new GioHangTaiQuay();
         gioHang.getDanhSachSanPham().addAll(danhSach);
         return gioHang;
@@ -734,6 +738,8 @@ public class BanHangTaiQuayService {
             this(idKhachHang,tenKhachHang,soDienThoai,email,diaChi,idPhuongThucThanhToan,ghiChu,idPhieuGiamGia,null);
         }
         public YeuCauThanhToan(Integer idKhachHang, String tenKhachHang, String soDienThoai, String email, String diaChi, Integer idPhuongThucThanhToan, String ghiChu, Integer idPhieuGiamGia, BigDecimal tienKhachDaThanhToan) {
+            if (ghiChu != null && ghiChu.length() > 255)
+                throw new IllegalArgumentException("Ghi chú đơn hàng tối đa 255 ký tự.");
             this.idKhachHang = idKhachHang;
             this.tenKhachHang = tenKhachHang;
             this.soDienThoai = soDienThoai;

@@ -117,4 +117,29 @@ class FormValidationTests {
                 .andExpect(redirectedUrl("/pos")).andExpect(flash().attributeExists("loiThemKhachHang"));
         verifyNoInteractions(service);
     }
+
+    @Test void thieuTungDanhMucCuaMauKhongDuocLuu() throws Exception {
+        var service = mock(QuanLySanPhamService.class);
+        var mvc = MockMvcBuilders.standaloneSetup(new QuanLySanPhamController(service)).build();
+        for (String field : new String[]{"id_mau_sac", "id_kich_thuoc", "id_form_chan"}) {
+            var request = post("/quan-ly/san-pham/1/mau/luu").session(admin())
+                    .param("trang_thai", "1").param("so_luong", "5");
+            for (String other : new String[]{"id_mau_sac", "id_kich_thuoc", "id_form_chan"}) {
+                if (!field.equals(other)) request.param(other, "1");
+            }
+            mvc.perform(request).andExpect(redirectedUrl("/quan-ly/san-pham/1#mau-giay"))
+                    .andExpect(flash().attributeExists("error", "mauForm"));
+        }
+        verifyNoInteractions(service);
+    }
+
+    @Test void ghiChuDonChoQuaDaiKhongDuocGhi() throws Exception {
+        var service = mock(BanHangTaiQuayService.class);
+        MockMvcBuilders.standaloneSetup(new BanHangTaiQuayController(service)).build()
+                .perform(post("/pos/checkout").session(admin()).param("hanhDong", "luu-don-cho")
+                        .param("note", "a".repeat(256)))
+                .andExpect(redirectedUrl("/pos"))
+                .andExpect(flash().attribute("error", "Ghi chú đơn hàng tối đa 255 ký tự."));
+        verifyNoInteractions(service);
+    }
 }

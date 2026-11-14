@@ -1,3 +1,168 @@
+// Kiểm tra các ô nhập trên cả trang quản lý và trang khách hàng.
+(function () {
+    'use strict';
+    if (window.VictorKiemTraDuLieu) return;
+    var states = new WeakMap(), nextId = 0;
+    var moneyNames = new Set(['gia_ban', 'gia_tri_giam_gia', 'so_tien_giam_toi_da', 'hoa_don_toi_thieu', 'paidAmount']);
+    var lengths = {tuKhoa: 255, keyword: 255, note: 255, email: 100, emailMoi: 100,
+        matKhau: 255, matKhauCu: 255};
+    var requiredChoices = new Set(['trang_thai', 'trang_thai_kinh_doanh', 'loai_giam_gia',
+        'loai_phieu_giam_gia', 'ap_dung_van_chuyen', 'chi_ap_dung_ha_noi', 'paymentMethodId']);
+    function state(input) {
+        if (!states.has(input)) states.set(input, {message: '', shown: false});
+        return states.get(input);
+    }
+    function named(form, name) { return form && form.elements.namedItem(name); }
+    function label(input) {
+        var group = input.closest('fieldset');
+        var title = input.name === 'sizes' && group ? group.querySelector('legend') : input.labels && input.labels[0];
+        return (title ? title.textContent : input.getAttribute('aria-label') || 'Thông tin')
+            .replace(/\*/g, '').replace(/\s+/g, ' ').trim();
+    }
+    function configure(input) {
+        if (input.tagName === 'SELECT' && input.form.method === 'post' && requiredChoices.has(input.name)) input.required = true;
+        if (lengths[input.name] && !input.hasAttribute('maxlength')) input.maxLength = lengths[input.name];
+        if (input.type === 'tel') {
+            input.inputMode = 'numeric';
+            if (!input.hasAttribute('pattern')) input.pattern = '0[0-9]{9}';
+            if (!input.hasAttribute('maxlength')) input.maxLength = 10;
+        }
+        if (input.type === 'number' && !input.hasAttribute('max'))
+            input.max = moneyNames.has(input.name) ? '9999999999999999.99' : '2147483647';
+        if (input.type === 'date') {
+            if (!input.min) input.min = '0001-01-01';
+            if (input.name === 'ngay_sinh' || input.name === 'ngaySinh') {
+                var today = new Date();
+                input.max = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0')
+                    + '-' + String(today.getDate()).padStart(2, '0');
+            }
+        }
+        if (input.name === 'sizes' && input.form.hasAttribute('data-min-checked')) {
+            var boxes = Array.from(input.form.querySelectorAll('input[name="sizes"]:enabled'));
+            input.required = input === boxes[0] && !boxes.some(function (box) { return box.checked; });
+        }
+    }
+    function message(input) {
+        var value = input.value, title = label(input), form = input.form;
+        if (input.required && !/^(radio|checkbox|file)$/.test(input.type) && !value.trim())
+            return (input.tagName === 'SELECT' ? 'Vui lòng chọn ' : 'Vui lòng nhập ') + title.toLowerCase() + '.';
+        if (input.type === 'checkbox' && input.required && !input.checked) return 'Vui lòng chọn ít nhất một size.';
+        if (input.type === 'password' && value) {
+            if (!value.trim()) return 'Mật khẩu không được chỉ chứa khoảng trắng.';
+            if (input.autocomplete === 'new-password' && !form.action.endsWith('/login')
+                && new TextEncoder().encode(value).length > 72)
+                return 'Mật khẩu tối đa 72 byte. Ký tự có dấu có thể chiếm nhiều byte.';
+            if (input.name === 'nhapLai' && named(form, 'matKhau') && value !== named(form, 'matKhau').value)
+                return 'Mật khẩu nhập lại không khớp.';
+            if (input.name === 'matKhau' && named(form, 'matKhauCu') && value === named(form, 'matKhauCu').value)
+                return 'Mật khẩu mới phải khác mật khẩu hiện tại.';
+        }
+        if (value && input.type === 'email' && !/^[a-z0-9]+([._%+\-][a-z0-9]+)*@gmail\.com$/i.test(value.trim()))
+            return 'Email phải có dạng ten@gmail.com và tối đa 100 ký tự.';
+        if (value && input.name === 'ten_tai_khoan' && value.includes('@')
+            && !/^[a-z0-9]+([._%+\-][a-z0-9]+)*@gmail\.com$/i.test(value.trim()))
+            return 'Nếu dùng email làm tên tài khoản, hãy nhập email có dạng ten@gmail.com.';
+        if (input.maxLength >= 0 && value.length > input.maxLength) return title + ' tối đa ' + input.maxLength + ' ký tự.';
+        if (value && input.minLength > 0 && value.length < input.minLength)
+            return title + ' cần ít nhất ' + input.minLength + ' ký tự.';
+        if (value && moneyNames.has(input.name) && !/^[0-9]{1,16}(\.[0-9]{1,2})?$/.test(value))
+            return title + ' phải là số không âm, tối đa 16 chữ số và 2 chữ số thập phân.';
+        if (input.name === 'gia_tri_giam_gia' && value) {
+            if (Number(value) <= 0) return 'Giá trị giảm phải lớn hơn 0.';
+            var kind = named(form, 'loai_giam_gia') || named(form, 'loai_phieu_giam_gia');
+            if (kind && kind.value === '0' && Number(value) > 100) return 'Giảm theo phần trăm không được vượt quá 100%.';
+        }
+        var start = named(form, 'ngay_bat_dau'), end = named(form, 'ngay_ket_thuc');
+        if (input === end && start && start.value && value && value < start.value)
+            return 'Ngày kết thúc phải từ ngày bắt đầu trở đi.';
+        start = named(form, 'tuNgay');end = named(form, 'denNgay');
+        if (input === end && start && start.value && value && value < start.value)
+            return 'Đến ngày phải từ Từ ngày trở đi.';
+        if (input.type === 'file' && input.files.length && /image\/(jpeg|png)/.test(input.accept)) {
+            var file = input.files[0];
+            if (!/\.(jpe?g|png)$/i.test(file.name) || !file.size || file.size > 5 * 1024 * 1024)
+                return 'Chọn ảnh JPG hoặc PNG có dung lượng lớn hơn 0 và tối đa 5 MB.';
+        }
+        var validity = input.validity;
+        if (validity.valueMissing) return input.type === 'file' ? 'Vui lòng chọn ảnh.' : 'Vui lòng chọn ' + title.toLowerCase() + '.';
+        if (validity.badInput || validity.typeMismatch) return title + ' chưa đúng định dạng.';
+        if (validity.patternMismatch) return input.type === 'tel' ? 'Số điện thoại phải đủ 10 số và bắt đầu bằng 0.'
+            : input.title || title + ' chưa đúng định dạng.';
+        if (validity.tooShort) return title + ' cần ít nhất ' + input.minLength + ' ký tự.';
+        if (validity.rangeUnderflow) return title + ' phải từ ' + input.min + ' trở lên.';
+        if (validity.rangeOverflow) return input.name === 'ngay_sinh' || input.name === 'ngaySinh'
+            ? 'Ngày sinh không được ở tương lai.' : title + ' không được vượt quá ' + input.max + '.';
+        if (validity.stepMismatch) return input.step === '1' || !input.step
+            ? title + ' phải là số nguyên.' : title + ' chỉ nhận tối đa 2 chữ số thập phân.';
+        return '';
+    }
+    function display(input, text) {
+        var info = state(input);
+        input.classList.toggle('vs-field-invalid', !!text);
+        if (text) input.setAttribute('aria-invalid', 'true');
+        else input.removeAttribute('aria-invalid');
+        if (!info.error && !text) return;
+        if (!info.error || !info.error.isConnected) {
+            var error = document.createElement('small');
+            error.id = 'vs-field-error-' + (++nextId);error.className = 'vs-field-error';
+            var anchor = input.type === 'checkbox' ? input.closest('fieldset') || input : input;
+            anchor.insertAdjacentElement('afterend', error);
+            var described = (input.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
+            if (info.error) described = described.filter(function (id) { return id !== info.error.id; });
+            described.push(error.id);input.setAttribute('aria-describedby', described.join(' '));
+            info.error = error;
+        }
+        info.error.textContent = text;info.error.hidden = !text;
+    }
+    function validate(input, show) {
+        if (!input.matches || !input.matches('input:not([type="hidden"]),select,textarea')) return true;
+        configure(input);
+        var info = state(input);
+        if (info.message && (!input.willValidate || input.validationMessage === info.message)) input.setCustomValidity('');
+        info.message = '';
+        if (!input.willValidate) { if (info.shown) display(input, '');return true; }
+        // Giữ thông báo kiểm tra tiền khách đưa và tải ảnh của từng trang.
+        if (!input.validity.customError) {
+            info.message = message(input);
+            input.setCustomValidity(info.message);
+        }
+        if (show) info.shown = true;
+        if (info.shown) display(input, input.validationMessage);
+        return input.validity.valid;
+    }
+    function validateForm(form, show) {
+        var valid = true;
+        Array.from(form.elements).forEach(function (input) { if (!validate(input, show)) valid = false; });
+        return valid;
+    }
+    function init() { document.querySelectorAll('form').forEach(function (form) { validateForm(form, false); }); }
+    window.VictorKiemTraDuLieu = init;
+    document.addEventListener('invalid', function (event) { validate(event.target, true); }, true);
+    document.addEventListener('focusout', function (event) { if (event.target.form) validate(event.target, true); });
+    function edited(event) { if (event.target.form) validateForm(event.target.form, false); }
+    document.addEventListener('input', edited);
+    document.addEventListener('change', edited);
+    // Cập nhật lại các giá trị được trình duyệt tự điền trước khi kiểm tra HTML.
+    document.addEventListener('click', function (event) {
+        var button = event.target.closest('button,input[type="submit"],input[type="image"]');
+        if (button && button.form && /^(submit|image)$/.test(button.type)
+            && !button.formNoValidate && !button.form.noValidate) validateForm(button.form, false);
+    }, true);
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' && !event.isComposing && event.target.form
+            && event.target.tagName !== 'TEXTAREA' && !event.target.form.noValidate)
+            validateForm(event.target.form, false);
+    }, true);
+    document.addEventListener('submit', function (event) {
+        if (event.target.noValidate || event.submitter && event.submitter.formNoValidate) return;
+        if (validateForm(event.target, true)) return;
+        event.preventDefault();event.stopImmediatePropagation();event.target.reportValidity();
+    }, true);
+    document.addEventListener('vs:du-lieu-da-cap-nhat', init);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once: true});
+    else init();
+})();
+
 (function () {
     'use strict';
     if (window.VictorThaoTacTaiCho) return;
@@ -142,7 +307,17 @@
             if (lichSu && location.href !== dich.href) history.pushState({vsTaiCho: true}, '', dich.pathname + dich.search + (new URL(url, location.href).hash || ''));
             if (!lichSu && dich.search !== location.search) history.replaceState({vsTaiCho: true}, '', dich.pathname + dich.search + location.hash);
             trangDaHienThi = location.pathname + location.search;
-            window.scrollTo({left: x, top: y, behavior: 'instant'});
+            var yeuCau = new URL(url, location.href);
+            var formMau = options.method === 'GET' && /^\/quan-ly\/san-pham\/\d+$/.test(dich.pathname)
+                && yeuCau.hash === '#form-mau-giay' && document.getElementById('form-mau-giay');
+            if (formMau) {
+                var dauTrang = document.querySelector('.topbar');
+                var leTren = (dauTrang ? dauTrang.getBoundingClientRect().height : 0) + 18;
+                var viTriForm = window.scrollY + formMau.getBoundingClientRect().top - leTren;
+                formMau.focus({preventScroll: true});
+                window.scrollTo({left: 0, top: Math.max(0, viTriForm),
+                    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
+            } else window.scrollTo({left: x, top: y, behavior: 'instant'});
         } catch (e) {
             // Không tự gửi lại POST: máy chủ có thể đã ghi dữ liệu trước khi mất kết nối.
             thongBao(options.method === 'POST'
@@ -159,6 +334,17 @@
             thanh.remove();dangGui = false;window.VictorDangThaoTac = false;
         }
     }
+    document.addEventListener('change', function (event) {
+        var size = event.target;
+        if (!size.matches('input[data-ton-theo-size]')) return;
+        var vungTon = document.getElementById(size.getAttribute('aria-controls'));
+        if (!vungTon) return;
+        var oTon = vungTon.querySelector('input');
+        vungTon.hidden = !size.checked;
+        oTon.disabled = !size.checked;
+        size.setAttribute('aria-expanded', String(size.checked));
+        if (size.checked) oTon.focus({preventScroll: true});
+    });
     document.addEventListener('change', function (event) {
         var input = event.target, form = input.form;
         if (!form || !form.hasAttribute('data-tu-luu-anh-mau') || input.type !== 'file' || !input.files.length) return;

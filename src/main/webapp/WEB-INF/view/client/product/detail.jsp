@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/trang-chu.css?v=20261107-balanced">
     <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable">
-    <link rel="stylesheet" href="/css/chi-tiet-san-pham.css?v=20261108-size-guide">
+    <link rel="stylesheet" href="/css/chi-tiet-san-pham.css?v=20261112-gender-1">
 </head>
 <body><%@ include file="/WEB-INF/view/client/layout/header.jsp" %>
 <main class="store-container online-container">
@@ -32,12 +32,15 @@
             </div>
         </section>
         <section class="account-card online-product-info">
-            <p class="eyebrow"><c:out value="${sanPham.ten_thuong_hieu}"/><c:forEach items="${cacDoiTuong}" var="loai"><c:if test="${sanPham.doi_tuong == loai.ma}"> · <c:out value="${loai.ten}"/></c:if></c:forEach></p>
+            <p class="eyebrow"><c:out value="${sanPham.ten_thuong_hieu}"/></p>
             <h1><c:out value="${sanPham.ten_san_pham}"/></h1>
             <p class="subtle">Mã sản phẩm: <c:out value="${sanPham.ma_san_pham}"/></p>
             <p class="online-price"><span id="giaBan"><c:choose><c:when test="${not empty sanPham.gia_ban}"><fmt:formatNumber value="${sanPham.gia_ban}"/> đ</c:when><c:otherwise>Chưa có giá</c:otherwise></c:choose></span> <del id="giaGoc" hidden></del></p>
             <p id="tonKho" class="subtle">${tongTonKho > 0 ? 'Chọn kích thước và màu để xem tồn kho.' : 'Hết hàng'}</p>
             <form method="post" action="/san-pham/${sanPham.id}/chon" id="formChonGiay">
+                <fieldset class="online-gender-picker"><legend>Chọn giới tính</legend><div class="online-gender-options">
+                    <c:forEach items="${cacDoiTuong}" var="loai"><label><input type="radio" name="doiTuong" value="${loai.ma}" required ${gioiTinhDaChon == loai.ma ? 'checked' : ''} ${not gioiTinhCoSan.contains(loai.ma) ? 'disabled' : ''}><span><c:out value="${loai.ten}"/></span></label></c:forEach>
+                </div></fieldset>
                 <fieldset class="online-variants"><legend><span>Kích thước · Màu sắc · Dáng giày</span>
                     <button type="button" id="moHuongDanSize" class="size-guide-button" aria-haspopup="dialog" aria-controls="huongDanSize">Hướng dẫn chọn size</button>
                 </legend>
@@ -48,10 +51,10 @@
                         <c:if test="${empty anhMau}"><c:set var="anhMau" value="/images/giay-mac-dinh.svg"/></c:if>
                         <c:if test="${not fn:startsWith(anhMau, '/') and not fn:startsWith(anhMau, 'http')}"><c:set var="anhMau" value="/${anhMau}"/></c:if>
                         <label class="online-variant">
-                            <input type="radio" name="idPhienBan" value="${pb.id}" data-gia="${pb.gia_sau_giam}" data-gia-goc="${pb.gia_goc}" data-ton="${pb.so_luong}" data-anh="<c:out value='${anhMau}'/>" data-mau="${pb.id_mau_sac}" required
+                            <input type="radio" name="idPhienBan" value="${pb.id}" data-gia="${pb.gia_sau_giam}" data-gia-goc="${pb.gia_goc}" data-ton="${pb.so_luong}" data-anh="<c:out value='${anhMau}'/>" data-mau="${pb.id_mau_sac}" data-gioi-tinh="${pb.doi_tuong}" required
                                 <c:if test="${pb.so_luong <= 0}">disabled</c:if>
-                                <c:if test="${pb.so_luong > 0 and not daChon}">checked<c:set var="daChon" value="true"/></c:if>>
-                            <span><strong><c:out value="${pb.ten_kich_thuoc}"/></strong><small><c:out value="${pb.ten_mau_sac}"/> · <c:out value="${pb.ten_form_chan}"/></small><c:if test="${pb.so_luong <= 0}"><small>Hết hàng</small></c:if></span>
+                                <c:if test="${pb.so_luong > 0 and pb.doi_tuong == gioiTinhDaChon and not daChon}">checked<c:set var="daChon" value="true"/></c:if>>
+                            <span><strong><c:out value="${pb.ten_kich_thuoc}"/></strong><small><c:out value="${pb.ten_gioi_tinh}"/> · <c:out value="${pb.ten_mau_sac}"/> · <c:out value="${pb.ten_form_chan}"/></small><c:if test="${pb.so_luong <= 0}"><small>Hết hàng</small></c:if></span>
                         </label>
                     </c:forEach>
                     </div>
@@ -63,7 +66,7 @@
                     <button class="store-button online-buy-now" name="thaoTac" value="mua" <c:if test="${not daChon}">disabled</c:if>>Mua ngay</button>
                 </div>
             </form>
-            <div class="online-notes"><p>Chọn đúng size và màu trước khi đặt hàng.</p></div>
+            <div class="online-notes"><p>Chọn đúng giới tính, size và màu trước khi đặt hàng.</p></div>
         </section>
     </div>
     <section class="account-card online-description">
@@ -263,6 +266,6 @@
     </div>
 </footer>
 <button type="button" class="back-to-top" id="backToTopBtn" aria-label="Lên đầu trang">↑</button>
-<script src="/js/san-pham-online.js?v=20261108-show-sold-out"></script>
+<script src="/js/san-pham-online.js?v=20261112-gender-20261108-show-sold-out"></script>
 <script src="/js/victor-modern.js?v=20261023-slider-2"></script>
 </body></html>

@@ -3,6 +3,10 @@ package com.example.victorsport.Dto;
 import java.math.BigDecimal;
 
 public class SanPhamTrongGio {
+    private String doiTuong = "UNISEX";
+    public String getDoiTuong() { return doiTuong; }
+    public SanPhamTrongGio voiDoiTuong(String ma) { doiTuong = ma == null ? "UNISEX" : ma; return this; }
+    public String getTenGioiTinh() { return switch(doiTuong) { case "NAM" -> "Nam"; case "NU" -> "Nữ"; default -> "Unisex"; }; }
     private Integer idChiTietSanPham;
     private String maSanPham;
     private String tenSanPham;

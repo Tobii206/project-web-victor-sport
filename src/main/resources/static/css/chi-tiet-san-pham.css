@@ -97,3 +97,14 @@
 .size-guide-panel .size-table tbody tr:last-child > * { border-bottom: 0; }
 .size-guide-source { margin: 9px 0 0; font-size: 14px; }
 .size-guide-source a { color: #19345a; text-decoration: underline; }
+
+.online-gender-picker { border: 0; padding: 0; margin: 0 0 22px; min-width: 0; }
+.online-gender-picker legend { padding: 0; margin-bottom: 12px; font-weight: 650; }
+.online-gender-options { display: flex; flex-wrap: wrap; gap: 10px; }
+.online-gender-options label { position: relative; cursor: pointer; }
+.online-gender-options input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.online-gender-options span { display: block; min-width: 86px; text-align: center; padding: 11px 20px; border: 1px solid #dfe6f0; background: #fff; border-radius: 10px; font-weight: 600; }
+.online-gender-options input:checked + span { border-color: #f17638; background: #fff3e9; color: #bc5c22; box-shadow: 0 0 0 1px #f17638; }
+.online-gender-options input:disabled + span { opacity: .4; background: #f5f7fa; cursor: not-allowed; }
+.online-gender-options input:focus-visible + span { outline: 3px solid #ffd3b3; outline-offset: 3px; }
+.online-variant[hidden] { display: none; }

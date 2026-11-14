@@ -302,19 +302,36 @@ public class HoaDonService {
             FROM giao_dich_thanh_toan WHERE id_hoa_don=? AND ISNULL(xoa_mem,0)=0
             """,hd.get("id"));
         BigDecimal daThu=ds.isEmpty()?BigDecimal.ZERO:(BigDecimal)ds.get(0).get("da_thu");
-        hd.put("da_thu",daThu);hd.put("phuong_thuc",((Number)hd.get("loai_don")).intValue()!=1?"Tại quầy":(laCod(((Number)hd.get("id")).intValue(),hd)?"COD":"QR / chuyển khoản"));
+        hd.put("vnpay",laVnpay(((Number)hd.get("id")).intValue()));
+        hd.put("qr_demo",laQrDemo(((Number)hd.get("id")).intValue()));
+        hd.put("da_thu",daThu);hd.put("phuong_thuc",((Number)hd.get("loai_don")).intValue()!=1?"Tại quầy":(laCod(((Number)hd.get("id")).intValue(),hd)?"COD":(Boolean.TRUE.equals(hd.get("qr_demo"))?"Thanh toán QR":(Boolean.TRUE.equals(hd.get("vnpay"))?"VNPAY Sandbox":"QR / chuyển khoản"))));
         BigDecimal canThu = (BigDecimal) hd.get("tong_tien_sau_giam");
         hd.put("da_thanh_toan", daThu.compareTo(canThu) >= 0 && (canThu.signum() > 0 || hd.get("ngay_thanh_toan") != null));
         hd.put("co_thanh_toan",daThu.signum()>0);
+        if(Boolean.TRUE.equals(hd.get("qr_demo")) && hd.get("ghi_chu") instanceof String note
+                && (note.contains("QR DEMO") || note.equals("QR mô phỏng") || note.equals("Chờ thanh toán online")))
+            hd.put("ghi_chu",Boolean.TRUE.equals(hd.get("da_thanh_toan"))?"Đã thanh toán online":"Chờ thanh toán online");
     }
     private boolean laCod(int id,Map<String,Object> hd) {
         var pt=jdbcTemplate.queryForList("""
             SELECT TOP 1 pt.nha_cung_cap FROM giao_dich_thanh_toan gd
             JOIN phuong_thuc_thanh_toan pt ON pt.id=gd.id_phuong_thuc_thanh_toan
-            WHERE gd.id_hoa_don=? AND gd.trang_thai<>N'da_huy' AND ISNULL(gd.xoa_mem,0)=0 ORDER BY gd.id DESC
+            WHERE gd.id_hoa_don=? AND (gd.trang_thai<>N'da_huy' OR pt.nha_cung_cap IN (N'VNPAY_SANDBOX',N'QR_DEMO')) AND ISNULL(gd.xoa_mem,0)=0 ORDER BY gd.id DESC
             """,id);
         if(!pt.isEmpty()) return "COD".equals(pt.get(0).get("nha_cung_cap"));
         return !String.valueOf(hd.get("ghi_chu")).contains("QR");
+    }
+    private boolean laVnpay(int id) {
+        return !jdbcTemplate.queryForList("""
+            SELECT gd.id FROM giao_dich_thanh_toan gd JOIN phuong_thuc_thanh_toan pt ON pt.id=gd.id_phuong_thuc_thanh_toan
+            WHERE gd.id_hoa_don=? AND pt.nha_cung_cap=N'VNPAY_SANDBOX' AND ISNULL(gd.xoa_mem,0)=0
+            """,id).isEmpty();
+    }
+    private boolean laQrDemo(int id) {
+        return !jdbcTemplate.queryForList("""
+            SELECT gd.id FROM giao_dich_thanh_toan gd JOIN phuong_thuc_thanh_toan pt ON pt.id=gd.id_phuong_thuc_thanh_toan
+            WHERE gd.id_hoa_don=? AND pt.nha_cung_cap=N'QR_DEMO' AND ISNULL(gd.xoa_mem,0)=0
+            """,id).isEmpty();
     }
     private void kiemTraAdmin(int id) {
         if(jdbcTemplate.queryForList("""
@@ -402,7 +419,7 @@ public class HoaDonService {
 
     public List<Map<String, Object>> laySanPhamTrongHoaDon(Integer idHoaDon) {
         String sql = """
-                SELECT sp.ma_san_pham, sp.ten_san_pham, ms.ten_mau_sac, kt.ten_kich_thuoc,
+                SELECT ct.doi_tuong, CASE ct.doi_tuong WHEN 'NAM' THEN N'Nam' WHEN 'NU' THEN N'Nữ' ELSE N'Unisex' END AS ten_gioi_tinh, sp.ma_san_pham, sp.ten_san_pham, ms.ten_mau_sac, kt.ten_kich_thuoc,
                        hdct.id AS id_dong, hdct.so_luong, hdct.don_gia, hdct.thanh_tien
                 FROM hoa_don_chi_tiet hdct
                 LEFT JOIN chi_tiet_san_pham ct ON ct.id = hdct.id_chi_tiet_san_pham
@@ -422,6 +439,8 @@ public class HoaDonService {
                 """, idHoaDon);
         var ketQua=new java.util.ArrayList<Map<String,Object>>();
         for(var buoc:lichSu) {
+            if(buoc.get("ghi_chu") instanceof String note && note.contains("QR DEMO"))
+                buoc.put("ghi_chu",note.replace("QR DEMO","Thanh toán QR").replace("tự động giả lập đã thanh toán, không thu tiền thật.","đã xác nhận thanh toán."));
             if("Shipper đã lấy kiện hàng; đơn chuyển sang đang vận chuyển.".equals(buoc.get("ghi_chu"))) {
                 // Tách cách hiển thị sự kiện cũ, giữ nguyên thời điểm đã ghi nhận.
                 for(String nhan:List.of("Đã gửi hàng cho shipper.","Đơn hàng đang vận chuyển.")) {
@@ -504,6 +523,8 @@ public class HoaDonService {
                 WHERE id_hoa_don=? AND trang_thai=N'thanh_cong' AND ISNULL(xoa_mem,0)=0
                 """, BigDecimal.class,idHoaDon);
         BigDecimal conLai = ((BigDecimal) hd.get("tong_tien_sau_giam")).subtract(daThu);
+        if((laVnpay(idHoaDon) || laQrDemo(idHoaDon)) && conLai.signum()>0)
+            throw new IllegalArgumentException("Đơn chưa có xác nhận thanh toán tự động. Không được ghi nhận tiền thủ công.");
         if (conLai.signum() > 0) {
             var phuongThuc = jdbcTemplate.queryForList("""
                     SELECT TOP 1 id_phuong_thuc_thanh_toan AS id FROM giao_dich_thanh_toan

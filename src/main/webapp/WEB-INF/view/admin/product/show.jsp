@@ -4,8 +4,8 @@
 <fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html><html lang="vi"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${currentUser.suaSanPham ? 'Quản lý sản phẩm' : 'Xem tồn kho'} — VictorSport</title>
-<link rel="icon" href="/logo/favicon-victorsport.svg"><link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=20261107-balanced">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
+<link rel="icon" href="/logo/favicon-victorsport.svg"><link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=20261112-gender-20261107-balanced">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"><link rel="stylesheet" href="/css/admin-theme.css?v=20261112-jsp-3"></head><body class="admin-page"><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
 <%@ include file="/WEB-INF/view/admin/layout/product-header.jsp" %>
 <main class="content-layout"><section class="panel"><div class="panel-header"><h2>Danh sách sản phẩm</h2><c:if test="${currentUser.suaSanPham}"><a class="button" href="/quan-ly/san-pham/them">+ Thêm sản phẩm</a></c:if></div><div class="panel-body">
 <c:if test="${not empty error}"><div class="alert error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
@@ -16,7 +16,7 @@
         <div class="field"><label for="${dm.truong}"><c:out value="${dm.nhan}"/></label><select class="select" id="${dm.truong}" name="${dm.truong}"><option value="">Tất cả</option><c:forEach items="${dm.luaChon}" var="muc"><option value="${muc.id}" <c:if test="${loc[dm.truong] == muc.id}">selected</c:if>><c:out value="${muc.ten}"/></option></c:forEach></select></div>
     </c:if></c:forEach>
     <div class="field"><label for="locDoiTuong">Giới tính</label><select class="select" id="locDoiTuong" name="doi_tuong">
-        <option value="">Tất cả</option><option value="chua-phan-loai" ${loc.doi_tuong == 'chua-phan-loai' ? 'selected' : ''}>Chưa phân loại</option>
+        <option value="">Tất cả</option><option value="chua-phan-loai" ${loc.doi_tuong == 'chua-phan-loai' ? 'selected' : ''}>Chưa có biến thể</option>
         <c:forEach items="${cacDoiTuong}" var="loai"><option value="${loai.ma}" ${loc.doi_tuong == loai.ma ? 'selected' : ''}><c:out value="${loai.ten}"/></option></c:forEach>
     </select></div>
     <div class="field"><label for="trangThai">Trạng thái bán</label><select class="select" id="trangThai" name="trang_thai_kinh_doanh"><option value="">Tất cả</option><option value="1" ${loc.trang_thai_kinh_doanh == '1' ? 'selected' : ''}>Đang bán</option><option value="0" ${loc.trang_thai_kinh_doanh == '0' ? 'selected' : ''}>Ngừng bán</option></select></div>

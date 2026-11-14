@@ -356,7 +356,6 @@
                         <h3><a href="/san-pham/${sp.id}"><c:out value="${sp.ten_san_pham}"/></a></h3>
 
                         <div class="shop-product-tags">
-                            <c:forEach items="${cacDoiTuong}" var="loai"><c:if test="${sp.doi_tuong == loai.ma}"><span><c:out value="${loai.ten}"/></span></c:if></c:forEach>
                             <c:if test="${not empty sp.ten_vi_tri}"><span><c:out value="${sp.ten_vi_tri}"/></span></c:if>
                             <c:if test="${not empty sp.ten_chat_lieu}"><span><c:out value="${sp.ten_chat_lieu}"/></span></c:if>
                         </div>

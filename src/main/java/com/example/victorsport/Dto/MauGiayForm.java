@@ -5,16 +5,22 @@ import java.math.BigDecimal;
 
 // Nhận dữ liệu từ form và kiểm tra trước khi lưu.
 public class MauGiayForm {
-    @NotNull(message = "Vui lòng chọn màu sắc, kích thước và dáng giày.")
-    @Positive(message = "Vui lòng chọn màu sắc, kích thước và dáng giày.")
+    @NotBlank(message = "Vui lòng chọn giới tính của mẫu giày.")
+    @Pattern(regexp = "NAM|NU|UNISEX", message = "Giới tính phải là Nam, Nữ hoặc Unisex.")
+    private String doi_tuong = "UNISEX";
+
+    public String getDoi_tuong() { return doi_tuong; }
+    public void setDoi_tuong(String doi_tuong) { this.doi_tuong = doi_tuong; }
+    @NotNull(message = "Vui lòng chọn màu sắc.")
+    @Positive(message = "Màu sắc không hợp lệ.")
     private Integer id_mau_sac;
 
-    @NotNull(message = "Vui lòng chọn màu sắc, kích thước và dáng giày.")
-    @Positive(message = "Vui lòng chọn màu sắc, kích thước và dáng giày.")
+    @NotNull(message = "Vui lòng chọn kích thước.")
+    @Positive(message = "Kích thước không hợp lệ.")
     private Integer id_kich_thuoc;
 
-    @NotNull(message = "Vui lòng chọn màu sắc, kích thước và dáng giày.")
-    @Positive(message = "Vui lòng chọn màu sắc, kích thước và dáng giày.")
+    @NotNull(message = "Vui lòng chọn form chân.")
+    @Positive(message = "Form chân không hợp lệ.")
     private Integer id_form_chan;
 
     @DecimalMin(value = "0", message = "Giá không được âm.")

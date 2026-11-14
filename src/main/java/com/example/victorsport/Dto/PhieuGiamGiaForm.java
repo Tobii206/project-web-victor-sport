@@ -6,9 +6,11 @@ import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public class PhieuGiamGiaForm {
-    @NotNull @Min(0) @Max(1)
+    @NotNull(message="Vui lòng chọn loại phiếu.")
+    @Min(value=0,message="Loại phiếu không hợp lệ.") @Max(value=1,message="Loại phiếu không hợp lệ.")
     private Integer ap_dung_van_chuyen=0;
-    @NotNull @Min(0) @Max(1)
+    @NotNull(message="Vui lòng chọn phạm vi áp dụng.")
+    @Min(value=0,message="Phạm vi áp dụng không hợp lệ.") @Max(value=1,message="Phạm vi áp dụng không hợp lệ.")
     private Integer chi_ap_dung_ha_noi=0;
     public Integer getAp_dung_van_chuyen() { return ap_dung_van_chuyen; }
     public void setAp_dung_van_chuyen(Integer value) { ap_dung_van_chuyen=value; }

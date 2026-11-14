@@ -6,11 +6,12 @@ import jakarta.validation.constraints.*;
 public class DangNhapForm {
     @NotBlank(message = "Vui lòng nhập tài khoản.")
     @Size(max = 100, message = "Tài khoản tối đa 100 ký tự.")
-    @Pattern(regexp = "(?i)([^@]+|[a-z0-9]+([._%+\\-][a-z0-9]+)*@gmail\\.com)", message = "Email phải đúng định dạng, ví dụ: ten@gmail.com.")
+    @Pattern(regexp = "(?i)([a-z0-9._\\-]+|[a-z0-9]+([._%+\\-][a-z0-9]+)*@gmail\\.com)", message = "Nhập tên tài khoản không dấu hoặc email có dạng ten@gmail.com.")
     private String taiKhoan;
 
     @NotBlank(message = "Vui lòng nhập mật khẩu.")
     @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự.")
+    @Size(max = 255, message = "Mật khẩu tối đa 255 ký tự.")
     private String matKhau;
 
     public String getTaiKhoan() { return taiKhoan; }

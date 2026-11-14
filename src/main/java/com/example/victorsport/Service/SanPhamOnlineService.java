@@ -17,6 +17,12 @@ public class SanPhamOnlineService {
 
     private final JdbcTemplate jdbc;
     @org.springframework.beans.factory.annotation.Autowired
+    private VnpaySandboxService vnpay;
+    @org.springframework.beans.factory.annotation.Autowired
+    private QrDemoService qrDemo;
+    public boolean qrDemoDangBat() { return qrDemo!=null && qrDemo.dangBat(); }
+    public boolean vnpaySanSang() { return vnpay!=null && vnpay.sanSang(); }
+    @org.springframework.beans.factory.annotation.Autowired
     private GiaoHangGhnService giaoHangGhn;
     public boolean dungGhn(){return giaoHangGhn!=null && giaoHangGhn.dangBat();}
     public com.example.victorsport.Dto.BaoGiaGhn baoGiaGhn(Map<Integer,Integer> gio,String ten,String sdt,String diaChi,String pt,int tinh,int xa) {
@@ -135,7 +141,7 @@ public class SanPhamOnlineService {
     }
 
     static final String MAU_DANG_BAN = """
-        SELECT ct.id_san_pham, ct.id_kich_thuoc, ct.id_mau_sac, ct.gia_ban, ct.so_luong
+        SELECT ct.doi_tuong, ct.id_san_pham, ct.id_kich_thuoc, ct.id_mau_sac, ct.gia_ban, ct.so_luong
         FROM chi_tiet_san_pham ct
         JOIN kich_thuoc kt ON kt.id=ct.id_kich_thuoc AND ISNULL(kt.xoa_mem,0)=0 AND ISNULL(kt.trang_thai,1)=1
         JOIN mau_sac ms ON ms.id=ct.id_mau_sac AND ISNULL(ms.xoa_mem,0)=0 AND ISNULL(ms.trang_thai,1)=1
@@ -182,9 +188,9 @@ public class SanPhamOnlineService {
 
     private String sqlPhienBan() {
         return """
-                SELECT ct.id, ct.id_san_pham, ct.id_mau_sac, ct.ma_chi_tiet_san_pham, ct.so_luong,
+                SELECT ct.doi_tuong, ct.id, ct.id_san_pham, ct.id_mau_sac, ct.ma_chi_tiet_san_pham, ct.so_luong,
                        ct.gia_ban AS gia_ban,
-                       sp.ten_san_pham, kt.ten_kich_thuoc, ms.ten_mau_sac, fc.ten_form_chan,
+                       sp.ten_san_pham, CASE ct.doi_tuong WHEN 'NAM' THEN N'Nam' WHEN 'NU' THEN N'Nữ' ELSE N'Unisex' END AS ten_gioi_tinh, kt.ten_kich_thuoc, ms.ten_mau_sac, fc.ten_form_chan,
                        (SELECT TOP 1 a.duong_dan_anh FROM anh_chi_tiet_san_pham a
                         JOIN chi_tiet_san_pham cung_mau ON cung_mau.id=a.id_chi_tiet_san_pham
                         WHERE cung_mau.id_san_pham=ct.id_san_pham AND cung_mau.id_mau_sac=ct.id_mau_sac AND ISNULL(a.xoa_mem,0)=0
@@ -343,8 +349,16 @@ public class SanPhamOnlineService {
                            boolean muaNgay,String phuongThuc,Integer idPhieuGiamGia,BigDecimal tongTienDuKien,
                            com.example.victorsport.Dto.BaoGiaGhn baoGia) {
         if(dungGhn() && baoGia==null) throw new IllegalArgumentException("Vui lòng chọn địa chỉ và lấy phí GHN trước khi đặt hàng.");
-        if (!"COD".equals(phuongThuc) && !"QR".equals(phuongThuc))
+        if (!"COD".equals(phuongThuc) && !"QR".equals(phuongThuc) && !"VNPAY".equals(phuongThuc) && !"QR_DEMO".equals(phuongThuc))
             throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ.");
+        if("QR_DEMO".equals(phuongThuc)) {
+            if(qrDemo==null) throw new IllegalArgumentException("Phương thức thanh toán QR đang tắt.");
+            qrDemo.kiemTraCheDo();
+        }
+        if("VNPAY".equals(phuongThuc)) {
+            if(vnpay==null) throw new IllegalArgumentException("VNPAY Sandbox chưa được cấu hình.");
+            vnpay.kiemTraCauHinh();
+        }
         if ("QR".equals(phuongThuc) && (nganHang.isBlank() || soTaiKhoan.isBlank() || chuTaiKhoan.isBlank()))
             throw new IllegalArgumentException("Cửa hàng chưa cấu hình tài khoản nhận tiền QR. Vui lòng chọn COD.");
         ten = ten.trim(); sdt = sdt.trim(); diaChi = diaChi.trim();
@@ -412,7 +426,7 @@ public class SanPhamOnlineService {
         tong=tong.add(phi);
         if(tongTienDuKien!=null && tong.compareTo(tongTienDuKien)!=0)
             throw new IllegalArgumentException("Giá, phí giao hàng hoặc ưu đãi đã thay đổi. Vui lòng kiểm tra lại trước khi đặt hàng.");
-        if ("QR".equals(phuongThuc) && (tong.signum() <= 0 || tong.stripTrailingZeros().scale() > 0))
+        if (("QR".equals(phuongThuc) || "VNPAY".equals(phuongThuc) || "QR_DEMO".equals(phuongThuc)) && (tong.signum() <= 0 || tong.stripTrailingZeros().scale() > 0))
             throw new IllegalArgumentException("Số tiền chuyển khoản QR phải là số đồng nguyên và lớn hơn 0. Vui lòng chọn COD.");
         Integer id = jdbc.queryForObject("""
                 INSERT INTO hoa_don (id_khach_hang, loai_don, tong_tien, tong_tien_sau_giam,
@@ -422,15 +436,19 @@ public class SanPhamOnlineService {
                 SELECT ?, 1, ?, ?, ?, ?, ?,
                     (SELECT NULLIF(LTRIM(RTRIM(email)), '') FROM khach_hang WHERE id = ?), 1, ?
                 """, Integer.class, idKhachHang, tongGoc, tong, ten, sdt, diaChi, idKhachHang,
-                "QR".equals(phuongThuc) ? "Chuyển khoản QR - chờ kiểm tra thanh toán" : "Thanh toán khi nhận hàng (COD)");
+                "QR_DEMO".equals(phuongThuc)?"Chờ thanh toán online":("VNPAY".equals(phuongThuc)?"VNPAY Sandbox - chờ thanh toán thử nghiệm":("QR".equals(phuongThuc) ? "Chuyển khoản QR - chờ kiểm tra thanh toán" : "Thanh toán khi nhận hàng (COD)")));
         for (Map<String, Object> dong : ds) {
             jdbc.update("INSERT INTO hoa_don_chi_tiet (id_hoa_don, id_chi_tiet_san_pham, so_luong, don_gia) VALUES (?, ?, ?, ?)",
                     id, dong.get("id"), dong.get("so_luong_mua"), dong.get("gia_ban"));
         }
         jdbc.update("UPDATE hoa_don SET phi_van_chuyen=?,id_phieu_giam_gia=? WHERE id=?",phi,phieuApDung,id);
         jdbc.update("INSERT INTO lich_su_hoa_don (id_hoa_don, trang_thai, ghi_chu) VALUES (?, 1, ?)", id,
-                "Khách đặt hàng online, " + ("QR".equals(phuongThuc) ? "chuyển khoản QR" : "thanh toán khi nhận hàng"));
-        if ("QR".equals(phuongThuc)) {
+                "Khách đặt hàng online, " + ("QR_DEMO".equals(phuongThuc)?"thanh toán QR mô phỏng":("VNPAY".equals(phuongThuc)?"thanh toán thử nghiệm VNPAY Sandbox":("QR".equals(phuongThuc) ? "chuyển khoản QR" : "thanh toán khi nhận hàng"))));
+        if("QR_DEMO".equals(phuongThuc)) {
+            qrDemo.taoGiaoDich(id,tong);
+        } else if("VNPAY".equals(phuongThuc)) {
+            vnpay.taoGiaoDich(id,tong);
+        } else if ("QR".equals(phuongThuc)) {
             var cachThanhToan = jdbc.queryForList("""
                     SELECT TOP 1 id FROM phuong_thuc_thanh_toan
                     WHERE nha_cung_cap=N'VietQR' AND trang_thai=1 AND ISNULL(xoa_mem,0)=0 ORDER BY id

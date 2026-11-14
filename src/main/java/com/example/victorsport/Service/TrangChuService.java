@@ -48,7 +48,7 @@ public class TrangChuService {
         List<Object> thamSo = new ArrayList<>();
         thamSo.add(timKiem); thamSo.add(timKiem); thamSo.add(timKiem);
         String sql = """
-                SELECT sp.id, sp.ma_san_pham, sp.ten_san_pham, sp.mo_ta_ngan, sp.doi_tuong, th.ten_thuong_hieu,
+                SELECT sp.id, sp.ma_san_pham, sp.ten_san_pham, sp.mo_ta_ngan, CASE WHEN MIN(ct.doi_tuong)=MAX(ct.doi_tuong) THEN MIN(ct.doi_tuong) END AS doi_tuong, th.ten_thuong_hieu,
                        cl.ten_chat_lieu, xx.ten_xuat_xu, vt.ten_vi_tri,
                        COALESCE(MIN(ct.gia_ban), sp.gia_ban) AS gia_ban,
                        SUM(ISNULL(ct.so_luong, 0)) AS so_luong, COUNT(DISTINCT ct.id_kich_thuoc) AS so_size,
@@ -74,7 +74,7 @@ public class TrangChuService {
         if (kichThuoc != null) { sql += " AND ct.id_kich_thuoc = ?"; thamSo.add(kichThuoc); }
         if (mauSac != null) { sql += " AND ct.id_mau_sac = ?"; thamSo.add(mauSac); }
         if (QuanLySanPhamService.doiTuongHopLe(doiTuong)) {
-            sql += " AND (sp.doi_tuong = ? OR sp.doi_tuong = 'UNISEX')";
+            sql += " AND (ct.doi_tuong = ? OR ct.doi_tuong = 'UNISEX')";
             thamSo.add(doiTuong);
         }
         if (conHang) sql += " AND ct.so_luong > 0";
@@ -83,7 +83,7 @@ public class TrangChuService {
         else if ("gia-giam".equals(sapXep)) sql += " ORDER BY gia_ban DESC, sp.id DESC";
         else sql += " ORDER BY sp.id DESC";
         var ds = jdbcTemplate.queryForList(sql, thamSo.toArray());
-        GiaGiamSanPham.themGiaDanhSach(jdbcTemplate, ds, kichThuoc, mauSac, conHang);
+        GiaGiamSanPham.themGiaDanhSach(jdbcTemplate, ds, kichThuoc, mauSac, conHang,doiTuong);
         if ("gia-tang".equals(sapXep) || "gia-giam".equals(sapXep)) {
             Comparator<java.math.BigDecimal> thuTuGia = "gia-tang".equals(sapXep) ? Comparator.naturalOrder() : Comparator.reverseOrder();
             ds.sort(Comparator.comparing(sp -> (java.math.BigDecimal) sp.get("gia_sau_giam"), Comparator.nullsLast(thuTuGia)));

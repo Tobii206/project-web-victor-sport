@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${tenChucNang} - Victor Sport</title>
     <link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"></head>
-<body>
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"><link rel="stylesheet" href="/css/admin-theme.css?v=20261112-jsp-3"></head>
+<body class="admin-page">
 <div class="app-shell">
     <jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/>
     <div class="main-area">

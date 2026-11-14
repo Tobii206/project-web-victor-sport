@@ -177,6 +177,7 @@ CREATE TABLE chi_tiet_san_pham (
     id_mau_sac INT NOT NULL,
     id_kich_thuoc INT NOT NULL,
     id_form_chan INT NOT NULL,
+    doi_tuong VARCHAR(6) NOT NULL DEFAULT 'UNISEX' CHECK (doi_tuong IN ('NAM','NU','UNISEX')),
     ma_chi_tiet_san_pham AS 'CTSP' + RIGHT('00000' + CAST(id AS VARCHAR(5)), 5) PERSISTED,
     so_luong INT DEFAULT 0,
     gia_ban DECIMAL(18,2) NOT NULL,

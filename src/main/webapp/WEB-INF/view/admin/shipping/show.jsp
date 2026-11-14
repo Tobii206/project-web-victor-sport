@@ -5,7 +5,7 @@
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Quản lý vận chuyển — VictorSport</title><link rel="icon" href="/logo/favicon-victorsport.svg">
 <link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced"><link rel="stylesheet" href="/css/tong-quan.css?v=20261107-balanced">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"></head><body><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"><link rel="stylesheet" href="/css/admin-theme.css?v=20261112-jsp-3"></head><body class="admin-page"><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
 <%@ include file="/WEB-INF/view/admin/layout/dashboard-header.jsp" %>
 <main class="content-layout overview-page">
 <section class="overview-intro"><div><p class="overview-eyebrow">ĐƠN HÀNG ONLINE</p><h2>Theo dõi vận chuyển</h2><p class="muted">Theo dõi phí giao hàng, mã vận đơn và trạng thái. GHN được xử lý tự động.</p></div></section>

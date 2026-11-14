@@ -37,6 +37,7 @@
                 </aside>
                 <section class="account-card">
                     <h2>Thông tin cá nhân</h2>
+                    <c:if test="${laNhanVien}"><div class="account-profile-actions"><a href="/tai-khoan/doi-mat-khau">Đổi mật khẩu</a></div></c:if>
                     <c:if test="${not laNhanVien}"><div class="account-profile-actions"><a href="/tai-khoan/chinh-sua">Chỉnh sửa thông tin</a><a href="/tai-khoan/doi-mat-khau">Đổi mật khẩu</a><a href="/tai-khoan/dia-chi">Địa chỉ của tôi</a></div></c:if>
                     <p class="subtle">Thông tin đang được lưu trong tài khoản của bạn.</p>
                     <dl class="account-info">

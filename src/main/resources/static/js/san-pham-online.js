@@ -29,7 +29,7 @@ cacAnhMau.forEach(function (nut) {
 
 function hienThiMau() {
     var dangChon = document.querySelector('input[name="idPhienBan"]:checked:not(:disabled)');
-    var mau = dangChon || cacMau[0];
+    var mau = dangChon || Array.from(cacMau).find(function (el) { return !el.closest('.online-variant').hidden; });
     document.getElementById('tonKho').textContent = dangChon ? 'Còn ' + dangChon.dataset.ton + ' sản phẩm' : 'Hết hàng';
     document.querySelectorAll('#formChonGiay .online-purchase button, #soLuong').forEach(function (el) {
         el.disabled = !dangChon;
@@ -64,10 +64,27 @@ function hienThiMau() {
 }
 
 for (var i = 0; i < cacMau.length; i++) { cacMau[i].onchange = hienThiMau; }
+var cacGioiTinh = document.querySelectorAll('#formChonGiay input[name="doiTuong"]');
+function hienThiGioiTinh() {
+    var loai = document.querySelector('#formChonGiay input[name="doiTuong"]:checked');
+    if (!loai) return;
+    cacMau.forEach(function (el) {
+        var phuHop = el.dataset.gioiTinh === loai.value;
+        el.closest('.online-variant').hidden = !phuHop;
+        el.disabled = !phuHop || Number(el.dataset.ton) <= 0;
+        if (el.disabled) el.checked = false;
+    });
+    if (!document.querySelector('input[name="idPhienBan"]:checked:not(:disabled)')) {
+        var dauTien = Array.from(cacMau).find(function (el) { return !el.disabled; });
+        if (dauTien) dauTien.checked = true;
+    }
+    hienThiMau();
+}
+cacGioiTinh.forEach(function (el) { el.onchange = hienThiGioiTinh; });
 if (soLuong) {
     document.getElementById('giamSoLuong').onclick = function () { if (Number(soLuong.value) > 1) { soLuong.stepDown(); } };
     document.getElementById('tangSoLuong').onclick = function () { soLuong.stepUp(); };
-    hienThiMau();
+    if (cacGioiTinh.length) hienThiGioiTinh(); else hienThiMau();
 }
 
 var cacNutThongTin = document.querySelectorAll('.online-info-tab');

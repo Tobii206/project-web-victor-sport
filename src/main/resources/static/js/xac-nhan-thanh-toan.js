@@ -31,6 +31,12 @@ if (bangXacNhan) {
             if (phuongThuc && phuongThuc.name === 'phuongThuc' && phuongThuc.value === 'QR') {
                 document.getElementById('noiDungXacNhan').textContent = 'Sau khi đặt hàng, quét mã QR để chuyển khoản đúng số tiền và nội dung. Cửa hàng sẽ kiểm tra và xác nhận thanh toán.';
             }
+            if (phuongThuc && phuongThuc.name === 'phuongThuc' && phuongThuc.value === 'VNPAY') {
+                document.getElementById('noiDungXacNhan').textContent = 'Đặt đơn và tiếp tục đến VNPAY Sandbox để thanh toán bằng thẻ thử nghiệm. Không thu tiền thật.';
+            }
+            if (phuongThuc && phuongThuc.name === 'phuongThuc' && phuongThuc.value === 'QR_DEMO') {
+                document.getElementById('noiDungXacNhan').textContent = 'Quét QR bằng camera điện thoại và kiểm tra thông tin trước khi xác nhận.';
+            }
             var maHoaDon = formThanhToan.dataset.maHoaDon;
             document.getElementById('dongMaHoaDon').hidden = !maHoaDon;
             document.getElementById('maHoaDonXacNhan').textContent = maHoaDon || '';

@@ -39,6 +39,7 @@ public class BanHangTaiQuayController {
     @GetMapping("/pos")
     public String hienThiBanHangTaiQuay(@RequestParam(value = "keyword", required = false) String tuKhoaSanPham,
                                         @RequestParam(value = "customerKeyword", required = false) String tuKhoaKhachHang,
+                                        @RequestParam(required=false) String doiTuong,
                                         HttpSession phienDangNhap,
                                         Model model) {
         NguoiDungDangNhap nguoiDungDangNhap = DangNhapController.layNguoiDungDangNhap(phienDangNhap, model);
@@ -62,7 +63,14 @@ public class BanHangTaiQuayController {
         model.addAttribute("activeMenu", "ban-hang");
         model.addAttribute("keyword", tuKhoaSanPham == null ? "" : tuKhoaSanPham);
         model.addAttribute("customerKeyword", tuKhoaKhachHang == null ? "" : tuKhoaKhachHang);
-        model.addAttribute("products", banHangTaiQuayService.timSanPham(tuKhoaSanPham));
+        if(doiTuong!=null) {
+            if(!doiTuong.isEmpty() && !com.example.victorsport.Service.QuanLySanPhamService.doiTuongHopLe(doiTuong))
+                throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST,"Giới tính không hợp lệ.");
+            phienDangNhap.setAttribute("gioiTinhTaiQuay",doiTuong);
+        }
+        String gioiTinh=java.util.Objects.toString(phienDangNhap.getAttribute("gioiTinhTaiQuay"),"");
+        model.addAttribute("gioiTinhDangChon",gioiTinh);
+        model.addAttribute("products", gioiTinh.isEmpty()?banHangTaiQuayService.timSanPham(tuKhoaSanPham):banHangTaiQuayService.timSanPham(tuKhoaSanPham,gioiTinh));
         model.addAttribute("customers", banHangTaiQuayService.timKhachHang(tuKhoaKhachHang));
         Integer idKhachHang = (Integer) phienDangNhap.getAttribute(KHOA_KHACH_HANG);
         if (idKhachHang != null) {
@@ -127,7 +135,7 @@ public class BanHangTaiQuayController {
             return org.springframework.http.ResponseEntity.status(403).body(Map.of("error","Phiên giao hàng không hợp lệ. Vui lòng tải lại trang."));
         synchronized(session) {
             try {
-                if(loi.hasErrors()) throw new IllegalArgumentException("Vui lòng nhập đủ tên, số điện thoại và địa chỉ nhận hàng hợp lệ.");
+                KiemTraForm.kiemTra(loi);
                 var q=banHangTaiQuayService.baoGiaGiaoHang(layGioHang(session),layIdPhieuGiamGia(session),form);
                 String ma=java.util.UUID.randomUUID().toString();
                 session.setAttribute(KHOA_BAO_GIA,q);session.setAttribute("maBaoGiaTaiQuay",ma);

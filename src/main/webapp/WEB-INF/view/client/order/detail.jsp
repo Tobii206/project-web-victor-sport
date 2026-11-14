@@ -14,6 +14,8 @@
 <c:if test="${not empty error and not (moSuaNhanHang and coTheSuaNhanHang)}"><div class="account-error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
 <c:if test="${not empty success}"><div class="online-success" role="status" data-vs-flash="success"><c:out value="${success}"/></div></c:if>
 <a class="account-back" href="${khachVangLai ? '/tra-cuu-don-hang' : '/don-hang'}">← Quay lại</a>
+<c:if test="${don.vnpay}"><p><a class="store-button" href="/thanh-toan/vnpay/${don.id}">Xem thanh toán VNPAY Sandbox</a></p></c:if>
+<c:if test="${don.qr_demo}"><p><a class="store-button" href="/thanh-toan/qr-demo/${don.id}">Xem thanh toán QR</a></p></c:if>
 <c:if test="${don.trang_thai_hien_tai >= 1 && don.trang_thai_hien_tai <= 3 && don.ghi_chu == 'Chuyển khoản QR - chờ kiểm tra thanh toán'}">
     <p><a class="store-button" href="/thanh-toan/qr/${don.id}">Xem mã QR thanh toán</a></p>
 </c:if>
@@ -59,7 +61,7 @@
 <p class="don-hang-row"><span>Tổng thanh toán</span><strong class="online-price"><fmt:formatNumber value="${don.tong_tien_sau_giam}" maxFractionDigits="0"/> đ</strong></p></section></div>
 <section class="account-card don-hang-card"><h2>Sản phẩm đã đặt</h2>
 <c:forEach items="${sanPham}" var="sp"><div class="don-hang-item don-hang-row"><div><strong><c:out value="${sp.ten_san_pham}"/></strong>
-<p class="subtle"><c:out value="${sp.ten_mau_sac}"/> · <c:out value="${sp.ten_kich_thuoc}"/> · Số lượng: <c:out value="${sp.so_luong}"/></p>
+<p class="subtle"><c:out value="${sp.ten_mau_sac}"/> · <c:out value="${sp.ten_gioi_tinh}"/> · <c:out value="${sp.ten_kich_thuoc}"/> · Số lượng: <c:out value="${sp.so_luong}"/></p>
 <p>Đơn giá: <fmt:formatNumber value="${sp.don_gia}" maxFractionDigits="0"/> đ</p></div><strong><fmt:formatNumber value="${sp.thanh_tien}" maxFractionDigits="0"/> đ</strong></div></c:forEach></section>
 <section class="account-card don-hang-card"><h2>Lịch sử đơn hàng</h2><ol class="don-hang-timeline">
 <c:forEach items="${lichSu}" var="buoc"><li><p><strong><fmt:formatDate value="${buoc.thoi_gian}" pattern="dd/MM/yyyy HH:mm"/></strong></p><p><c:out value="${buoc.ghi_chu}"/></p></li></c:forEach>

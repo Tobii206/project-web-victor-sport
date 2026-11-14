@@ -42,7 +42,7 @@
                     <c:out value="${dong.ten_san_pham}"/>
                 </a>
                 <p class="subtle" style="margin: 4px 0 8px; font-size: 13px;">
-                    <c:out value="${dong.ten_kich_thuoc}"/> · <c:out value="${dong.ten_mau_sac}"/> · <c:out value="${dong.ten_form_chan}"/>
+                    <c:out value="${dong.ten_gioi_tinh}"/> · <c:out value="${dong.ten_kich_thuoc}"/> · <c:out value="${dong.ten_mau_sac}"/> · <c:out value="${dong.ten_form_chan}"/>
                 </p>
                 <p style="margin: 0; font-family: var(--vs-font-heading); font-weight: 700; color: #ff5e1e;">
                     <fmt:formatNumber value="${dong.gia_sau_giam}"/> đ / đôi

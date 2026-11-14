@@ -10,8 +10,8 @@
     <title>Quản lý hóa đơn - Victor Sport</title>
     <link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced">
     <link rel="stylesheet" href="/css/loc-hoa-don.css?v=20261107-balanced">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"></head>
-<body>
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"><link rel="stylesheet" href="/css/admin-theme.css?v=20261112-jsp-3"></head>
+<body class="admin-page">
 <div class="app-shell">
     <jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/>
     <div class="main-area">
@@ -25,7 +25,7 @@
             </div>
             <div class="topbar-user">
                 <jsp:include page="/WEB-INF/view/admin/layout/store-link.jsp"/>
-                <span><c:out value="${currentUser.hoTen}"/> - <c:out value="${currentUser.tenQuyen}"/></span>
+                <a class="admin-user-chip" href="/tai-khoan" title="Thông tin tài khoản"><span class="admin-user-avatar" aria-hidden="true"><c:out value="${empty currentUser.hoTen ? 'V' : currentUser.hoTen.substring(0,1)}"/></span><span class="admin-user-name"><c:out value="${currentUser.hoTen}"/></span></a>
                 <form method="post" action="/logout">
                     <button class="button secondary" type="submit">Đăng xuất</button>
                 </form>
@@ -94,7 +94,10 @@
 <form method="post" action="/quan-ly/hoa-don/${hd.id}/xac-nhan-don-cod" data-xac-nhan-thanh-toan data-tieu-de="Xác nhận đơn COD" data-nhan-xac-nhan="Xác nhận đơn" data-tong-tien="${hd.tong_tien_sau_giam}" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đã xác nhận đơn" data-noi-dung="Xác nhận đơn COD để chuyển sang bước chuẩn bị hàng."><input type="hidden" name="quayLai" value="danh-sach"><button class="button">Xác nhận đơn COD</button></form></c:if>
 
 
-                                        <c:if test="${currentUser.quanLy and (hd.loai_don == 1 or hd.loai_don == 2) and hd.phuong_thuc != 'COD' and hd.trang_thai_hien_tai == 1}">
+                                        <c:if test="${currentUser.quanLy and (hd.vnpay or hd.qr_demo) and hd.da_thanh_toan and hd.trang_thai_hien_tai == 1}">
+                                            <form method="post" action="/quan-ly/hoa-don/${hd.id}/xac-nhan-thanh-toan" data-xac-nhan-thanh-toan data-tong-tien="${hd.tong_tien_sau_giam}" data-tieu-de="Xác nhận đơn hàng" data-nhan-xac-nhan="Xác nhận đơn" data-phuong-thuc="${hd.qr_demo ? 'QR đã xác nhận thanh toán' : 'VNPAY Sandbox đã thanh toán'}" data-noi-dung="Hệ thống đã ghi nhận thanh toán thử nghiệm. Xác nhận tiếp nhận đơn để chuẩn bị hàng."><input type="hidden" name="quayLai" value="danh-sach"><button class="button" type="submit">Xác nhận đơn hàng</button></form>
+                                        </c:if>
+                                        <c:if test="${currentUser.quanLy and (hd.loai_don == 1 or hd.loai_don == 2) and hd.phuong_thuc != 'COD' and not hd.vnpay and not hd.qr_demo and hd.trang_thai_hien_tai == 1}">
                                             <form method="post" action="/quan-ly/hoa-don/${hd.id}/xac-nhan-thanh-toan" data-xac-nhan-thanh-toan data-ma-hoa-don="<c:out value='${hd.ma_hoa_don}'/>" data-tong-tien="${hd.tong_tien_sau_giam}" data-nhan-phuong-thuc="Trạng thái" data-tieu-de="Xác nhận thanh toán" data-phuong-thuc="Đã xác nhận đơn" data-noi-dung="Kiểm tra khoản chuyển khoản để xác nhận thanh toán và đơn hàng. Đơn sẽ chuyển sang chờ chuẩn bị.">
                                                 <input type="hidden" name="quayLai" value="danh-sach"><button class="button" type="submit">Xác nhận thanh toán</button>
                                             </form>

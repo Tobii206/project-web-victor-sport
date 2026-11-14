@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced">
     <link rel="stylesheet" href="/css/in-hoa-don.css?v=3" media="print">
     <link rel="stylesheet" href="/css/pos-gio-hang.css?v=20261107-pos-payment">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"></head>
-<body>
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"><link rel="stylesheet" href="/css/admin-theme.css?v=20261112-jsp-3"></head>
+<body class="admin-page">
 <div class="app-shell">
     <jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/>
     <div class="main-area">
@@ -96,6 +96,7 @@
 
                 <form class="search-row" method="get" action="/pos">
                     <input class="input" name="keyword" value="<c:out value='${keyword}'/>" placeholder="Tìm tên, mã sản phẩm, mã mẫu, hãng" aria-label="Tìm sản phẩm">
+                    <select class="select" name="doiTuong" aria-label="Giới tính giày"><option value="">Tất cả giới tính</option><option value="NAM" ${gioiTinhDangChon == 'NAM' ? 'selected' : ''}>Nam</option><option value="NU" ${gioiTinhDangChon == 'NU' ? 'selected' : ''}>Nữ</option><option value="UNISEX" ${gioiTinhDangChon == 'UNISEX' ? 'selected' : ''}>Unisex</option></select>
                     <button class="button" type="submit">Tìm kiếm</button>
                 </form>
 
@@ -121,7 +122,7 @@
                                     <div><strong><c:out value="${product.tenSanPham}"/></strong><div class="muted"><c:out value="${product.maSanPham}"/> - <c:out value="${product.tenThuongHieu}"/></div></div>
                                 </div>
                             </td>
-                            <td>${product.tenMauSac}, ${product.tenKichThuoc}</td>
+                            <td><strong><c:out value="${product.tenGioiTinh}"/></strong><br><c:out value="${product.tenMauSac}"/>, <c:out value="${product.tenKichThuoc}"/></td>
                             <td>${product.soLuongTon}</td>
                             <td class="money"><fmt:formatNumber value="${product.giaSauGiam}" type="number" groupingUsed="true"/> đ <c:if test="${product.giaSauGiam lt product.giaBan}"><del class="gia-goc"><fmt:formatNumber value="${product.giaBan}" groupingUsed="true"/> đ</del></c:if></td>
                             <td>
@@ -161,7 +162,7 @@
                                     <button class="pos-cart-remove" type="submit" title="Xóa sản phẩm" aria-label="Xóa <c:out value='${item.tenSanPham}'/>"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6"/></svg></button>
                                 </form>
                             </div>
-                            <div class="pos-cart-meta"><span><c:out value="${item.tenMauSac}"/></span><span><c:out value="${item.tenKichThuoc}"/></span><small>Còn ${item.soLuongTon}</small></div>
+                            <div class="pos-cart-meta"><span><c:out value="${item.tenGioiTinh}"/></span><span><c:out value="${item.tenMauSac}"/></span><span><c:out value="${item.tenKichThuoc}"/></span><small>Còn ${item.soLuongTon}</small></div>
                             <div class="pos-cart-unit">Đơn giá <span><fmt:formatNumber value="${item.donGia}" maxFractionDigits="0" groupingUsed="true"/> đ</span></div>
                             <div class="pos-cart-item-bottom">
                                 <form class="pos-cart-quantity" method="post" action="/pos/cart/update">

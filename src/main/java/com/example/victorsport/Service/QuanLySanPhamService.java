@@ -14,6 +14,9 @@ public class QuanLySanPhamService {
     public static boolean doiTuongHopLe(String ma) {
         return DOI_TUONG.stream().anyMatch(muc -> muc.get("ma").equals(ma));
     }
+    public static String tenDoiTuong(String ma) {
+        return DOI_TUONG.stream().filter(muc -> muc.get("ma").equals(ma)).map(muc -> muc.get("ten")).findFirst().orElse("Unisex");
+    }
     private final JdbcTemplate jdbc;
     // Tên bảng và cột cố định, không lấy tên bảng từ dữ liệu người nhập.
     private static final String[][] DANH_MUC = {
@@ -73,9 +76,9 @@ public class QuanLySanPhamService {
         }
         String trangThai = loc.getOrDefault("trang_thai_kinh_doanh", "");
         String doiTuong = loc.get("doi_tuong");
-        if ("chua-phan-loai".equals(doiTuong)) sql += " AND sp.doi_tuong IS NULL";
+        if ("chua-phan-loai".equals(doiTuong)) sql += " AND NOT EXISTS (SELECT 1 FROM chi_tiet_san_pham gt WHERE gt.id_san_pham=sp.id AND ISNULL(gt.xoa_mem,0)=0)";
         else if (doiTuongHopLe(doiTuong)) {
-            sql += " AND sp.doi_tuong=?";
+            sql += " AND EXISTS (SELECT 1 FROM chi_tiet_san_pham gt WHERE gt.id_san_pham=sp.id AND ISNULL(gt.xoa_mem,0)=0 AND gt.doi_tuong=?)";
             args.add(doiTuong);
         }
         if (trangThai.equals("0") || trangThai.equals("1")) { sql += " AND sp.trang_thai_kinh_doanh=?"; args.add(Integer.valueOf(trangThai)); }
@@ -137,6 +140,15 @@ public class QuanLySanPhamService {
             var anhCungMau = (List<Map<String, Object>>) nhomMau.get("cacAnh");
             anhCungMau.add(anh);
         }
+        for(var n:nhom.values()) {
+            @SuppressWarnings("unchecked") var sizes=(List<Map<String,Object>>)n.get("cacMau");
+            var cacNhom=new ArrayList<Map<String,Object>>();
+            for(var loai:DOI_TUONG) {
+                var ds=sizes.stream().filter(m -> loai.get("ma").equals(Objects.toString(m.get("doi_tuong"),"UNISEX"))).toList();
+                if(!ds.isEmpty())cacNhom.add(Map.of("ma",loai.get("ma"),"ten",loai.get("ten"),"cacMau",ds));
+            }
+            n.put("cacNhomGioiTinh",cacNhom);
+        }
         return new ArrayList<>(nhom.values());
     }
     private void khoaSanPham(int id) {
@@ -156,31 +168,23 @@ public class QuanLySanPhamService {
         String ngan = chu(d.get("mo_ta_ngan"), "Mô tả ngắn", 500, false);
         String chiTiet = chu(d.get("mo_ta_chi_tiet"), "Mô tả chi tiết", 20000, false);
         BigDecimal giaChung = tien(d.get("gia_ban"), "Giá sản phẩm", true);
-        String doiTuong = chu(d.get("doi_tuong"), "Giới tính", 6, false);
-        if (!doiTuong.isEmpty() && !doiTuongHopLe(doiTuong))
-            throw new IllegalArgumentException("Giới tính sản phẩm không hợp lệ.");
-        String maDoiTuong = doiTuong.isEmpty() ? null : doiTuong;
         List<Object> args = new ArrayList<>();
         for (int i=0;i<6;i++) args.add(chonDanhMuc(d, i, i==0));
         args.add(ten); args.add(ngan); args.add(chiTiet); args.add(trangThai(d.get("trang_thai_kinh_doanh"))); args.add(nhanVien);
         if (id == null) {
             args.add(giaChung);
-            args.add(maDoiTuong);
             return jdbc.queryForObject("""
                 INSERT INTO san_pham (id_thuong_hieu,id_xuat_xu,id_vi_tri_thi_dau,id_phong_cach_choi,id_co_giay,id_chat_lieu,
-                    ten_san_pham,mo_ta_ngan,mo_ta_chi_tiet,trang_thai_kinh_doanh,nguoi_tao,gia_ban,doi_tuong)
-                OUTPUT INSERTED.id VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    ten_san_pham,mo_ta_ngan,mo_ta_chi_tiet,trang_thai_kinh_doanh,nguoi_tao,gia_ban)
+                OUTPUT INSERTED.id VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
                 """, Integer.class, args.toArray());
         }
         khoaSanPham(id);
         args.add(giaChung);
-        args.add(d.containsKey("doi_tuong") ? 1 : 0);
-        args.add(maDoiTuong);
         args.add(id);
         jdbc.update("""
             UPDATE san_pham SET id_thuong_hieu=?,id_xuat_xu=?,id_vi_tri_thi_dau=?,id_phong_cach_choi=?,id_co_giay=?,id_chat_lieu=?,
-                ten_san_pham=?,mo_ta_ngan=?,mo_ta_chi_tiet=?,trang_thai_kinh_doanh=?,nguoi_cap_nhat=?,gia_ban=?,
-                doi_tuong=CASE WHEN ?=1 THEN ? ELSE doi_tuong END,ngay_cap_nhat=SYSDATETIME() WHERE id=?
+                ten_san_pham=?,mo_ta_ngan=?,mo_ta_chi_tiet=?,trang_thai_kinh_doanh=?,nguoi_cap_nhat=?,gia_ban=?,ngay_cap_nhat=SYSDATETIME() WHERE id=?
             """, args.toArray());
         jdbc.update("UPDATE chi_tiet_san_pham SET gia_ban=?,nguoi_cap_nhat=?,ngay_cap_nhat=SYSDATETIME() WHERE id_san_pham=? AND ISNULL(xoa_mem,0)=0", giaChung, nhanVien, id);
         return id;
@@ -194,18 +198,25 @@ public class QuanLySanPhamService {
     public int luuMau(int sanPham, Integer id, Map<String, String> d, int nhanVien) {
         khoaSanPham(sanPham);
         Integer mau = chonDanhMuc(d,6,true), size = chonDanhMuc(d,7,true), form = chonDanhMuc(d,8,true);
+        String doiTuong = d.get("doi_tuong");
+        // Yêu cầu cũ chưa có giới tính giữ loại của biến thể; mẫu mới dùng Unisex.
+        if(doiTuong==null) doiTuong=id==null
+                ? "UNISEX"
+                : jdbc.queryForObject("SELECT doi_tuong FROM chi_tiet_san_pham WHERE id=? AND id_san_pham=?",String.class,id,sanPham);
+        if(doiTuong==null)doiTuong="UNISEX";
+        if(!doiTuongHopLe(doiTuong))throw new IllegalArgumentException("Vui lòng chọn giới tính Nam, Nữ hoặc Unisex.");
         int ton = soNguyen(d.get("so_luong"), "Số lượng", true);
         if (ton<0) throw new IllegalArgumentException("Tồn kho không được âm.");
         BigDecimal gia = jdbc.queryForObject("SELECT gia_ban FROM san_pham WHERE id=? AND ISNULL(xoa_mem,0)=0", BigDecimal.class, sanPham);
         if (gia == null) throw new IllegalArgumentException("Vui lòng lưu giá trong Thông tin sản phẩm trước khi thêm mẫu.");
-        int soMauTrung = jdbc.queryForObject("SELECT COUNT(*) FROM chi_tiet_san_pham WHERE id_san_pham=? AND id_mau_sac=? AND id_kich_thuoc=? AND id_form_chan=? AND ISNULL(xoa_mem,0)=0 AND id<>?", Integer.class,sanPham,mau,size,form,id==null?0:id);
+        int soMauTrung = jdbc.queryForObject("SELECT COUNT(*) FROM chi_tiet_san_pham WHERE id_san_pham=? AND id_mau_sac=? AND id_kich_thuoc=? AND id_form_chan=? AND doi_tuong=? AND ISNULL(xoa_mem,0)=0 AND id<>?", Integer.class,sanPham,mau,size,form,doiTuong,id==null?0:id);
         if (soMauTrung > 0) {
             if (id != null || soMauTrung > 1)
-                throw new IllegalArgumentException("Mẫu có cùng màu, size và form chân đã tồn tại.");
+                throw new IllegalArgumentException("Mẫu có cùng giới tính, màu, size và form chân đã tồn tại.");
             int idMau = jdbc.queryForObject("""
                 SELECT id FROM chi_tiet_san_pham
-                WHERE id_san_pham=? AND id_mau_sac=? AND id_kich_thuoc=? AND id_form_chan=? AND ISNULL(xoa_mem,0)=0
-                """, Integer.class, sanPham, mau, size, form);
+                WHERE id_san_pham=? AND id_mau_sac=? AND id_kich_thuoc=? AND id_form_chan=? AND doi_tuong=? AND ISNULL(xoa_mem,0)=0
+                """, Integer.class, sanPham, mau, size, form,doiTuong);
             int soDong = jdbc.update("""
                 UPDATE chi_tiet_san_pham
                 SET so_luong=so_luong+?,nguoi_cap_nhat=?,ngay_cap_nhat=SYSDATETIME()
@@ -217,15 +228,15 @@ public class QuanLySanPhamService {
         String ghiChu = chu(d.get("ghi_chu"),"Ghi chú",255,false);
         int trangThai = trangThai(d.get("trang_thai"));
         if (id==null) return jdbc.queryForObject("""
-            INSERT INTO chi_tiet_san_pham (id_san_pham,id_mau_sac,id_kich_thuoc,id_form_chan,so_luong,gia_ban,trang_thai,ghi_chu,nguoi_tao)
-            OUTPUT INSERTED.id VALUES (?,?,?,?,?,?,?,?,?)
-            """,Integer.class,sanPham,mau,size,form,ton,gia,trangThai,ghiChu,nhanVien);
+            INSERT INTO chi_tiet_san_pham (id_san_pham,id_mau_sac,id_kich_thuoc,id_form_chan,so_luong,gia_ban,trang_thai,ghi_chu,nguoi_tao,doi_tuong)
+            OUTPUT INSERTED.id VALUES (?,?,?,?,?,?,?,?,?,?)
+            """,Integer.class,sanPham,mau,size,form,ton,gia,trangThai,ghiChu,nhanVien,doiTuong);
         int tonCu = soNguyen(d.get("so_luong_cu"),"Tồn kho trước khi sửa",true);
         giuAnhKhiDoiMau(sanPham,id,mau);
         int soDong = jdbc.update("""
-            UPDATE chi_tiet_san_pham SET id_mau_sac=?,id_kich_thuoc=?,id_form_chan=?,so_luong=?,gia_ban=?,trang_thai=?,ghi_chu=?,nguoi_cap_nhat=?,ngay_cap_nhat=SYSDATETIME()
+            UPDATE chi_tiet_san_pham SET id_mau_sac=?,id_kich_thuoc=?,id_form_chan=?,so_luong=?,gia_ban=?,trang_thai=?,ghi_chu=?,nguoi_cap_nhat=?,doi_tuong=?,ngay_cap_nhat=SYSDATETIME()
             WHERE id=? AND id_san_pham=? AND ISNULL(xoa_mem,0)=0 AND so_luong=?
-            """,mau,size,form,ton,gia,trangThai,ghiChu,nhanVien,id,sanPham,tonCu);
+            """,mau,size,form,ton,gia,trangThai,ghiChu,nhanVien,doiTuong,id,sanPham,tonCu);
         if (soDong!=1) throw new IllegalArgumentException("Mẫu giày hoặc tồn kho đã thay đổi. Vui lòng tải lại trang rồi sửa.");
         return id;
     }
@@ -233,10 +244,17 @@ public class QuanLySanPhamService {
     public int themNhanhMau(int sanPham, List<Integer> sizes, Map<String, String> duLieu, int nhanVien) {
         if (sizes == null || sizes.isEmpty() || sizes.size() > 30 || sizes.stream().anyMatch(size -> size == null || size <= 0))
             throw new IllegalArgumentException("Vui lòng chọn từ 1 đến 30 size hợp lệ.");
-        Map<String, String> mau = new HashMap<>(duLieu);
         var sizeKhongTrung = new LinkedHashSet<>(sizes);
+        var tonTheoSize = new LinkedHashMap<Integer,Integer>();
+        for(Integer size:sizeKhongTrung) {
+            int ton=soNguyen(duLieu.get("ton_size_"+size),"Tồn kho của từng size đã chọn",true);
+            if(ton<0)throw new IllegalArgumentException("Tồn kho của từng size không được âm.");
+            tonTheoSize.put(size,ton);
+        }
         for (Integer size : sizeKhongTrung) {
+            Map<String, String> mau = new HashMap<>(duLieu);
             mau.put("id_kich_thuoc", size.toString());
+            mau.put("so_luong",tonTheoSize.get(size).toString());
             luuMau(sanPham, null, mau, nhanVien);
         }
         return sizeKhongTrung.size();

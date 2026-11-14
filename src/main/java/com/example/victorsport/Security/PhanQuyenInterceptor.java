@@ -55,8 +55,8 @@ public class PhanQuyenInterceptor implements HandlerInterceptor {
                 || thuocMuc(duongDan, "/quan-ly/nhan-vien") || thuocMuc(duongDan, "/quan-ly/gio-hang")
                 || thuocMuc(duongDan, "/quan-ly/thong-ke") || thuocMuc(duongDan, "/quan-ly/van-chuyen")) duocTruyCap = nguoiDung.isQuanLy();
         if (duocTruyCap) return true;
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setHeader("Cache-Control", "no-store");
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         request.getRequestDispatcher("/WEB-INF/view/error/403.jsp").forward(request, response);
         return false;
     }

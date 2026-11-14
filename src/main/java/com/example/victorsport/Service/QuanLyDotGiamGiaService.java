@@ -98,7 +98,7 @@ public class QuanLyDotGiamGiaService {
 
     public List<Map<String,Object>> cacMau() {
         return jdbc.queryForList("""
-                SELECT ct.id,ct.ma_chi_tiet_san_pham,sp.ten_san_pham,kt.ten_kich_thuoc,ms.ten_mau_sac,fc.ten_form_chan
+                SELECT ct.id,ct.ma_chi_tiet_san_pham,sp.ten_san_pham,CASE ct.doi_tuong WHEN 'NAM' THEN N'Nam' WHEN 'NU' THEN N'Nữ' ELSE N'Unisex' END AS ten_gioi_tinh,kt.ten_kich_thuoc,ms.ten_mau_sac,fc.ten_form_chan
                 FROM chi_tiet_san_pham ct JOIN san_pham sp ON sp.id=ct.id_san_pham
                 JOIN kich_thuoc kt ON kt.id=ct.id_kich_thuoc JOIN mau_sac ms ON ms.id=ct.id_mau_sac JOIN form_chan fc ON fc.id=ct.id_form_chan
                 WHERE ISNULL(ct.xoa_mem,0)=0 AND ct.trang_thai=1 AND ISNULL(sp.xoa_mem,0)=0 AND sp.trang_thai_kinh_doanh=1
@@ -110,7 +110,7 @@ public class QuanLyDotGiamGiaService {
 
     public List<Map<String,Object>> mauDaChon(int id) {
         return jdbc.queryForList("""
-                SELECT c.*,ct.ma_chi_tiet_san_pham,sp.ten_san_pham,kt.ten_kich_thuoc,ms.ten_mau_sac,fc.ten_form_chan
+                SELECT c.*,ct.ma_chi_tiet_san_pham,sp.ten_san_pham,CASE ct.doi_tuong WHEN 'NAM' THEN N'Nam' WHEN 'NU' THEN N'Nữ' ELSE N'Unisex' END AS ten_gioi_tinh,kt.ten_kich_thuoc,ms.ten_mau_sac,fc.ten_form_chan
                 FROM chi_tiet_dot_giam_gia c JOIN chi_tiet_san_pham ct ON ct.id=c.id_chi_tiet_san_pham
                 JOIN san_pham sp ON sp.id=ct.id_san_pham JOIN kich_thuoc kt ON kt.id=ct.id_kich_thuoc
                 JOIN mau_sac ms ON ms.id=ct.id_mau_sac JOIN form_chan fc ON fc.id=ct.id_form_chan

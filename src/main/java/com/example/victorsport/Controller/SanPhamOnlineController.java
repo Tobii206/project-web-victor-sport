@@ -33,6 +33,14 @@ public class SanPhamOnlineController {
             int tongTonKho = 0;
             for (Map<String, Object> mau : phienBan) tongTonKho += ((Number) mau.get("so_luong")).intValue();
             model.addAttribute("phienBan", phienBan);
+            var gioiTinhCoSan=new java.util.LinkedHashSet<String>();
+            String macDinh=null;
+            for(var mau:phienBan) {
+                String ma=java.util.Objects.toString(mau.get("doi_tuong"),"UNISEX");gioiTinhCoSan.add(ma);
+                if(macDinh==null && ((Number)mau.get("so_luong")).intValue()>0)macDinh=ma;
+            }
+            model.addAttribute("gioiTinhCoSan",gioiTinhCoSan);
+            model.addAttribute("gioiTinhDaChon",macDinh==null?(gioiTinhCoSan.isEmpty()?"UNISEX":gioiTinhCoSan.iterator().next()):macDinh);
             model.addAttribute("tongTonKho", tongTonKho);
             model.addAttribute("boAnh", service.layBoAnh(id));
         } catch (IllegalArgumentException loi) { model.addAttribute("error", loi.getMessage()); }
@@ -46,10 +54,14 @@ public class SanPhamOnlineController {
 
     @PostMapping("/san-pham/{id}/chon")
     public String chon(@PathVariable int id, @RequestParam int idPhienBan, @RequestParam int soLuong,
+                       @RequestParam(required=false) String doiTuong,
                        @RequestParam(defaultValue = "them") String thaoTac, HttpSession session, RedirectAttributes tb) {
         try {
             Map<String, Object> pb = service.layPhienBanTheoId(idPhienBan);
             if (((Number) pb.get("id_san_pham")).intValue() != id) { throw new IllegalArgumentException("Mẫu giày không thuộc sản phẩm này."); }
+            if(doiTuong!=null && (!QuanLySanPhamService.doiTuongHopLe(doiTuong)
+                    || !doiTuong.equals(java.util.Objects.toString(pb.get("doi_tuong"),"UNISEX"))))
+                throw new IllegalArgumentException("Mẫu giày không khớp giới tính đã chọn. Vui lòng chọn lại.");
             service.kiemTraSoLuong(pb, soLuong);
             if ("mua".equals(thaoTac)) {
                 Map<Integer, Integer> muaNgay = new LinkedHashMap<>();
@@ -144,6 +156,8 @@ public class SanPhamOnlineController {
         model.addAttribute("loai", "mua".equals(loai) ? "mua" : "gio");
         hienThiGio(session, khoaGio(loai), model,true);
         model.addAttribute("dungGhn",service.dungGhn());
+        model.addAttribute("vnpaySanSang",service.vnpaySanSang());
+        model.addAttribute("qrDemoDangBat",service.qrDemoDangBat());
         if(session.getAttribute("csrfGhn")==null) session.setAttribute("csrfGhn",java.util.UUID.randomUUID().toString());
         model.addAttribute("csrfGhn",session.getAttribute("csrfGhn"));
         var baoGia=session.getAttribute("baoGiaGhn_"+khoaGio(loai)) instanceof com.example.victorsport.Dto.BaoGiaGhn q?q:null;
@@ -258,13 +272,15 @@ public class SanPhamOnlineController {
                 }
                 else if(form.getIdPhieuGiamGia()!=null || form.getTongTienDuKien()!=null)
                     id=service.datHang(gio,kh,ten,sdt,diaChi,"mua".equals(loai),form.getPhuongThuc(),form.getIdPhieuGiamGia(),form.getTongTienDuKien());
-                else if ("QR".equals(form.getPhuongThuc()))
-                    id = service.datHang(gio, kh, ten, sdt, diaChi,"mua".equals(loai),"QR");
+                else if ("QR".equals(form.getPhuongThuc()) || "VNPAY".equals(form.getPhuongThuc()) || "QR_DEMO".equals(form.getPhuongThuc()))
+                    id = service.datHang(gio, kh, ten, sdt, diaChi,"mua".equals(loai),form.getPhuongThuc());
                 else id = service.datHang(gio, kh, ten, sdt, diaChi,"mua".equals(loai));
                 @SuppressWarnings("unchecked") var gioDayDu=(Map<Integer,Integer>)session.getAttribute(khoaGio(loai));
                 if(gioDayDu!=null) gioDayDu.keySet().removeAll(gio.keySet());
                 if(!"mua".equals(loai)) session.removeAttribute("mauChonMuaOnline");
                 if(kh==null) session.setAttribute("donVangLai_"+id,true);
+                if("QR_DEMO".equals(form.getPhuongThuc())) return "redirect:/thanh-toan/qr-demo/"+id;
+                if("VNPAY".equals(form.getPhuongThuc())) return "redirect:/thanh-toan/vnpay/"+id;
                 if ("QR".equals(form.getPhuongThuc())) {
                     if (kh == null) session.setAttribute("donQr_" + id, true);
                     return "redirect:/thanh-toan/qr/" + id;
