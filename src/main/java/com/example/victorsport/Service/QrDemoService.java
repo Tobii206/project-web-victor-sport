@@ -171,14 +171,14 @@ public class QrDemoService {
         if(((BigDecimal)gd.get("so_tien")).compareTo((BigDecimal)don.get("tong_tien_sau_giam"))!=0)
             throw new IllegalArgumentException("Tổng tiền đã thay đổi. Vui lòng kiểm tra lại đơn hàng.");
         jdbc.update("UPDATE giao_dich_thanh_toan SET trang_thai=?,thoi_gian_cap_nhat=SYSDATETIME(),ghi_chu=? WHERE id=?",
-            ketQua,"QR mô phỏng - kết quả: "+ketQua+"; không thu tiền thật",gd.get("id"));
+            ketQua,"thanh_cong".equals(ketQua)?"Đã thanh toán QR":"Thanh toán QR thất bại",gd.get("id"));
         if("thanh_cong".equals(ketQua)) {
             jdbc.update("""
                 UPDATE hoa_don SET ngay_thanh_toan=COALESCE(ngay_thanh_toan,SYSDATETIME()),ngay_cap_nhat=SYSDATETIME(),
                     ghi_chu=CASE WHEN ghi_chu IN (N'QR DEMO - giả lập, không thu tiền thật',N'QR mô phỏng',N'Chờ thanh toán online')
-                        THEN N'Đã thanh toán online' ELSE ghi_chu END WHERE id=?
+                        THEN N'Đã thanh toán QR' ELSE ghi_chu END WHERE id=?
                 """,id);
-            jdbc.update("INSERT INTO lich_su_hoa_don(id_hoa_don,trang_thai,ghi_chu) VALUES(?,?,N'Thanh toán QR: đã xác nhận trên điện thoại. Chờ cửa hàng xác nhận đơn.')",
+            jdbc.update("INSERT INTO lich_su_hoa_don(id_hoa_don,trang_thai,ghi_chu,loai_nguoi_thuc_hien) VALUES(?,?,N'Đã thanh toán QR','he_thong')",
                 id,don.get("trang_thai_hien_tai"));
         }
         if(chuong!=null) chuong.donThayDoi(id);

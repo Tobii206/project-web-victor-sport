@@ -278,7 +278,7 @@
             var invoice = doc.querySelector('[data-hoa-don-da-thanh-toan="true"]');
             if (!invoice || invoice.dataset.maHoaDon !== url.pathname.split('/').pop()) throw new Error('HoaDonKhongHopLe');
             // Chỉ lấy nội dung hóa đơn; bỏ điều khiển và mã chạy từ trang chi tiết.
-            invoice.querySelectorAll('script,iframe,object,embed,style,link,form,button,.invoice-actions').forEach(function (node) {node.remove();});
+            invoice.querySelectorAll('script,iframe,object,embed,style,link,form,button,.invoice-actions,.invoice-toolbar,.invoice-status,.don-hang-status,.invoice-no-print').forEach(function (node) {node.remove();});
             invoice.querySelectorAll('*').forEach(function (node) {
                 Array.from(node.attributes).forEach(function (attr) {
                     if (/^on/i.test(attr.name) || /^(href|src|action)$/i.test(attr.name) && /^\s*(javascript|vbscript):/i.test(attr.value)) node.removeAttribute(attr.name);

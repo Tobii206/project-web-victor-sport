@@ -254,7 +254,7 @@
             <h4>Thanh toán & Kết nối</h4>
             <div class="footer-payment-badges">
                 <span class="payment-tag">COD</span>
-                <span class="payment-tag">VietQR</span>
+                <span class="payment-tag">VNPAY</span>
                 <span class="payment-tag">Napas 247</span>
                 <span class="payment-tag">GHN Express</span>
             </div>

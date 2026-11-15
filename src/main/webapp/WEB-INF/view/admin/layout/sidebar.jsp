@@ -28,10 +28,13 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18l-3-2-4 2-4-2-3 2zM9 7h6M9 11h6M9 15h3"/></svg><span>Quản lý hóa đơn</span>
         </a>
         </c:if>
-        <c:if test="${currentUser.quanLy}">
+        <c:if test="${currentUser.xuLyDonHang}">
         <a class="menu-item ${activeMenu == 'van-chuyen' ? 'active' : ''}" href="/quan-ly/van-chuyen" aria-current="${activeMenu == 'van-chuyen' ? 'page' : 'false'}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h11v12H3zM14 10h4l3 4v4h-7M14 14h7"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg><span>Quản lý vận chuyển</span>
         </a>
+        <a class="menu-item ${activeMenu == 'tra-hang' ? 'active' : ''}" href="/quan-ly/tra-hang"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v5M4 4l6 6M5 14a8 8 0 1 0 2-8"/></svg><span>Trả hàng &amp; hoàn tiền</span></a>
+        </c:if>
+        <c:if test="${not empty currentUser}">
         <p class="menu-caption">ƯU ĐÃI</p>
         <a class="menu-item ${activeMenu == 'dot-giam-gia' ? 'active' : ''}" href="/quan-ly/dot-giam-gia" aria-current="${activeMenu == 'dot-giam-gia' ? 'page' : 'false'}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h8l10 10-8 8L3 11z"/><circle cx="7.5" cy="7.5" r="1"/><path d="m11 10 5 5"/></svg><span>Quản lý đợt giảm giá</span>
@@ -39,6 +42,8 @@
         <a class="menu-item ${activeMenu == 'phieu-giam-gia' ? 'active' : ''}" href="/quan-ly/phieu-giam-gia" aria-current="${activeMenu == 'phieu-giam-gia' ? 'page' : 'false'}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4zM14 6v3M14 11v2M14 15v3"/></svg><span>Phiếu giảm giá</span>
         </a>
+        </c:if>
+        <c:if test="${currentUser.quanLy}">
         <p class="menu-caption">CHỨC NĂNG QUẢN LÝ</p>
         <a class="menu-item ${activeMenu == 'nhan-vien' ? 'active' : ''}" href="/quan-ly/nhan-vien" aria-current="${activeMenu == 'nhan-vien' ? 'page' : 'false'}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2M10 16l2 2 2-2M12 18v3"/></svg><span>Quản lý nhân viên</span>

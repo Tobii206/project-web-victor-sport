@@ -152,7 +152,7 @@ public class VnpaySandboxService {
         if(thanhCong) {
             jdbc.update("UPDATE hoa_don SET ngay_thanh_toan=COALESCE(ngay_thanh_toan,SYSDATETIME()),ngay_cap_nhat=SYSDATETIME() WHERE id=?",id);
             int trangThai=((Number)don.get("trang_thai_hien_tai")).intValue();
-            jdbc.update("INSERT INTO lich_su_hoa_don(id_hoa_don,trang_thai,ghi_chu) VALUES(?,?,?)",id,trangThai,
+            jdbc.update("INSERT INTO lich_su_hoa_don(id_hoa_don,trang_thai,ghi_chu,loai_nguoi_thuc_hien) VALUES(?,?,?,'he_thong')",id,trangThai,
                 trangThai==6?"VNPAY Sandbox đã thanh toán cho đơn đã hủy. Cửa hàng cần đối soát hoàn tiền.":"VNPAY Sandbox xác nhận đã thanh toán. Chờ cửa hàng xác nhận đơn.");
             if(chuong!=null) chuong.donThayDoi(id);
         }

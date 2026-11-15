@@ -20,10 +20,11 @@
 .invoice-address-dialog [role="status"]:empty { display: none; }
 .invoice-address-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
 @media print {
+    .invoice-toolbar,.invoice-status,.don-hang-status {display:none!important;}
      .invoice-print-brand {display:flex!important;justify-content:space-between;align-items:center;gap:20px;break-inside:avoid;padding:10px 0 20px;border-bottom:1px solid #bbb;}
     .invoice-print-brand .invoice-print-logo {display:block!important;width:210px!important;height:auto!important;max-height:70px;object-fit:contain;}
     .invoice-print-brand > span {text-align:right;font-size:10pt;}
-    @page { size:A4; margin:15mm; }
+    @page { size:A4; margin:10mm; }
     body { background:white!important;font-size:11pt!important;color:#111!important; }
     .side-menu,.topbar,.invoice-actions,.invoice-toolbar form,.panel-header>a,.invoice-detail>.alert,.account-back,.store-header,.invoice-no-print,.invoice-history,.invoice-delivery-steps,button,script {display:none!important;}
     .app-shell,.main-area,.invoice-detail,.content-layout {display:block!important;width:auto!important;min-width:0!important;margin:0!important;padding:0!important;}
@@ -36,5 +37,33 @@
     tr {break-inside:avoid;} thead {display:table-header-group;}
     .invoice-table {overflow:visible!important;}
     .invoice-detail .invoice-bottom {display:flex!important;justify-content:flex-end;}
+    /* Bố cục A4 gọn, giữ nguyên đủ sản phẩm và tổng thanh toán. */
+    body {font-size:11pt!important;line-height:1.5!important;}
+    .invoice-print-brand {padding:4px 0 16px!important;gap:16px!important;}
+    .invoice-print-brand .invoice-print-logo {width:195px!important;max-height:60px!important;}
+    .invoice-print-brand > span {font-size:9pt!important;}
+    .invoice-detail .panel-header,.invoice-detail .panel-body {padding:8px 0!important;}
+    .invoice-detail .panel-header h2 {font-size:20pt!important;margin:4px 0 0!important;}
+    .invoice-detail .panel-body>p {margin:6px 0!important;}
+    .invoice-detail .invoice-info {gap:16px!important;margin:14px 0!important;}
+    .invoice-detail .invoice-info-card {padding:14px 16px!important;}
+    .invoice-detail .invoice-info-card h3 {font-size:10pt!important;margin:0 0 12px!important;padding-bottom:9px!important;}
+    .invoice-detail .invoice-info-card p {grid-template-columns:112px minmax(0,1fr)!important;gap:10px!important;margin:8px 0!important;font-size:10pt!important;line-height:1.5!important;}
+    .invoice-detail .invoice-info-card p strong {font-size:10pt!important;}
+    .invoice-detail .invoice-note {padding:10px 12px!important;margin:10px 0 16px!important;}
+    .invoice-detail .invoice-section-title {margin:14px 0 12px!important;font-size:11pt!important;}
+    .invoice-detail .table th,.invoice-detail .table td {padding:10px 7px!important;font-size:10pt!important;}
+    .invoice-detail .table .muted {margin-top:3px!important;font-size:8.5pt!important;}
+    .invoice-detail .invoice-bottom {margin-top:18px!important;gap:0!important;break-inside:avoid;}
+    .invoice-detail .invoice-total {box-sizing:border-box;width:100mm!important;max-width:100%;padding:16px 20px!important;}
+    .invoice-detail .invoice-total h3 {font-size:10pt!important;margin:0 0 8px!important;}
+    .invoice-detail .invoice-total .summary-row {font-size:10.5pt!important;padding:5px 0!important;gap:16px!important;}
+    .invoice-detail .invoice-total .summary-row.total {margin-top:6px!important;padding-top:8px!important;}
+    .invoice-detail .invoice-total .total strong {font-size:16pt!important;}
+    .order-detail-page .account-card {padding:12px!important;margin:10px 0!important;box-shadow:none!important;}
+    .order-detail-page .don-hang-columns {gap:12px!important;margin:12px 0!important;}
+    .order-detail-page h2 {font-size:12pt!important;margin:0 0 10px!important;}
+    .order-detail-page p {margin:5px 0!important;}
+    .order-detail-page .don-hang-item {padding:8px 0!important;}
     a {color:inherit!important;text-decoration:none!important;}
 }

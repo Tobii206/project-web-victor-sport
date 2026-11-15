@@ -169,6 +169,8 @@
                 </div>
             </div>
             <div class="countdown-timer" id="flashSaleCountdown" data-han="${hanUuDai}" aria-label="Thời gian ưu đãi còn lại">
+                <div class="countdown-box"><span class="num" id="fsDays">--</span><span class="label">Ngày</span></div>
+                <span class="countdown-colon">:</span>
                 <div class="countdown-box"><span class="num" id="fsHours">--</span><span class="label">Giờ</span></div>
                 <span class="countdown-colon">:</span>
                 <div class="countdown-box"><span class="num" id="fsMinutes">--</span><span class="label">Phút</span></div>
@@ -454,7 +456,7 @@
             </ul>
             <div class="footer-payment-badges" style="margin-top: 16px;">
                 <span class="payment-tag">COD</span>
-                <span class="payment-tag">VietQR</span>
+                <span class="payment-tag">VNPAY</span>
                 <span class="payment-tag">Napas 247</span>
                 <span class="payment-tag">GHN Express</span>
             </div>
@@ -470,6 +472,6 @@
 <!-- 10. Floating Back to Top Button -->
 <button type="button" class="back-to-top" id="backToTopBtn" aria-label="Lên đầu trang">↑</button>
 
-<script src="/js/victor-modern.js?v=20261102-banner-state"></script>
+<script src="/js/victor-modern.js?v=20261115-countdown-days"></script>
 </body>
 </html>

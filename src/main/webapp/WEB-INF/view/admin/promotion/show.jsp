@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=20261112-gender-20261107-balanced">
 <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"><link rel="stylesheet" href="/css/admin-theme.css?v=20261112-jsp-3"></head><body class="admin-page"><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
 <%@ include file="/WEB-INF/view/admin/layout/promotion-header.jsp" %><main class="content-layout">
-<section class="panel"><div class="panel-header"><h2>Danh sách đợt giảm giá</h2><a class="button" href="/quan-ly/dot-giam-gia/them">+ Thêm đợt giảm giá</a></div><div class="panel-body">
+<section class="panel"><div class="panel-header"><h2>Danh sách đợt giảm giá</h2><c:if test="${not chiXem}"><a class="button" href="/quan-ly/dot-giam-gia/them">+ Thêm đợt giảm giá</a></c:if></div><div class="panel-body">
 <c:if test="${not empty error}"><div class="alert error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
 <c:if test="${not empty success}"><div class="alert success" role="status" data-vs-flash="success"><c:out value="${success}"/></div></c:if>
 <form method="get" class="product-admin-filters">
@@ -17,7 +17,7 @@
 <c:forEach items="${danhSach}" var="u" varStatus="st"><tr><td class="table-stt">${st.count}</td><td><strong><c:out value="${u.ten_dot_giam_gia}"/></strong><div class="muted"><c:out value="${u.ma_dot_giam_gia}"/></div></td>
 <td><fmt:formatNumber value="${u.gia_tri_giam_gia}" maxFractionDigits="2"/> ${u.loai_giam_gia ? 'đ' : '%'}</td><td><c:out value="${u.ngay_bat_dau}"/><div class="muted">đến <c:out value="${u.ngay_ket_thuc}"/></div></td>
 <td><c:out value="${u.so_mau}"/></td><td><span class="product-admin-tag ${u.het_han ? 'expired' : (u.sap_mo ? 'upcoming' : (u.trang_thai ? '' : 'off'))}"><c:out value="${u.ten_trang_thai}"/></span></td>
-<td><div class="product-admin-actions"><a class="button secondary" href="/quan-ly/dot-giam-gia/${u.id}">Chi tiết / Sửa</a>
-<c:if test="${u.trang_thai and not u.het_han}"><form method="post" action="/quan-ly/dot-giam-gia/${u.id}/ngung" data-vs-confirm="Bạn muốn ngừng áp dụng đợt giảm giá này? Các sản phẩm trong đợt sẽ ngừng nhận ưu đãi này." data-vs-title="Ngừng đợt giảm giá" data-vs-button="Ngừng áp dụng" data-vs-tone="danger"><button class="button danger">Ngừng áp dụng</button></form></c:if></div></td></tr></c:forEach>
+<td><div class="product-admin-actions"><a class="button secondary" href="/quan-ly/dot-giam-gia/${u.id}">${chiXem ? 'Xem chi tiết' : 'Chi tiết / Sửa'}</a>
+<c:if test="${not chiXem and u.trang_thai and not u.het_han}"><form method="post" action="/quan-ly/dot-giam-gia/${u.id}/ngung" data-vs-confirm="Bạn muốn ngừng áp dụng đợt giảm giá này? Các sản phẩm trong đợt sẽ ngừng nhận ưu đãi này." data-vs-title="Ngừng đợt giảm giá" data-vs-button="Ngừng áp dụng" data-vs-tone="danger"><button class="button danger">Ngừng áp dụng</button></form></c:if></div></td></tr></c:forEach>
 <c:if test="${empty danhSach}"><tr><td colspan="7">Không có đợt giảm giá phù hợp.</td></tr></c:if></tbody></table></div>
 </div></section></main></div></div></body></html>

@@ -54,6 +54,9 @@ class NhanHangThanhToanCodTests {
             nhan.run();assertThrows(IllegalArgumentException.class,nhan::run);
             verify(jdbc).update(contains("INSERT INTO giao_dich_thanh_toan"),eq(10),eq(4),eq(new BigDecimal("130000")),eq(admin));
             verify(jdbc).update(contains("ngay_thanh_toan=SYSDATETIME()"),eq(admin),eq(10));
+            if(role==0)verify(jdbc).update(contains("INSERT INTO lich_su_hoa_don"),eq(10),eq("Khách hàng xác nhận đã nhận hàng. Đã nhận tiền COD."),eq(7));
+            else if(role==1)verify(jdbc).update(contains("INSERT INTO lich_su_hoa_don"),eq(10),eq("Khách vãng lai xác nhận đã nhận hàng. Đã nhận tiền COD."));
+            else verify(jdbc).update(contains("INSERT INTO lich_su_hoa_don"),eq(10),eq(5),eq("Cửa hàng xác nhận khách đã nhận hàng. Đã nhận tiền COD."),eq(2),eq(2));
         }
     }
     @Test void chiThuPhanConThieuVaKhongThuLaiDonDaThanhToan() {
@@ -62,7 +65,7 @@ class NhanHangThanhToanCodTests {
             when(jdbc.update(contains("SET trang_thai_hien_tai=5"),eq(10))).thenReturn(1);
             when(jdbc.queryForObject(contains("SUM(so_tien)"),eq(BigDecimal.class),eq(10))).thenReturn(new BigDecimal(daThu));
             service.nhanDonVangLai(10,true);
-            if(daThu.equals("130000")) verify(jdbc,never()).update(contains("INSERT INTO giao_dich_thanh_toan"),any(Object[].class));
+            if(daThu.equals("130000")) {verify(jdbc,never()).update(contains("INSERT INTO giao_dich_thanh_toan"),any(Object[].class));verify(jdbc).update(contains("INSERT INTO lich_su_hoa_don"),eq(10),eq("Khách vãng lai xác nhận đã nhận hàng."));}
             else verify(jdbc).update(contains("INSERT INTO giao_dich_thanh_toan"),eq(10),eq(4),eq(new BigDecimal("100000")),isNull());
         }
     }
@@ -72,6 +75,16 @@ class NhanHangThanhToanCodTests {
         when(jdbc.queryForList(contains("SELECT TOP 1 pt.nha_cung_cap"),eq(10))).thenReturn(List.of(Map.of("nha_cung_cap","VietQR")));
         service.nhanDonVangLai(10,true);
         verify(jdbc,never()).update(contains("INSERT INTO giao_dich_thanh_toan"),any(Object[].class));
+        verify(jdbc).update(contains("INSERT INTO lich_su_hoa_don"),eq(10),eq("Khách vãng lai xác nhận đã nhận hàng."));
+    }
+    @Test void lichSuCuHienTheoKhoanThuCodThucTe() {
+        for(boolean cod:List.of(false,true)) {
+            var j=mock(JdbcTemplate.class);
+            when(j.queryForList(contains("SELECT ls.trang_thai,ls.thoi_gian,ls.ghi_chu"),eq(10))).thenReturn(List.of(new HashMap<>(Map.of("ghi_chu","Khách hàng xác nhận đã nhận hàng; nếu thanh toán COD, đã trả đủ tiền COD."))));
+            when(j.queryForList(contains("SELECT TOP 1 gd.id"),eq(10))).thenReturn(cod?List.of(Map.of("id",1)):List.of());
+            assertEquals("Khách hàng xác nhận đã nhận hàng."+(cod?" Đã nhận tiền COD.":""),new HoaDonService(j).layLichSu(10).get(0).get("ghi_chu"));
+            verify(j,never()).update(anyString(),any(Object[].class));
+        }
     }
     @Test void cacDuongDanThuCodRiengKhongConHoatDong() throws Exception {
         var service=mock(HoaDonService.class);

@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class HoaDonService {
@@ -75,7 +76,7 @@ public class HoaDonService {
     private List<Map<String,Object>> docDanhSachHoaDon(LocHoaDon loc,Integer trang) {
         String sql = """
                 SELECT id, id_nhan_vien, id_khach_hang, loai_don, ma_hoa_don, ten_khach_hang, so_dien_thoai_khach_hang,
-                       ngay_tao, ngay_thanh_toan, tong_tien_sau_giam, trang_thai_hien_tai,
+                       ngay_tao, ngay_thanh_toan, tong_tien_sau_giam, tong_tien_da_hoan, trang_thai_hien_tai,
                        CASE WHEN trang_thai_hien_tai = 0 THEN N'Đơn chờ'
                             WHEN trang_thai_hien_tai = 1 THEN N'Chờ xác nhận'
                             WHEN trang_thai_hien_tai = 2 THEN N'Đã xác nhận đơn'
@@ -309,8 +310,8 @@ public class HoaDonService {
         hd.put("da_thanh_toan", daThu.compareTo(canThu) >= 0 && (canThu.signum() > 0 || hd.get("ngay_thanh_toan") != null));
         hd.put("co_thanh_toan",daThu.signum()>0);
         if(Boolean.TRUE.equals(hd.get("qr_demo")) && hd.get("ghi_chu") instanceof String note
-                && (note.contains("QR DEMO") || note.equals("QR mô phỏng") || note.equals("Chờ thanh toán online")))
-            hd.put("ghi_chu",Boolean.TRUE.equals(hd.get("da_thanh_toan"))?"Đã thanh toán online":"Chờ thanh toán online");
+                && (note.contains("QR DEMO") || note.contains("QR giả lập") || note.toLowerCase(java.util.Locale.ROOT).contains("qr mô phỏng") || note.equals("Đã thanh toán online") || note.equals("Chờ thanh toán online")))
+            hd.put("ghi_chu",Boolean.TRUE.equals(hd.get("da_thanh_toan"))?"Đã thanh toán QR":"Chờ thanh toán online");
     }
     private boolean laCod(int id,Map<String,Object> hd) {
         var pt=jdbcTemplate.queryForList("""
@@ -333,28 +334,31 @@ public class HoaDonService {
             WHERE gd.id_hoa_don=? AND pt.nha_cung_cap=N'QR_DEMO' AND ISNULL(gd.xoa_mem,0)=0
             """,id).isEmpty();
     }
-    private void kiemTraAdmin(int id) {
+    private void kiemTraQuyenXuLyDon(int id) {
         if(jdbcTemplate.queryForList("""
             SELECT nv.id FROM nhan_vien nv JOIN quyen_han q ON q.id=nv.id_quyen_han
             WHERE nv.id=? AND nv.trang_thai=1 AND ISNULL(nv.xoa_mem,0)=0
-              AND q.ten_quyen_han=N'Quản trị viên' AND q.trang_thai=1 AND ISNULL(q.xoa_mem,0)=0
-            """,id).isEmpty()) throw new IllegalArgumentException("Chỉ quản trị viên được thực hiện thao tác này.");
+              AND (q.ten_quyen_han=N'Quản trị viên' OR EXISTS (
+                    SELECT 1 FROM quyen_han_chuc_nang qcn JOIN chuc_nang cn ON cn.id=qcn.id_chuc_nang
+                    WHERE qcn.id_quyen_han=q.id AND ISNULL(qcn.xoa_mem,0)=0
+                      AND cn.ma_chuc_nang='ORDER_WRITE' AND ISNULL(cn.xoa_mem,0)=0 AND ISNULL(cn.trang_thai,1)=1)) AND q.trang_thai=1 AND ISNULL(q.xoa_mem,0)=0
+            """,id).isEmpty()) throw new IllegalArgumentException("Bạn không có quyền xử lý đơn hàng.");
     }
     @Transactional
     public void xacNhanDonCod(int id,int admin) {
-        kiemTraAdmin(admin);
+        kiemTraQuyenXuLyDon(admin);
         var ds=jdbcTemplate.queryForList("SELECT * FROM hoa_don WITH (UPDLOCK,HOLDLOCK) WHERE id=? AND loai_don IN (1,2) AND ISNULL(xoa_mem,0)=0",id);
         if(ds.isEmpty() || ((Number)ds.get(0).get("trang_thai_hien_tai")).intValue()!=1 || !laCod(id,ds.get(0)))
             throw new IllegalArgumentException("Chỉ xác nhận được đơn COD đang chờ xác nhận.");
         if(jdbcTemplate.queryForList("SELECT id FROM hoa_don_chi_tiet WHERE id_hoa_don=? AND so_luong>0 AND ISNULL(xoa_mem,0)=0",id).isEmpty())
             throw new IllegalArgumentException("Đơn chưa có sản phẩm.");
         jdbcTemplate.update("UPDATE hoa_don SET trang_thai_hien_tai=2,ngay_cap_nhat=SYSDATETIME(),nguoi_cap_nhat=? WHERE id=? AND trang_thai_hien_tai=1",admin,id);
-        ghiLichSuAdmin(id,2,"Quản trị viên xác nhận đơn COD. Đơn chờ chuẩn bị hàng.",admin);
+        ghiLichSuAdmin(id,2,"Cửa hàng xác nhận đơn COD. Đơn chờ chuẩn bị hàng.",admin);
     }
 
     @Transactional
     public void batDauChuanBi(int id,int admin) {
-        kiemTraAdmin(admin);
+        kiemTraQuyenXuLyDon(admin);
         int dong=jdbcTemplate.update("UPDATE hoa_don SET trang_thai_hien_tai=3,ngay_cap_nhat=SYSDATETIME(),nguoi_cap_nhat=? WHERE id=? AND loai_don IN (1,2) AND trang_thai_hien_tai=2 AND ISNULL(xoa_mem,0)=0",admin,id);
         if(dong!=1) throw new IllegalArgumentException("Chỉ bắt đầu chuẩn bị được đơn đã xác nhận.");
         ghiLichSuAdmin(id,3,"Cửa hàng bắt đầu chuẩn bị hàng.",admin);
@@ -362,7 +366,7 @@ public class HoaDonService {
 
     @Transactional
     public void banGiaoShipper(int id,int admin) {
-        kiemTraAdmin(admin);
+        kiemTraQuyenXuLyDon(admin);
         var ds=jdbcTemplate.queryForList("SELECT trang_thai_hien_tai FROM hoa_don WITH (UPDLOCK,HOLDLOCK) WHERE id=? AND loai_don IN (1,2) AND ISNULL(xoa_mem,0)=0",id);
         if(ds.isEmpty() || ((Number)ds.get(0).get("trang_thai_hien_tai")).intValue()!=3)
             throw new IllegalArgumentException("Chỉ gửi được đơn đang chuẩn bị hàng.");
@@ -375,7 +379,7 @@ public class HoaDonService {
     }
     @Transactional
     public void xacNhanThuTienCod(int id,int admin) {
-        kiemTraAdmin(admin);
+        kiemTraQuyenXuLyDon(admin);
         ghiNhanCodKhiNhanHang(id,admin);
     }
     @Transactional
@@ -405,11 +409,11 @@ public class HoaDonService {
     }
     @Transactional
     public void xacNhanGiaoKhachVangLai(int id,int admin) {
-        kiemTraAdmin(admin);
+        kiemTraQuyenXuLyDon(admin);
         int dong=jdbcTemplate.update("UPDATE hoa_don SET trang_thai_hien_tai=5,ngay_cap_nhat=SYSDATETIME(),nguoi_cap_nhat=? WHERE id=? AND (id_khach_hang IS NULL OR loai_don=2) AND loai_don IN (1,2) AND trang_thai_hien_tai=4 AND ISNULL(xoa_mem,0)=0",admin,id);
         if(dong!=1) throw new IllegalArgumentException("Chỉ xác nhận hộ đơn khách vãng lai hoặc đơn tại quầy đang vận chuyển.");
-        ghiNhanCodKhiNhanHang(id,admin);
-        ghiLichSuAdmin(id,5,"Quản trị viên xác nhận khách đã nhận hàng; nếu thanh toán COD, đã trả đủ tiền COD.",admin);
+        boolean thuCod=ghiNhanCodKhiNhanHang(id,admin);
+        ghiLichSuAdmin(id,5,"Cửa hàng xác nhận khách đã nhận hàng."+(thuCod?" Đã nhận tiền COD.":""),admin);
     }
 
     private void ghiLichSuAdmin(int id,int tt,String ghiChu,int admin) {
@@ -433,14 +437,47 @@ public class HoaDonService {
     }
 
     public List<Map<String,Object>> layLichSu(int idHoaDon) {
-        var lichSu=jdbcTemplate.queryForList("""
-                SELECT trang_thai,thoi_gian,ghi_chu FROM lich_su_hoa_don
-                WHERE id_hoa_don=? AND ISNULL(xoa_mem,0)=0 ORDER BY thoi_gian,id
-                """, idHoaDon);
+        var lichSu=new java.util.ArrayList<>(jdbcTemplate.queryForList("""
+                SELECT ls.trang_thai,ls.thoi_gian,ls.ghi_chu,ls.nguoi_thuc_hien,ls.nguoi_cap_nhat,
+                    nv.ten_nhan_vien,nv.ma_nhan_vien,q.ten_quyen_han,
+                    kh.ten_khach_hang,kh.ma_khach_hang,hd.ten_khach_hang AS ten_khach_tren_don,hd.id_khach_hang,
+                    actor.loai AS loai_tac_nhan
+                FROM lich_su_hoa_don ls JOIN hoa_don hd ON hd.id=ls.id_hoa_don
+                CROSS APPLY(SELECT CASE
+                    WHEN NULLIF(ls.loai_nguoi_thuc_hien,'') IS NOT NULL THEN ls.loai_nguoi_thuc_hien
+                    WHEN ls.nguoi_cap_nhat IS NOT NULL THEN 'nhan_vien'
+                    WHEN ls.ghi_chu LIKE N'Khách đặt hàng online%' OR ls.ghi_chu LIKE N'Khách hàng xác nhận đã nhận%' THEN 'khach_hang'
+                    WHEN ls.ghi_chu IN (N'Đã thanh toán QR',N'Thanh toán QR: đã xác nhận trên điện thoại. Chờ cửa hàng xác nhận đơn.') THEN 'he_thong'
+                    ELSE 'khong_ro' END AS loai) actor
+                LEFT JOIN nhan_vien nv ON actor.loai='nhan_vien' AND nv.id=COALESCE(ls.nguoi_thuc_hien,ls.nguoi_cap_nhat)
+                LEFT JOIN quyen_han q ON q.id=nv.id_quyen_han
+                LEFT JOIN khach_hang kh ON actor.loai='khach_hang' AND kh.id=COALESCE(ls.nguoi_thuc_hien,hd.id_khach_hang)
+                WHERE ls.id_hoa_don=? AND ISNULL(ls.xoa_mem,0)=0 ORDER BY ls.thoi_gian,ls.id
+                """, idHoaDon));
+        themLichSuTraHang(lichSu,idHoaDon);
         var ketQua=new java.util.ArrayList<Map<String,Object>>();
-        for(var buoc:lichSu) {
+        Boolean daNhanCod=null;
+        for(var dongCu:lichSu) {
+            var buoc=new java.util.HashMap<String,Object>(dongCu);
+            themNguoiThaoTac(buoc);
+            if(buoc.get("ghi_chu") instanceof String note && Set.of(
+                    "Khách hàng xác nhận đã nhận hàng; nếu thanh toán COD, đã trả đủ tiền COD.",
+                    "Khách vãng lai xác nhận đã nhận hàng; nếu thanh toán COD, đã trả đủ tiền COD.",
+                    "Quản trị viên xác nhận khách đã nhận hàng; nếu thanh toán COD, đã trả đủ tiền COD.").contains(note)) {
+                if(daNhanCod==null)daNhanCod=!jdbcTemplate.queryForList("""
+                    SELECT TOP 1 gd.id FROM giao_dich_thanh_toan gd JOIN phuong_thuc_thanh_toan pt ON pt.id=gd.id_phuong_thuc_thanh_toan
+                    WHERE gd.id_hoa_don=? AND gd.trang_thai=N'thanh_cong' AND pt.nha_cung_cap=N'COD' AND ISNULL(gd.xoa_mem,0)=0
+                    """,idHoaDon).isEmpty();
+                buoc.put("ghi_chu",note.substring(0,note.indexOf(';'))+"."+(daNhanCod?" Đã nhận tiền COD.":""));
+            }
             if(buoc.get("ghi_chu") instanceof String note && note.contains("QR DEMO"))
                 buoc.put("ghi_chu",note.replace("QR DEMO","Thanh toán QR").replace("tự động giả lập đã thanh toán, không thu tiền thật.","đã xác nhận thanh toán."));
+            if(buoc.get("ghi_chu") instanceof String note && note.matches("Thanh toán QR\\s*[-:·]?\\s*giả lập, không thu tiền thật\\.?"))
+                buoc.put("ghi_chu","Đã thanh toán QR");
+            if(buoc.get("ghi_chu") instanceof String note) {
+                if(note.equals("Thanh toán QR: đã xác nhận trên điện thoại. Chờ cửa hàng xác nhận đơn."))buoc.put("ghi_chu","Đã thanh toán QR");
+                else buoc.put("ghi_chu",note.replace("Thanh toán QR mô phỏng","Thanh toán QR").replace("thanh toán QR mô phỏng","thanh toán QR"));
+            }
             if("Shipper đã lấy kiện hàng; đơn chuyển sang đang vận chuyển.".equals(buoc.get("ghi_chu"))) {
                 // Tách cách hiển thị sự kiện cũ, giữ nguyên thời điểm đã ghi nhận.
                 for(String nhan:List.of("Đã gửi hàng cho shipper.","Đơn hàng đang vận chuyển.")) {
@@ -449,6 +486,58 @@ public class HoaDonService {
             } else ketQua.add(buoc);
         }
         return ketQua;
+    }
+
+    private void themLichSuTraHang(List<Map<String,Object>> lichSu,int idHoaDon) {
+        var cacMoc=jdbcTemplate.queryForList("""
+            SELECT lr.id AS thu_tu_tra,lr.id_yeu_cau,y.ma_yeu_cau,lr.trang_thai AS trang_thai_tra_hang,
+                hd.trang_thai_hien_tai AS trang_thai,lr.ngay_tao AS thoi_gian,lr.noi_dung,
+                COALESCE(lr.id_nhan_vien,lr.id_khach) AS nguoi_thuc_hien,lr.id_nhan_vien AS nguoi_cap_nhat,
+                CASE WHEN lr.id_nhan_vien IS NOT NULL THEN 'nhan_vien' ELSE 'khach_hang' END AS loai_tac_nhan,
+                nv.ten_nhan_vien,nv.ma_nhan_vien,q.ten_quyen_han,
+                kh.ten_khach_hang,kh.ma_khach_hang,hd.ten_khach_hang AS ten_khach_tren_don,hd.id_khach_hang
+            FROM lich_su_tra_hang lr JOIN yeu_cau_tra_hang y ON y.id=lr.id_yeu_cau
+            JOIN hoa_don hd ON hd.id=y.id_hoa_don
+            LEFT JOIN nhan_vien nv ON nv.id=lr.id_nhan_vien LEFT JOIN quyen_han q ON q.id=nv.id_quyen_han
+            LEFT JOIN khach_hang kh ON kh.id=lr.id_khach
+            WHERE y.id_hoa_don=? ORDER BY lr.ngay_tao,lr.id
+            """,idHoaDon);
+        // Mốc hoàn tiền cũ đã có trong lịch sử trả hàng: chỉ hiển thị một lần.
+        var daHoan=new java.util.HashSet<Integer>();
+        for(var m:cacMoc)if("DA_HOAN_TIEN".equals(m.get("trang_thai_tra_hang"))&&m.get("id_yeu_cau") instanceof Number id)daHoan.add(id.intValue());
+        var mau=java.util.regex.Pattern.compile("Hoàn tiền theo yêu cầu TH([0-9]+):.*",java.util.regex.Pattern.DOTALL);
+        lichSu.removeIf(m->{Object note=m.get("ghi_chu");if(!(note instanceof String text))return false;var khop=mau.matcher(text);if(!khop.matches())return false;
+            try{return daHoan.contains(Integer.valueOf(khop.group(1)));}catch(NumberFormatException ex){return false;}});
+        for(var m:cacMoc){var buoc=new java.util.HashMap<String,Object>(m);
+            String tt=String.valueOf(m.get("trang_thai_tra_hang"));
+            String nhan=TraHangService.TRANG_THAI.getOrDefault(tt,"Trả hàng / hoàn tiền");
+            buoc.put("ghi_chu",m.get("ma_yeu_cau")+" · "+nhan+". "+java.util.Objects.toString(m.get("noi_dung"),""));lichSu.add(buoc);
+        }
+        lichSu.sort((x,y)->{long tx=x.get("thoi_gian") instanceof java.util.Date d?d.getTime():0;
+            long ty=y.get("thoi_gian") instanceof java.util.Date d?d.getTime():0;return Long.compare(tx,ty);});
+    }
+
+    private void themNguoiThaoTac(Map<String,Object> buoc) {
+        String loai=String.valueOf(buoc.get("loai_tac_nhan"));
+        String ten,ma="",vaiTro;
+        switch(loai) {
+            case "nhan_vien" -> {
+                ten=giaTriLichSu(buoc,"ten_nhan_vien","Nhân viên chưa có thông tin");
+                ma=giaTriLichSu(buoc,"ma_nhan_vien","");vaiTro=giaTriLichSu(buoc,"ten_quyen_han","Nhân viên");
+                if(ma.isBlank()){Object id=buoc.get("nguoi_thuc_hien")!=null?buoc.get("nguoi_thuc_hien"):buoc.get("nguoi_cap_nhat");if(id!=null)ma="ID "+id;}
+            }
+            case "khach_hang" -> {
+                boolean vangLai=buoc.get("nguoi_thuc_hien")==null&&buoc.get("id_khach_hang")==null;
+                ten=giaTriLichSu(buoc,"ten_khach_hang",giaTriLichSu(buoc,"ten_khach_tren_don","Khách hàng"));
+                ma=giaTriLichSu(buoc,"ma_khach_hang","");vaiTro=vangLai?"Khách vãng lai":"Khách hàng";
+            }
+            case "he_thong" -> {ten="Hệ thống";vaiTro="Tự động";}
+            default -> {ten="Chưa ghi nhận người thực hiện";vaiTro="Dữ liệu cũ";}
+        }
+        buoc.put("nguoi_thao_tac",ten);buoc.put("ma_nguoi_thao_tac",ma);buoc.put("vai_tro_thao_tac",vaiTro);
+    }
+    private String giaTriLichSu(Map<String,Object> buoc,String key,String macDinh) {
+        Object v=buoc.get(key);return v instanceof String text&&!text.isBlank()?text:macDinh;
     }
 
     private void kiemTraKhachHang(int idKhachHang) {
@@ -467,7 +556,7 @@ public class HoaDonService {
         String ma=tuKhoa==null?"":tuKhoa.trim().toUpperCase(java.util.Locale.ROOT);
         if(!ma.isEmpty() && !ma.matches("[A-Z0-9_-]{1,50}")) return List.of();
         String sql="""
-                SELECT id,ma_hoa_don,ngay_tao,tong_tien_sau_giam,trang_thai_hien_tai,
+                SELECT id,ma_hoa_don,ngay_tao,tong_tien_sau_giam,tong_tien_da_hoan,trang_thai_hien_tai,
                     CAST(CASE WHEN EXISTS (SELECT 1 FROM giao_dich_thanh_toan gd WHERE gd.id_hoa_don=hoa_don.id
                         AND gd.trang_thai=N'thanh_cong' AND gd.so_tien>0 AND ISNULL(gd.xoa_mem,0)=0) THEN 1 ELSE 0 END AS BIT) AS co_thanh_toan,
                     (SELECT TOP 1 vd.ma_van_don FROM van_don_ghn vd WHERE vd.id_hoa_don=hoa_don.id) AS ma_van_don,
@@ -501,9 +590,12 @@ public class HoaDonService {
         var admin = jdbcTemplate.queryForList("""
                 SELECT nv.id FROM nhan_vien nv JOIN quyen_han q ON q.id=nv.id_quyen_han
                 WHERE nv.id=? AND ISNULL(nv.xoa_mem,0)=0 AND nv.trang_thai=1
-                    AND ISNULL(q.xoa_mem,0)=0 AND q.trang_thai=1 AND q.ten_quyen_han=N'Quản trị viên'
+                    AND ISNULL(q.xoa_mem,0)=0 AND q.trang_thai=1 AND (q.ten_quyen_han=N'Quản trị viên' OR EXISTS (
+                    SELECT 1 FROM quyen_han_chuc_nang qcn JOIN chuc_nang cn ON cn.id=qcn.id_chuc_nang
+                    WHERE qcn.id_quyen_han=q.id AND ISNULL(qcn.xoa_mem,0)=0
+                      AND cn.ma_chuc_nang='ORDER_WRITE' AND ISNULL(cn.xoa_mem,0)=0 AND ISNULL(cn.trang_thai,1)=1))
                 """, idAdmin);
-        if (admin.isEmpty()) throw new IllegalArgumentException("Chỉ quản trị viên được xác nhận thanh toán.");
+        if (admin.isEmpty()) throw new IllegalArgumentException("Bạn không có quyền xác nhận thanh toán.");
         // Khóa hóa đơn để hai lần bấm không tạo trùng thanh toán và lịch sử.
         var ds = jdbcTemplate.queryForList("""
                 SELECT * FROM hoa_don WITH (UPDLOCK,HOLDLOCK)
@@ -537,7 +629,7 @@ public class HoaDonService {
             if (phuongThuc.isEmpty()) throw new IllegalArgumentException("Chưa có phương thức thanh toán cho đơn hàng.");
             int daCapNhatQr = jdbcTemplate.update("""
                     UPDATE gd SET trang_thai=N'thanh_cong',thoi_gian_cap_nhat=SYSDATETIME(),nguoi_cap_nhat=?,
-                        ghi_chu=N'Quản trị viên đã kiểm tra và xác nhận chuyển khoản QR'
+                        ghi_chu=N'Cửa hàng đã kiểm tra và xác nhận chuyển khoản QR'
                     FROM giao_dich_thanh_toan gd JOIN phuong_thuc_thanh_toan pt ON pt.id=gd.id_phuong_thuc_thanh_toan
                     WHERE gd.id=(SELECT MIN(id) FROM giao_dich_thanh_toan WHERE id_hoa_don=?
                         AND trang_thai=N'cho_thanh_toan' AND so_tien=? AND ISNULL(xoa_mem,0)=0)
@@ -545,7 +637,7 @@ public class HoaDonService {
                     """, idAdmin,idHoaDon,conLai);
             if (daCapNhatQr == 0) jdbcTemplate.update("""
                     INSERT INTO giao_dich_thanh_toan (id_hoa_don,id_phuong_thuc_thanh_toan,so_tien,trang_thai,nguoi_cap_nhat,ghi_chu)
-                    VALUES (?,?,?,N'thanh_cong',?,N'Quản trị viên xác nhận đã thanh toán')
+                    VALUES (?,?,?,N'thanh_cong',?,N'Cửa hàng xác nhận đã thanh toán')
                     """, idHoaDon,phuongThuc.get(0).get("id"),conLai,idAdmin);
         }
         int dong = jdbcTemplate.update("""
@@ -556,7 +648,7 @@ public class HoaDonService {
         if (dong != 1) throw new IllegalArgumentException("Trạng thái đơn đã thay đổi. Vui lòng tải lại trang.");
         jdbcTemplate.update("""
                 INSERT INTO lich_su_hoa_don (id_hoa_don,trang_thai,ghi_chu,nguoi_cap_nhat,nguoi_thuc_hien,loai_nguoi_thuc_hien)
-                VALUES (?,2,N'Quản trị viên xác nhận thanh toán và xác nhận đơn hàng.',?,?,'nhan_vien')
+                VALUES (?,2,N'Cửa hàng xác nhận thanh toán và xác nhận đơn hàng.',?,?,'nhan_vien')
                 """, idHoaDon,idAdmin,idAdmin);
         baoChuong(idHoaDon);
         // Kho đã được trừ khi khách đặt hàng, không trừ lại khi xác nhận.
@@ -570,11 +662,11 @@ public class HoaDonService {
                 WHERE id=? AND id_khach_hang=? AND loai_don IN (1,2) AND trang_thai_hien_tai=4 AND ISNULL(xoa_mem,0)=0
                 """, idHoaDon,idKhachHang);
         if (dong != 1) throw new IllegalArgumentException("Không thể xác nhận. Đơn phải thuộc tài khoản của bạn và đang vận chuyển.");
-        ghiNhanCodKhiNhanHang(idHoaDon,null);
+        boolean thuCod=ghiNhanCodKhiNhanHang(idHoaDon,null);
         jdbcTemplate.update("""
                 INSERT INTO lich_su_hoa_don (id_hoa_don,trang_thai,ghi_chu,nguoi_thuc_hien,loai_nguoi_thuc_hien)
-                VALUES (?,5,N'Khách hàng xác nhận đã nhận hàng; nếu thanh toán COD, đã trả đủ tiền COD.',?,'khach_hang')
-                """, idHoaDon,idKhachHang);
+                VALUES (?,5,?,?,'khach_hang')
+                """, idHoaDon,"Khách hàng xác nhận đã nhận hàng."+(thuCod?" Đã nhận tiền COD.":""),idKhachHang);
         baoChuong(idHoaDon);
     }
 
@@ -606,8 +698,8 @@ public class HoaDonService {
         if(!dungPhien) throw new IllegalArgumentException("Bạn không có quyền xử lý đơn hàng này.");
         int dong=jdbcTemplate.update("UPDATE hoa_don SET trang_thai_hien_tai=5,ngay_cap_nhat=SYSDATETIME() WHERE id=? AND id_khach_hang IS NULL AND loai_don IN (1,2) AND trang_thai_hien_tai=4 AND ISNULL(xoa_mem,0)=0",id);
         if(dong!=1) throw new IllegalArgumentException("Đơn hàng phải đang vận chuyển.");
-        ghiNhanCodKhiNhanHang(id,null);
-        jdbcTemplate.update("INSERT INTO lich_su_hoa_don(id_hoa_don,trang_thai,ghi_chu,loai_nguoi_thuc_hien) VALUES (?,5,N'Khách vãng lai xác nhận đã nhận hàng; nếu thanh toán COD, đã trả đủ tiền COD.','khach_hang')",id);
+        boolean thuCod=ghiNhanCodKhiNhanHang(id,null);
+        jdbcTemplate.update("INSERT INTO lich_su_hoa_don(id_hoa_don,trang_thai,ghi_chu,loai_nguoi_thuc_hien) VALUES (?,5,?,'khach_hang')",id,"Khách vãng lai xác nhận đã nhận hàng."+(thuCod?" Đã nhận tiền COD.":""));
         baoChuong(id);
     }
     @Transactional
@@ -637,9 +729,12 @@ public class HoaDonService {
         var admin = jdbcTemplate.queryForList("""
                 SELECT nv.id FROM nhan_vien nv JOIN quyen_han q ON q.id=nv.id_quyen_han
                 WHERE nv.id=? AND nv.trang_thai=1 AND ISNULL(nv.xoa_mem,0)=0
-                  AND q.ten_quyen_han=N'Quản trị viên' AND q.trang_thai=1 AND ISNULL(q.xoa_mem,0)=0
+                  AND (q.ten_quyen_han=N'Quản trị viên' OR EXISTS (
+                    SELECT 1 FROM quyen_han_chuc_nang qcn JOIN chuc_nang cn ON cn.id=qcn.id_chuc_nang
+                    WHERE qcn.id_quyen_han=q.id AND ISNULL(qcn.xoa_mem,0)=0
+                      AND cn.ma_chuc_nang='ORDER_WRITE' AND ISNULL(cn.xoa_mem,0)=0 AND ISNULL(cn.trang_thai,1)=1)) AND q.trang_thai=1 AND ISNULL(q.xoa_mem,0)=0
                 """,idAdmin);
-        if (admin.isEmpty()) throw new IllegalArgumentException("Chỉ quản trị viên được hủy hóa đơn.");
+        if (admin.isEmpty()) throw new IllegalArgumentException("Bạn không có quyền hủy hóa đơn.");
         huyDonChuaXacNhan(idHoaDon,null,idAdmin);
     }
 
@@ -696,7 +791,7 @@ public class HoaDonService {
             jdbcTemplate.update("UPDATE phieu_giam_gia SET so_luong_su_dung=so_luong_su_dung+1 WHERE id=?",ds.get(0).get("id_phieu_giam_gia"));
         if (idAdmin != null) jdbcTemplate.update("""
                 INSERT INTO lich_su_hoa_don (id_hoa_don,trang_thai,ghi_chu,nguoi_cap_nhat,nguoi_thuc_hien,loai_nguoi_thuc_hien)
-                VALUES (?,6,N'Quản trị viên hủy hóa đơn chưa xác nhận.',?,?,'nhan_vien')
+                VALUES (?,6,N'Cửa hàng hủy hóa đơn chưa xác nhận.',?,?,'nhan_vien')
                 """,idHoaDon,idAdmin,idAdmin);
         else jdbcTemplate.update("""
                 INSERT INTO lich_su_hoa_don (id_hoa_don,trang_thai,ghi_chu,nguoi_thuc_hien,loai_nguoi_thuc_hien)

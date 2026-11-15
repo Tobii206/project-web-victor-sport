@@ -4,11 +4,11 @@
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title><c:out value="${tenChucNang}"/> — VictorSport</title><link rel="icon" href="/logo/favicon-victorsport.svg">
 <link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=20261112-gender-20261107-balanced">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"><link rel="stylesheet" href="/css/admin-theme.css?v=20261112-jsp-3"></head><body class="admin-page"><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"><link rel="stylesheet" href="/css/admin-theme.css?v=20261112-jsp-3"><style>.promotion-fields{display:contents}.promotion-fields[disabled] :is(input,select){opacity:1;color:#334155;background:#f6f8fc;cursor:default}</style></head><body class="admin-page"><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
 <%@ include file="/WEB-INF/view/admin/layout/promotion-header.jsp" %><main class="content-layout">
 <section class="panel"><div class="panel-header"><h2>Thông tin ${phieuFreeship ? 'phiếu giảm giá vận chuyển' : 'phiếu giảm tiền hàng'} <span class="muted"><c:out value="${maUuDai}"/></span></h2><a class="button secondary" href="${duongDanDanhSach}">Về danh sách</a></div><div class="panel-body"><c:if test="${not empty error}"><div class="alert error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
 <c:if test="${not empty success}"><div class="alert success" role="status" data-vs-flash="success"><c:out value="${success}"/></div></c:if>
-<form method="post" action="${duongDanLuu}" class="product-admin-form">
+<c:if test="${chiXem}"><p class="muted">Chỉ xem thông tin</p></c:if><form method="post" action="${duongDanLuu}" class="product-admin-form"><fieldset class="promotion-fields" ${chiXem ? 'disabled' : ''}>
 <c:if test="${uuDai.het_han}"><div class="product-admin-wide"><span class="product-admin-tag expired">Hết hạn</span> Phiếu đã hết thời gian áp dụng. Cập nhật ngày để áp dụng lại.</div></c:if>
 <c:if test="${uuDai.sap_mo}"><div class="product-admin-wide"><span class="product-admin-tag upcoming">Sắp mở</span> Phiếu sẽ áp dụng từ ngày <c:out value="${uuDai.ngay_bat_dau}"/>.</div></c:if>
 <input type="hidden" name="so_luong_cu" value='<c:out value="${empty uuDai.so_luong_cu ? uuDai.so_luong_su_dung : uuDai.so_luong_cu}"/>'>
@@ -30,5 +30,5 @@
 <div class="field"><label for="mo_ta">Mô tả</label><input class="input" id="mo_ta" name="mo_ta" type="text" value='<c:out value="${uuDai.mo_ta}"/>'   maxlength="255"></div>
 <div class="field"><label for="trang_thai">Trạng thái</label><select class="select" id="trang_thai" name="trang_thai"><option value="1" ${uuDai.trang_thai ? 'selected' : ''}>Cho phép áp dụng</option><option value="0" ${not uuDai.trang_thai ? 'selected' : ''}>Ngừng áp dụng</option></select></div>
 <div class="product-admin-wide muted">Giảm theo phần trăm tối đa 100%. Ưu đãi được áp dụng từ ngày bắt đầu đến hết ngày kết thúc. Để trống hoặc nhập 0 ở ô giảm tối đa nếu không giới hạn.</div>
-<div class="product-admin-actions product-admin-wide"><button class="button">Lưu phiếu giảm giá</button></div></form></div></section>
+<c:if test="${not chiXem}"><div class="product-admin-actions product-admin-wide"><button class="button">Lưu phiếu giảm giá</button></div></c:if></fieldset></form></div></section>
 </main></div></div></body></html>

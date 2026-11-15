@@ -183,6 +183,15 @@ class DonHangTests {
         verify(jdbc,never()).update(anyString(),any(Object[].class));
     }
 
+    @Test void nhanVienXuLyDonDuocXacNhanVaChuanBi() throws Exception {
+        var service=mock(HoaDonService.class);var mvc=MockMvcBuilders.standaloneSetup(new HoaDonController(service)).build();
+        var nv=new NguoiDungDangNhap(3,"nv@local","Nhân viên","Nhân viên");nv.themChucNang("ORDER_WRITE");
+        var session=new MockHttpSession();session.setAttribute(DangNhapController.KHOA_NGUOI_DUNG_DANG_NHAP,nv);
+        mvc.perform(post("/quan-ly/hoa-don/10/xac-nhan-don-cod").session(session)).andExpect(status().is3xxRedirection());
+        mvc.perform(post("/quan-ly/hoa-don/10/chuan-bi").session(session)).andExpect(status().is3xxRedirection());
+        mvc.perform(post("/quan-ly/hoa-don/10/gui-hang").session(session)).andExpect(status().is3xxRedirection());
+        verify(service).xacNhanDonCod(10,3);verify(service).batDauChuanBi(10,3);verify(service).banGiaoShipper(10,3);
+    }
     private MockHttpSession nhanVien(String quyen) {
         var s = new MockHttpSession();
         s.setAttribute(DangNhapController.KHOA_NGUOI_DUNG_DANG_NHAP,new NguoiDungDangNhap(2,"admin@gmail.com","Quản lý",quyen));

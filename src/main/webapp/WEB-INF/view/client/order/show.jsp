@@ -15,7 +15,7 @@
 <section class="account-card don-hang-card">
 <div class="don-hang-row"><div><h2><a href="/don-hang/${don.id}"><c:out value="${don.ma_hoa_don}"/></a></h2><p class="subtle">Ngày đặt: <fmt:formatDate value="${don.ngay_tao}" pattern="dd/MM/yyyy HH:mm"/></p></div>
 <c:if test="${not empty don.ma_van_don}"><p class="subtle">Mã vận đơn: <strong><c:out value="${don.ma_van_don}"/></strong></p></c:if>
-<span class="don-hang-status ${don.trang_thai_hien_tai == 5 ? 'da-nhan' : ''} ${don.trang_thai_hien_tai == 6 ? 'da-huy' : ''}"><c:out value="${don.ten_trang_thai}"/></span></div>
+<span class="don-hang-status ${don.trang_thai_hien_tai == 5 ? 'da-nhan' : ''} ${don.trang_thai_hien_tai == 6 ? 'da-huy' : ''}"><c:out value="${don.ten_trang_thai}"/><c:if test="${don.tong_tien_da_hoan > 0}"><div class="muted">Đã hoàn <fmt:formatNumber value="${don.tong_tien_da_hoan}" maxFractionDigits="2"/> đ</div></c:if></span></div>
 <div class="don-hang-row"><p class="online-price"><fmt:formatNumber value="${don.tong_tien_sau_giam}" maxFractionDigits="0"/> đ</p>
 <div class="don-hang-actions"><a class="store-button online-buy-now" href="/don-hang/${don.id}">Xem chi tiết</a>
 <c:if test="${(don.trang_thai_hien_tai >= 1 and don.trang_thai_hien_tai <= 3) and not don.co_thanh_toan}"><form method="post" action="/don-hang/${don.id}/huy" data-vs-confirm="Bạn muốn hủy đơn hàng này? Sản phẩm đã chọn trong đơn sẽ được hoàn lại tồn kho." data-vs-title="Hủy đơn hàng" data-vs-button="Hủy đơn hàng" data-vs-tone="danger">

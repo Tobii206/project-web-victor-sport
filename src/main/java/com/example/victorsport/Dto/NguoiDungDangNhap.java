@@ -42,6 +42,7 @@ public class NguoiDungDangNhap {
     public boolean isXemSanPham() { return coChucNang("PRODUCT_READ") || coChucNang("PRODUCT_WRITE"); }
     public boolean isSuaSanPham() { return isQuanLy() && coChucNang("PRODUCT_WRITE"); }
     public boolean isXemHoaDon() { return coChucNang("ORDER_READ") || coChucNang("ORDER_WRITE"); }
+    public boolean isXuLyDonHang() { return isQuanLy() || isSuaHoaDon(); }
     public boolean isSuaHoaDon() { return coChucNang("ORDER_WRITE"); }
     public boolean isXemKhachHang() { return coChucNang("CUSTOMER_READ"); }
 

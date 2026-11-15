@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bán hàng tại quầy - Victor Sport</title>
     <link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced">
-    <link rel="stylesheet" href="/css/in-hoa-don.css?v=3" media="print">
+    <link rel="stylesheet" href="/css/in-hoa-don.css?v=20261114-balanced-a4" media="print">
     <link rel="stylesheet" href="/css/pos-gio-hang.css?v=20261107-pos-payment">
 <link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"><link rel="stylesheet" href="/css/admin-theme.css?v=20261112-jsp-3"></head>
 <body class="admin-page">
@@ -320,7 +320,7 @@
 <c:if test="${not empty loiThemKhachHang}">
     <script>document.getElementById('themKhachHang').showModal();</script>
 </c:if>
-<script src="/js/ban-hang-tai-quay.js?v=20261109-ghn-address"></script>
+<script src="/js/ban-hang-tai-quay.js?v=20261114-print-without-status"></script>
 <%@ include file="/WEB-INF/view/client/layout/payment-confirm.jsp" %>
 </body>
 </html>

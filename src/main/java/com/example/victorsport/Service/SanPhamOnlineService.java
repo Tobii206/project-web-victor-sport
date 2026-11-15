@@ -442,8 +442,8 @@ public class SanPhamOnlineService {
                     id, dong.get("id"), dong.get("so_luong_mua"), dong.get("gia_ban"));
         }
         jdbc.update("UPDATE hoa_don SET phi_van_chuyen=?,id_phieu_giam_gia=? WHERE id=?",phi,phieuApDung,id);
-        jdbc.update("INSERT INTO lich_su_hoa_don (id_hoa_don, trang_thai, ghi_chu) VALUES (?, 1, ?)", id,
-                "Khách đặt hàng online, " + ("QR_DEMO".equals(phuongThuc)?"thanh toán QR mô phỏng":("VNPAY".equals(phuongThuc)?"thanh toán thử nghiệm VNPAY Sandbox":("QR".equals(phuongThuc) ? "chuyển khoản QR" : "thanh toán khi nhận hàng"))));
+        jdbc.update("INSERT INTO lich_su_hoa_don (id_hoa_don, trang_thai, ghi_chu, nguoi_thuc_hien, loai_nguoi_thuc_hien) VALUES (?, 1, ?, ?, 'khach_hang')", id,
+                "Khách đặt hàng online, " + ("QR_DEMO".equals(phuongThuc)?"thanh toán QR":("VNPAY".equals(phuongThuc)?"thanh toán thử nghiệm VNPAY Sandbox":("QR".equals(phuongThuc) ? "chuyển khoản QR" : "thanh toán khi nhận hàng"))),idKhachHang);
         if("QR_DEMO".equals(phuongThuc)) {
             qrDemo.taoGiaoDich(id,tong);
         } else if("VNPAY".equals(phuongThuc)) {

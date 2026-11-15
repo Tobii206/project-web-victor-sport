@@ -49,7 +49,7 @@
         if (input.type === 'checkbox' && input.required && !input.checked) return 'Vui lòng chọn ít nhất một size.';
         if (input.type === 'password' && value) {
             if (!value.trim()) return 'Mật khẩu không được chỉ chứa khoảng trắng.';
-            if (input.autocomplete === 'new-password' && !form.action.endsWith('/login')
+            if (input.autocomplete === 'new-password' && !new URL(form.getAttribute('action') || location.href, location.href).pathname.endsWith('/login')
                 && new TextEncoder().encode(value).length > 72)
                 return 'Mật khẩu tối đa 72 byte. Ký tự có dấu có thể chiếm nhiều byte.';
             if (input.name === 'nhapLai' && named(form, 'matKhau') && value !== named(form, 'matKhau').value)
@@ -170,8 +170,9 @@
     var dangGui = false, formDaNhap = new WeakSet();
     var trangDaHienThi = location.pathname + location.search;
     function khoa(form) {
-        if (new URL(form.action, location.href).pathname === '/pos/checkout') return form.action;
-        return form.action + '|' + Array.from(form.querySelectorAll('input[type="hidden"]'))
+        var action = new URL(form.getAttribute('action') || location.href, location.href).href;
+        if (new URL(action).pathname === '/pos/checkout') return action;
+        return action + '|' + Array.from(form.querySelectorAll('input[type="hidden"]'))
             .filter(function (el) { return /^(id|ma)|id$/i.test(el.name); })
             .map(function (el) { return el.name + '=' + el.value; }).sort().join('&');
     }
@@ -362,7 +363,7 @@
         if (e.defaultPrevented || !(e.target instanceof HTMLFormElement)) return;
         var form = e.target, nut = e.submitter;
         var method = ((nut && nut.getAttribute('formmethod')) || form.method || 'get').toUpperCase();
-        var url = new URL((nut && nut.getAttribute('formaction')) || form.action || location.href, location.href);
+        var url = new URL((nut && nut.getAttribute('formaction')) || form.getAttribute('action') || location.href, location.href);
         if (!trangHoTro(location.pathname) || url.origin !== location.origin || form.target && form.target !== '_self' || method === 'DIALOG') return;
         if (method === 'GET' && url.pathname !== location.pathname) return;
         if (method === 'POST' && !(/^\/pos\//.test(url.pathname) || /^\/quan-ly\//.test(url.pathname)

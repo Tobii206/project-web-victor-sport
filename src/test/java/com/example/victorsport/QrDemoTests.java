@@ -36,7 +36,7 @@ class QrDemoTests {
     @Test void quetXacNhanChiThuMotLanKhongChuyenTrangThaiDon() {
         var j=jdbc("cho_thanh_toan",8,1);
         assertEquals("thanh_cong",service(j).xuLyQuet(MA,"thanh_cong"));
-        verify(j).update(contains("UPDATE giao_dich_thanh_toan"),eq("thanh_cong"),contains("không thu tiền thật"),eq(30));
+        verify(j).update(contains("UPDATE giao_dich_thanh_toan"),eq("thanh_cong"),eq("Đã thanh toán QR"),eq(30));
         verify(j).update(contains("UPDATE hoa_don SET ngay_thanh_toan"),eq(10));
         verify(j).update(contains("INSERT INTO lich_su_hoa_don"),eq(10),eq(1));
         verify(j,never()).update(contains("chi_tiet_san_pham"),any(Object[].class));
@@ -160,7 +160,7 @@ class QrDemoTests {
             var hd=new HashMap<String,Object>();hd.put("id",111);hd.put("loai_don",1);
             hd.put("tong_tien_sau_giam",new BigDecimal("100000"));hd.put("ghi_chu","QR DEMO giả lập, không thu tiền thật");
             ReflectionTestUtils.invokeMethod(new HoaDonService(j),"themThanhToan",hd);
-            assertEquals(paid?"Đã thanh toán online":"Chờ thanh toán online",hd.get("ghi_chu"));
+            assertEquals(paid?"Đã thanh toán QR":"Chờ thanh toán online",hd.get("ghi_chu"));
         }
     }
     private JdbcTemplate jdbcTaiLai(String tt,int seconds,int order) {

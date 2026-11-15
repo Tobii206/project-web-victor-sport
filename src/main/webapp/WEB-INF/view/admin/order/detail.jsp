@@ -10,7 +10,7 @@
     <title>Quản lý hóa đơn - Victor Sport</title>
     <link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced">
     <link rel="stylesheet" href="/css/chi-tiet-hoa-don.css?v=20261109-customer-dialog">
-<link rel="stylesheet" href="/css/in-hoa-don.css?v=4"><link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"><link rel="stylesheet" href="/css/admin-theme.css?v=20261112-jsp-3"></head>
+<link rel="stylesheet" href="/css/in-hoa-don.css?v=20261114-balanced-a4"><link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"><link rel="stylesheet" href="/css/admin-theme.css?v=20261112-jsp-3"><style>.invoice-history-actor{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin:10px 0 2px;font-size:12px;color:#526b88;line-height:1.6}.invoice-history-role{background:#eef3f9;border:1px solid #dfe7f1;border-radius:6px;padding:2px 8px;font-weight:600;white-space:nowrap}</style></head>
 <body class="admin-page">
 <div class="app-shell">
     <jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/>
@@ -40,44 +40,44 @@
                 <div class="panel-body">
                     <c:if test="${not empty error}"><div class="alert error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
                     <c:if test="${not empty success}"><div class="alert success" role="status" data-vs-flash="success"><c:out value="${success}"/></div></c:if>
-                    <div class="invoice-toolbar">
+                    <div class="invoice-toolbar invoice-no-print">
                         <span class="invoice-status invoice-status-${hoaDon.trang_thai_hien_tai}"><span aria-hidden="true">●</span> <c:out value="${hoaDon.ten_trang_thai}"/></span>
                         <div class="invoice-actions"><c:if test="${hoaDon.da_thanh_toan}"><button type="button" class="button secondary" onclick="window.print()">In / Lưu PDF</button></c:if>
-<c:if test="${currentUser.quanLy and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.phuong_thuc == 'COD' and hoaDon.trang_thai_hien_tai == 1}">
+<c:if test="${currentUser.xuLyDonHang and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.phuong_thuc == 'COD' and hoaDon.trang_thai_hien_tai == 1}">
 <form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/xac-nhan-don-cod" data-xac-nhan-thanh-toan data-tieu-de="Xác nhận đơn COD" data-nhan-xac-nhan="Xác nhận đơn" data-tong-tien="${hoaDon.tong_tien_sau_giam}" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đã xác nhận đơn" data-noi-dung="Xác nhận đơn COD để chuyển sang bước chuẩn bị hàng."><input type="hidden" name="quayLai" value="chi-tiet"><button class="button">Xác nhận đơn COD</button></form></c:if>
 
 
-                    <c:if test="${currentUser.quanLy and (hoaDon.vnpay or hoaDon.qr_demo) and hoaDon.trang_thai_hien_tai == 1}">
+                    <c:if test="${currentUser.xuLyDonHang and (hoaDon.vnpay or hoaDon.qr_demo) and hoaDon.trang_thai_hien_tai == 1}">
                         <c:choose>
                             <c:when test="${hoaDon.da_thanh_toan}"><form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/xac-nhan-thanh-toan" data-xac-nhan-thanh-toan data-tong-tien="${hoaDon.tong_tien_sau_giam}" data-tieu-de="Xác nhận đơn hàng" data-nhan-xac-nhan="Xác nhận đơn" data-phuong-thuc="${hoaDon.qr_demo ? 'QR đã xác nhận thanh toán' : 'VNPAY Sandbox đã thanh toán'}" data-noi-dung="Hệ thống đã ghi nhận thanh toán thử nghiệm. Xác nhận tiếp nhận đơn để chuẩn bị hàng."><input type="hidden" name="quayLai" value="chi-tiet"><button class="button" type="submit">Xác nhận đơn hàng</button></form></c:when>
                             <c:otherwise><p class="muted">Chờ hệ thống xác nhận thanh toán tự động.</p></c:otherwise>
                         </c:choose>
                     </c:if>
-                    <c:if test="${currentUser.quanLy and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.phuong_thuc != 'COD' and not hoaDon.vnpay and not hoaDon.qr_demo and hoaDon.trang_thai_hien_tai == 1}">
+                    <c:if test="${currentUser.xuLyDonHang and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.phuong_thuc != 'COD' and not hoaDon.vnpay and not hoaDon.qr_demo and hoaDon.trang_thai_hien_tai == 1}">
                         <form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/xac-nhan-thanh-toan" class="invoice-actions" data-xac-nhan-thanh-toan data-ma-hoa-don="<c:out value='${hoaDon.ma_hoa_don}'/>" data-tong-tien="${hoaDon.tong_tien_sau_giam}" data-nhan-phuong-thuc="Trạng thái" data-tieu-de="Xác nhận thanh toán" data-phuong-thuc="Đã xác nhận đơn" data-noi-dung="Kiểm tra khoản chuyển khoản để xác nhận thanh toán và đơn hàng. Đơn sẽ chuyển sang chờ chuẩn bị.">
                             <button class="button" type="submit">${hoaDon.vnpay ? 'Xác nhận đơn hàng' : 'Xác nhận thanh toán'}</button>
                         </form>
                     </c:if>
-                    <c:if test="${currentUser.quanLy and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 2}">
+                    <c:if test="${currentUser.xuLyDonHang and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 2}">
                         <form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/chuan-bi" class="invoice-actions" data-xac-nhan-thanh-toan data-tong-tien="${hoaDon.tong_tien_sau_giam}" data-tieu-de="Bắt đầu chuẩn bị hàng" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đang chuẩn bị hàng" data-noi-dung="Xác nhận cửa hàng bắt đầu lấy và đóng gói sản phẩm.">
                             <button class="button" type="submit">Bắt đầu chuẩn bị</button>
                         </form>
                     </c:if>
-                    <c:if test="${currentUser.quanLy and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 3}">
+                    <c:if test="${currentUser.xuLyDonHang and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 3}">
                         <form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/gui-hang" data-vs-confirm="Xác nhận bàn giao hàng cho shipper? Hệ thống sẽ tự tạo mã vận đơn GHN cho đơn giao qua GHN." data-vs-title="Xác nhận gửi hàng"><button class="button" type="submit">Gửi hàng</button></form>
                     </c:if>
-                    <c:if test="${currentUser.quanLy and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 1}">
+                    <c:if test="${currentUser.xuLyDonHang and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 1}">
                         <form class="invoice-actions" method="post" action="/quan-ly/hoa-don/${hoaDon.id}/huy" data-xac-nhan-thanh-toan data-ma-hoa-don="<c:out value='${hoaDon.ma_hoa_don}'/>" data-tong-tien="${hoaDon.tong_tien_sau_giam}" data-tieu-de="Hủy hóa đơn" data-nhan-xac-nhan="Hủy hóa đơn" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đã hủy" data-noi-dung="Bạn có chắc muốn hủy hóa đơn này? Số lượng sản phẩm sẽ được hoàn lại tồn kho.">
                             <button class="button danger" type="submit">Hủy hóa đơn</button>
                         </form>
                     </c:if>
-                        <c:if test="${currentUser.quanLy and (empty hoaDon.id_khach_hang or hoaDon.loai_don == 2) and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 4}">
+                        <c:if test="${currentUser.xuLyDonHang and (empty hoaDon.id_khach_hang or hoaDon.loai_don == 2) and (hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 4}">
                             <form method="post" action="/quan-ly/hoa-don/${hoaDon.id}/giao-khach-vang-lai" data-xac-nhan-thanh-toan data-tong-tien="${hoaDon.tong_tien_sau_giam}" data-tieu-de="Xác nhận khách đã nhận hàng" data-nhan-xac-nhan="Xác nhận đã nhận hàng" data-nhan-phuong-thuc="Trạng thái" data-phuong-thuc="Đã nhận hàng" data-noi-dung="Xác nhận khi khách đã nhận đủ hàng. Với đơn COD online, xác nhận đồng thời ghi nhận đã trả đủ tiền."><button class="button" type="submit">Xác nhận khách đã nhận hàng</button></form>
                         </c:if>
                         </div>
                     </div>
                     <c:if test="${(hoaDon.loai_don == 1 or hoaDon.loai_don == 2) and hoaDon.trang_thai_hien_tai == 5}">
-                        <div class="alert success">Đơn đã giao thành công. Trạng thái đơn hàng đã được khóa.</div>
+                        <div class="alert success invoice-no-print">Đơn đã giao thành công. Trạng thái đơn hàng đã được khóa.</div>
                     </c:if>
                     <c:if test="${currentUser.banHangTaiQuay and hoaDon.trang_thai_hien_tai == 0 and (hoaDon.loai_don == 0 or hoaDon.loai_don == 2) and hoaDon.id_nhan_vien == currentUser.id}">
                         <div class="invoice-actions">
@@ -92,6 +92,7 @@
                             </form>
                         </div>
                     </c:if>
+                    <c:if test="${currentUser.xuLyDonHang and hoaDon.trang_thai_hien_tai == 5}"><p class="invoice-no-print"><a class="button secondary" href="/quan-ly/tra-hang/don/${hoaDon.id}">Trả hàng / hoàn tiền</a></p></c:if><c:if test="${hoaDon.tong_tien_da_hoan > 0}"><p><strong>Đã hoàn tiền:</strong> <fmt:formatNumber value="${hoaDon.tong_tien_da_hoan}" maxFractionDigits="2"/> đ</p></c:if>
                     <p><strong>Phương thức:</strong> <c:out value="${hoaDon.phuong_thuc}"/> · <strong>Thanh toán:</strong> ${hoaDon.da_thanh_toan ? 'Đã thanh toán' : 'Chưa thanh toán'}</p>
 <c:if test="${not empty hoaDon.vanDonGhn.ma_van_don}"><p><strong>Mã vận đơn:</strong> <c:out value="${hoaDon.vanDonGhn.ma_van_don}"/></p></c:if>
 <div class="invoice-info">
@@ -146,7 +147,7 @@
                                     <c:otherwise><fmt:formatDate value="${hoaDon.ngay_thanh_toan}" pattern="dd/MM/yyyy HH:mm"/></c:otherwise>
                                 </c:choose>
                             </p>
-                            <p><strong>Trạng thái:</strong> <c:out value="${hoaDon.ten_trang_thai}"/></p>
+                            <p class="invoice-no-print"><strong>Trạng thái:</strong> <c:out value="${hoaDon.ten_trang_thai}"/></p>
                         </div>
                     </div>
                     <p class="invoice-note"><strong>Ghi chú:</strong> <c:out value="${hoaDon.ghi_chu}" default="Không có"/></p>
@@ -224,7 +225,7 @@
                     <section class="invoice-history">
                         <h3>Lịch sử đơn hàng</h3>
                         <ol>
-                            <c:forEach items="${lichSu}" var="buoc"><li><strong><fmt:formatDate value="${buoc.thoi_gian}" pattern="dd/MM/yyyy HH:mm"/></strong><p><c:out value="${buoc.ghi_chu}"/></p></li></c:forEach>
+                            <c:forEach items="${lichSu}" var="buoc"><li><strong><fmt:formatDate value="${buoc.thoi_gian}" pattern="dd/MM/yyyy HH:mm"/></strong><p><c:out value="${buoc.ghi_chu}"/></p><c:if test="${not empty buoc.id_yeu_cau and currentUser.xuLyDonHang}"><a href="/quan-ly/tra-hang/${buoc.id_yeu_cau}" style="font-size:12px;color:#b56228">Xem yêu cầu <c:out value="${buoc.ma_yeu_cau}"/> →</a></c:if><div class="invoice-history-actor"><span class="invoice-history-role"><c:out value="${buoc.vai_tro_thao_tac}" default="Chưa ghi nhận"/></span><span><c:out value="${buoc.nguoi_thao_tac}" default="Chưa ghi nhận người thực hiện"/><c:if test="${not empty buoc.ma_nguoi_thao_tac}"> · <c:out value="${buoc.ma_nguoi_thao_tac}"/></c:if></span></div></li></c:forEach>
                         </ol>
                         <c:if test="${empty lichSu}"><p class="muted">Chưa có lịch sử đơn hàng.</p></c:if>
                     </section>

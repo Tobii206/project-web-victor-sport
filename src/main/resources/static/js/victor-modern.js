@@ -17,8 +17,8 @@ window.VictorKhoiTaoModern = function () {
                 return false;
             }
             var seconds = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
-            var values = [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60];
-            ['fsHours', 'fsMinutes', 'fsSeconds'].forEach(function (id, index) {
+            var values = [Math.floor(seconds / 86400), Math.floor(seconds / 3600) % 24, Math.floor(seconds / 60) % 60, seconds % 60];
+            ['fsDays', 'fsHours', 'fsMinutes', 'fsSeconds'].forEach(function (id, index) {
                 countdown.querySelector('#' + id).textContent = deadline ? String(values[index]).padStart(2, '0') : '--';
             });
             return seconds > 0 && countdown.isConnected;

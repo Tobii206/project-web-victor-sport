@@ -30,7 +30,7 @@ public class VanChuyenController {
     private boolean quanLy(HttpSession session,Model model) {
         var user=DangNhapController.layNguoiDungDangNhap(session,model);
         if(user==null) return false;
-        if(!user.isQuanLy()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        if(!user.isXuLyDonHang()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         return true;
     }
     @GetMapping

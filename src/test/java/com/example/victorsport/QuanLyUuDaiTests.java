@@ -32,6 +32,24 @@ class QuanLyUuDaiTests {
         verifyNoInteractions(phieu,dot);
     }
 
+    @Test void nhanVienChiXemDanhSachVaChiTietKhongDuocGhi() throws Exception {
+        var phieu=mock(QuanLyPhieuGiamGiaService.class);var dot=mock(QuanLyDotGiamGiaService.class);
+        when(phieu.lay(1)).thenReturn(java.util.Map.of("ma_phieu_giam_gia","PGG1","ap_dung_van_chuyen",false));
+        when(dot.lay(1)).thenReturn(java.util.Map.of("ma_dot_giam_gia","DGG1"));
+        var mvc=MockMvcBuilders.standaloneSetup(new QuanLyPhieuGiamGiaController(phieu),new QuanLyDotGiamGiaController(dot,mock(EmailDotGiamGiaService.class))).build();
+        var nv=session("Nhân viên");
+        for(String path:new String[]{"/quan-ly/phieu-giam-gia","/quan-ly/dot-giam-gia","/quan-ly/phieu-giam-gia/1","/quan-ly/dot-giam-gia/1"})
+            mvc.perform(get(path).session(nv)).andExpect(status().isOk()).andExpect(model().attribute("chiXem",true));
+        clearInvocations(phieu,dot);
+        for(String base:new String[]{"/quan-ly/phieu-giam-gia","/quan-ly/dot-giam-gia"}) {
+            mvc.perform(get(base+"/them").session(nv)).andExpect(status().isForbidden());
+            for(String path:new String[]{"/luu","/1/luu","/1/ngung"})mvc.perform(post(base+path).session(nv)).andExpect(status().isForbidden());
+        }
+        mvc.perform(post("/quan-ly/phieu-giam-gia/1/luu-freeship").session(nv)).andExpect(status().isForbidden());
+        mvc.perform(post("/quan-ly/dot-giam-gia/1/mau/luu").session(nv)).andExpect(status().isForbidden());
+        mvc.perform(post("/quan-ly/dot-giam-gia/1/mau/2/bo").session(nv)).andExpect(status().isForbidden());
+        verifyNoInteractions(phieu,dot);
+    }
     @Test void duLieuSaiKhongDuocGhiVaGiuLaiForm() throws Exception {
         var phieu = mock(QuanLyPhieuGiamGiaService.class); var dot = mock(QuanLyDotGiamGiaService.class);
         var mvc = MockMvcBuilders.standaloneSetup(new QuanLyPhieuGiamGiaController(phieu),new QuanLyDotGiamGiaController(dot,mock(EmailDotGiamGiaService.class))).build();

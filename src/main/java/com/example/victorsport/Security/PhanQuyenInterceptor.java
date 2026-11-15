@@ -45,15 +45,18 @@ public class PhanQuyenInterceptor implements HandlerInterceptor {
             duocTruyCap = nguoiDung.isQuanLy() || (chiXem ? nguoiDung.isXemHoaDon() : nguoiDung.isSuaHoaDon());
             if (duongDan.endsWith("/xac-nhan-thanh-toan") || duongDan.endsWith("/huy") || duongDan.endsWith("/xac-nhan-don-cod")
                     || duongDan.endsWith("/thu-tien-cod") || duongDan.endsWith("/giao-khach-vang-lai")
-                    || duongDan.endsWith("/chuan-bi")) duocTruyCap = nguoiDung.isQuanLy();
+                    || duongDan.endsWith("/chuan-bi") || duongDan.endsWith("/gui-hang")) duocTruyCap = nguoiDung.isXuLyDonHang();
+        }
+        else if (thuocMuc(duongDan, "/quan-ly/tra-hang") || thuocMuc(duongDan, "/quan-ly/van-chuyen")) duocTruyCap = nguoiDung.isXuLyDonHang();
+        else if (thuocMuc(duongDan, "/quan-ly/dot-giam-gia") || thuocMuc(duongDan, "/quan-ly/phieu-giam-gia")) {
+            duocTruyCap = nguoiDung.isQuanLy() || (chiXem && duongDan.matches("/quan-ly/(dot-giam-gia|phieu-giam-gia)(/[0-9]+)?"));
         }
         else if (thuocMuc(duongDan, "/quan-ly/khach-hang")) {
             duocTruyCap = nguoiDung.isQuanLy() || (chiXem && nguoiDung.isXemKhachHang());
             if (duongDan.equals("/quan-ly/khach-hang/them")) duocTruyCap = nguoiDung.isQuanLy();
         }
-        else if (thuocMuc(duongDan, "/quan-ly/dot-giam-gia") || thuocMuc(duongDan, "/quan-ly/phieu-giam-gia")
-                || thuocMuc(duongDan, "/quan-ly/nhan-vien") || thuocMuc(duongDan, "/quan-ly/gio-hang")
-                || thuocMuc(duongDan, "/quan-ly/thong-ke") || thuocMuc(duongDan, "/quan-ly/van-chuyen")) duocTruyCap = nguoiDung.isQuanLy();
+        else if (thuocMuc(duongDan, "/quan-ly/nhan-vien") || thuocMuc(duongDan, "/quan-ly/gio-hang")
+                || thuocMuc(duongDan, "/quan-ly/thong-ke")) duocTruyCap = nguoiDung.isQuanLy();
         if (duocTruyCap) return true;
         response.setHeader("Cache-Control", "no-store");
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);

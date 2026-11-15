@@ -37,7 +37,10 @@ class PhanQuyenTests {
                 mvc.perform(post(duongDan).session(session)).andExpect(status().isOk());
             }
             mvc.perform(get("/quan-ly/san-pham").session(session)).andExpect(status().isOk());
-            mvc.perform(post("/quan-ly/hoa-don/1/xac-nhan-thanh-toan").session(session)).andExpect(status().isForbidden());
+            for(String path:new String[]{"/quan-ly/hoa-don/1/xac-nhan-thanh-toan","/quan-ly/hoa-don/1/xac-nhan-don-cod","/quan-ly/hoa-don/1/chuan-bi","/quan-ly/hoa-don/1/gui-hang","/quan-ly/hoa-don/1/giao-khach-vang-lai","/quan-ly/tra-hang/1/xu-ly","/quan-ly/van-chuyen/1/ban-giao"})
+                mvc.perform(post(path).session(session)).andExpect(status().isOk());
+            mvc.perform(get("/quan-ly/tra-hang").session(session)).andExpect(status().isOk());
+            mvc.perform(get("/quan-ly/van-chuyen").session(session)).andExpect(status().isOk());
             mvc.perform(get("/quan-ly/san-pham/8").session(session)).andExpect(status().isOk());
             // Nhân viên bị chặn quyền sửa kể cả database cũ còn PRODUCT_WRITE.
             mvc.perform(get("/quan-ly/san-pham/them").session(session)).andExpect(status().isForbidden());
@@ -48,10 +51,16 @@ class PhanQuyenTests {
             mvc.perform(get("/quan-ly/khach-hang").session(session)).andExpect(status().isOk());
             mvc.perform(post("/quan-ly/khach-hang").session(session)).andExpect(status().isForbidden());
             mvc.perform(get("/quan-ly/khach-hang/them").session(session)).andExpect(status().isForbidden());
-            for (String duongDan : new String[]{"/quan-ly/nhan-vien", "/quan-ly/dot-giam-gia", "/quan-ly/phieu-giam-gia", "/quan-ly/gio-hang", "/quan-ly/hoa-don-khac", "/quan-ly/thong-ke", "/quan-ly/van-chuyen", "/quan-ly/van-chuyen/ghn/dia-chi", "/quan-ly/van-chuyen/ghn/tinh-phi"}) {
+            for (String duongDan : new String[]{"/quan-ly/nhan-vien", "/quan-ly/gio-hang", "/quan-ly/hoa-don-khac", "/quan-ly/thong-ke"}) {
                 mvc.perform(get(duongDan).session(session)).andExpect(status().isForbidden());
                 mvc.perform(post(duongDan).session(session)).andExpect(status().isForbidden());
             }
+            for(String path:new String[]{"/quan-ly/dot-giam-gia","/quan-ly/dot-giam-gia/1","/quan-ly/phieu-giam-gia","/quan-ly/phieu-giam-gia/1"}) {
+                mvc.perform(get(path).session(session)).andExpect(status().isOk());
+                mvc.perform(post(path).session(session)).andExpect(status().isForbidden());
+            }
+            for(String path:new String[]{"/quan-ly/dot-giam-gia/them","/quan-ly/phieu-giam-gia/them","/quan-ly/phieu-giam-gia/them-freeship"})
+                mvc.perform(get(path).session(session)).andExpect(status().isForbidden());
             // Cùng phiên đăng nhập, thu hồi quyền ghi có hiệu lực ngay.
             when(service.layQuyen(2)).thenReturn(taoNguoiDung("Nhân viên", "PRODUCT_READ", "ORDER_READ"));
             mvc.perform(get("/quan-ly/san-pham").session(session)).andExpect(status().isOk());
@@ -59,6 +68,9 @@ class PhanQuyenTests {
             mvc.perform(get("/quan-ly/hoa-don").session(session)).andExpect(status().isOk());
             mvc.perform(post("/quan-ly/hoa-don").session(session)).andExpect(status().isForbidden());
             mvc.perform(get("/pos").session(session)).andExpect(status().isForbidden());
+            for(String path:new String[]{"/quan-ly/tra-hang","/quan-ly/tra-hang/1/xu-ly","/quan-ly/van-chuyen","/quan-ly/hoa-don/1/chuan-bi"}) {
+                mvc.perform(post(path).session(session)).andExpect(status().isForbidden());
+            }
             when(service.layQuyen(2)).thenReturn(taoNguoiDung("Quản trị viên"));
             mvc.perform(get("/quan-ly/thong-ke").session(session)).andExpect(status().isOk());
             mvc.perform(get("/quan-ly/van-chuyen").session(session)).andExpect(status().isOk());

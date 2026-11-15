@@ -53,8 +53,10 @@ public class ThongKeService {
         Map<String,Object> ketQua = new LinkedHashMap<>();
         var tongQuan = new LinkedHashMap<String,Object>(jdbc.queryForMap("""
                 SELECT COUNT(*) AS so_don,
-                  ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai=5 THEN hd.tong_tien_sau_giam ELSE 0 END),0) AS doanh_thu,
+                  ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai=5 THEN hd.tong_tien_sau_giam-ISNULL(hd.tong_tien_da_hoan,0) ELSE 0 END),0) AS doanh_thu,
                   ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai=5 THEN 1 ELSE 0 END),0) AS hoan_tat,
+                  ISNULL(SUM(hd.tong_tien_da_hoan),0) AS da_hoan_tien,
+                  ISNULL(SUM(CASE WHEN hd.tong_tien_da_hoan>0 THEN 1 ELSE 0 END),0) AS don_co_hoan,
                   ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai BETWEEN 0 AND 4 THEN 1 ELSE 0 END),0) AS dang_xu_ly,
                   ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai=0 THEN 1 ELSE 0 END),0) AS don_cho,
                   ISNULL(SUM(CASE WHEN hd.trang_thai_hien_tai=6 THEN 1 ELSE 0 END),0) AS da_huy,
@@ -74,21 +76,21 @@ public class ThongKeService {
                   COUNT(DISTINCT hd.id_khach_hang) AS khach_mua,
                   ISNULL(SUM(hd.phi_van_chuyen),0) AS phi_ship,
                   ISNULL(SUM(hd.tong_tien_giam),0) AS uu_dai,
-                  ISNULL(SUM(CASE WHEN thu.so_tien>hd.tong_tien_sau_giam THEN hd.tong_tien_sau_giam ELSE thu.so_tien END),0) AS da_thu
+                  ISNULL(SUM(CASE WHEN thu.so_tien>hd.tong_tien_sau_giam THEN hd.tong_tien_sau_giam ELSE thu.so_tien END - ISNULL(hd.tong_tien_da_hoan,0)),0) AS da_thu
                 FROM hoa_don hd
-                OUTER APPLY (SELECT SUM(ct.so_luong) AS so_doi FROM hoa_don_chi_tiet ct
+                OUTER APPLY (SELECT SUM(ct.so_luong-ISNULL(ct.so_luong_da_tra,0)) AS so_doi FROM hoa_don_chi_tiet ct
                   WHERE ct.id_hoa_don=hd.id AND ISNULL(ct.xoa_mem,0)=0) hang
                 OUTER APPLY (SELECT ISNULL(SUM(gd.so_tien),0) AS so_tien FROM giao_dich_thanh_toan gd
                   WHERE gd.id_hoa_don=hd.id AND gd.trang_thai=N'thanh_cong' AND ISNULL(gd.xoa_mem,0)=0) thu
                 """ + dieuKien + " AND hd.trang_thai_hien_tai=5", thamSo));
         ketQua.put("theoKenh", jdbc.queryForList("""
                 SELECT CASE WHEN hd.loai_don IN (0,2) THEN N'Tại quầy' ELSE N'Online' END AS kenh,
-                  COUNT(*) AS so_don, SUM(hd.tong_tien_sau_giam) AS doanh_thu
+                  COUNT(*) AS so_don, SUM(hd.tong_tien_sau_giam-ISNULL(hd.tong_tien_da_hoan,0)) AS doanh_thu
                 FROM hoa_don hd
                 """ + dieuKien + " AND hd.trang_thai_hien_tai=5 GROUP BY CASE WHEN hd.loai_don IN (0,2) THEN N'Tại quầy' ELSE N'Online' END", thamSo));
         ketQua.put("khachHang", jdbc.queryForList("""
                 SELECT TOP 5 hd.id_khach_hang, kh.ten_khach_hang, kh.ma_khach_hang,
-                  COUNT(*) AS so_don, SUM(hd.tong_tien_sau_giam) AS chi_tieu
+                  COUNT(*) AS so_don, SUM(hd.tong_tien_sau_giam-ISNULL(hd.tong_tien_da_hoan,0)) AS chi_tieu
                 FROM hoa_don hd JOIN khach_hang kh ON kh.id=hd.id_khach_hang
                 """ + dieuKien + " AND hd.trang_thai_hien_tai=5 GROUP BY hd.id_khach_hang,kh.ten_khach_hang,kh.ma_khach_hang ORDER BY chi_tieu DESC,hd.id_khach_hang", thamSo));
         ketQua.put("tonKho", jdbc.queryForMap("""
@@ -100,7 +102,7 @@ public class ThongKeService {
                 """));
         var theoNgay = jdbc.queryForList("""
                 SELECT CAST(hd.ngay_tao AS DATE) AS ngay,
-                  SUM(hd.tong_tien_sau_giam) AS doanh_thu, COUNT(*) AS so_don
+                  SUM(hd.tong_tien_sau_giam-ISNULL(hd.tong_tien_da_hoan,0)) AS doanh_thu, COUNT(*) AS so_don
                 FROM hoa_don hd
                 """ + dieuKien + " AND hd.trang_thai_hien_tai=5 GROUP BY CAST(hd.ngay_tao AS DATE) ORDER BY ngay", thamSo);
         Map<LocalDate,Map<String,Object>> theoNgayMap = new HashMap<>();
@@ -121,7 +123,7 @@ public class ThongKeService {
         ketQua.put("bieuDo", bieuDo);
         ketQua.put("banChay", jdbc.queryForList("""
                 SELECT TOP 10 sp.id, sp.ma_san_pham, sp.ten_san_pham,
-                  SUM(ct.so_luong) AS so_luong, SUM(ct.thanh_tien) AS tien_hang
+                  SUM(ct.so_luong-ISNULL(ct.so_luong_da_tra,0)) AS so_luong, SUM(ct.don_gia*(ct.so_luong-ISNULL(ct.so_luong_da_tra,0))) AS tien_hang
                 FROM hoa_don hd JOIN hoa_don_chi_tiet ct ON ct.id_hoa_don=hd.id AND ISNULL(ct.xoa_mem,0)=0
                 JOIN chi_tiet_san_pham mau ON mau.id=ct.id_chi_tiet_san_pham
                 JOIN san_pham sp ON sp.id=mau.id_san_pham

@@ -32,18 +32,24 @@ public class QuanLyPhieuGiamGiaController {
         model.addAttribute("duongDanDanhSach","/quan-ly/phieu-giam-gia?loai="+(freeship?"1":"0"));
     }
 
-    private NguoiDungDangNhap quanLy(HttpSession session, Model model) {
+    private NguoiDungDangNhap xem(HttpSession session, Model model) {
         var user = DangNhapController.layNguoiDungDangNhap(session, model);
-        if (user != null && !user.isQuanLy()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        model.addAttribute("chiXem",user != null && !user.isQuanLy());
         model.addAttribute("activeMenu", "phieu-giam-gia");
         model.addAttribute("tenChucNang", "Quản lý phiếu giảm giá");
+        return user;
+    }
+
+    private NguoiDungDangNhap quanLy(HttpSession session, Model model) {
+        var user=xem(session,model);
+        if(user!=null&&!user.isQuanLy())throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         return user;
     }
 
     @GetMapping
     public String danhSach(@RequestParam(defaultValue="") String tuKhoa,
                            @RequestParam(defaultValue="") String trangThai,@RequestParam(defaultValue="0") String loai, HttpSession session, Model model) {
-        if (quanLy(session, model) == null) return "redirect:/login";
+        if (xem(session, model) == null) return "redirect:/login";
         loai="1".equals(loai)?"1":"0";
         model.addAttribute("tuKhoa", tuKhoa); model.addAttribute("trangThai", trangThai);
         model.addAttribute("loai",loai);
@@ -65,7 +71,7 @@ public class QuanLyPhieuGiamGiaController {
 
     @GetMapping("/{id}")
     public String sua(@PathVariable int id, HttpSession session, Model model, RedirectAttributes flash) {
-        if (quanLy(session, model) == null) return "redirect:/login";
+        if (xem(session, model) == null) return "redirect:/login";
         try {
             var data = service.lay(id);
             boolean freeship=laFreeship(data);

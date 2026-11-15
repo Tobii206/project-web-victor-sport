@@ -70,7 +70,7 @@ public class HoaDonController {
                             HttpSession session,Model model,RedirectAttributes thongBao) {
         var user = DangNhapController.layNguoiDungDangNhap(session,model);
         if (user == null) return "redirect:/login";
-        if (!user.isQuanLy()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        if (!user.isXuLyDonHang()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         try {
             hoaDonService.huyHoaDon(id,user.getId());
             thongBao.addFlashAttribute("success","Đã hủy hóa đơn và hoàn lại tồn kho.");
@@ -105,7 +105,7 @@ public class HoaDonController {
                                   HttpSession session,Model model,RedirectAttributes thongBao) {
         var user = DangNhapController.layNguoiDungDangNhap(session,model);
         if (user == null) return "redirect:/login";
-        if (!user.isQuanLy()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        if (!user.isXuLyDonHang()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         try {
             hoaDonService.xacNhanThanhToan(id,user.getId());
             thongBao.addFlashAttribute("success","Đã xác nhận thanh toán và đơn hàng. Đơn chuyển sang chờ chuẩn bị.");
@@ -138,7 +138,7 @@ public class HoaDonController {
                                 HttpSession session,Model model,RedirectAttributes flash) {
         var user=DangNhapController.layNguoiDungDangNhap(session,model);
         if(user==null) return "redirect:/login";
-        if(!user.isQuanLy()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        if(!user.isXuLyDonHang()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         try { hoaDonService.batDauChuanBi(id,user.getId()); flash.addFlashAttribute("success","Đơn hàng chuyển sang trạng thái đang chuẩn bị."); }
         catch(IllegalArgumentException e){flash.addFlashAttribute("error",e.getMessage());}
         catch(DataAccessException e){flash.addFlashAttribute("error","Chưa cập nhật được đơn hàng. Vui lòng thử lại.");}
@@ -150,7 +150,7 @@ public class HoaDonController {
     public String giaoHang(@PathVariable int id,HttpSession session,Model model,RedirectAttributes flash) {
         var user=DangNhapController.layNguoiDungDangNhap(session,model);
         if(user==null) return "redirect:/login";
-        if(!user.isQuanLy()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        if(!user.isXuLyDonHang()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         try {
             hoaDonService.banGiaoShipper(id,user.getId());
             flash.addFlashAttribute("success","Đã gửi hàng. Mã vận đơn GHN được tạo tự động cho đơn giao qua GHN.");
@@ -164,7 +164,7 @@ public class HoaDonController {
                           HttpSession session,Model model,RedirectAttributes flash) {
         var user=DangNhapController.layNguoiDungDangNhap(session,model);
         if(user==null) return "redirect:/login";
-        if(!user.isQuanLy()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        if(!user.isXuLyDonHang()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         try {
             if(thaoTac.equals("xac-nhan-don-cod")) hoaDonService.xacNhanDonCod(id,user.getId());
             else hoaDonService.xacNhanGiaoKhachVangLai(id,user.getId());

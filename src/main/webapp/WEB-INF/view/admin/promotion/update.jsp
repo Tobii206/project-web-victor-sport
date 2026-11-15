@@ -4,11 +4,11 @@
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title><c:out value="${tenChucNang}"/> — VictorSport</title><link rel="icon" href="/logo/favicon-victorsport.svg">
 <link rel="stylesheet" href="/css/victorsport.css?v=20261107-balanced"><link rel="stylesheet" href="/css/quan-ly-san-pham.css?v=20261112-gender-20261107-balanced">
-<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"><link rel="stylesheet" href="/css/admin-theme.css?v=20261112-jsp-3"></head><body class="admin-page"><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
+<link rel="stylesheet" href="/css/giao-dien-chung.css?v=20261107-readable"><link rel="stylesheet" href="/css/admin-theme.css?v=20261112-jsp-3"><style>.promotion-fields{display:contents}.promotion-fields[disabled] :is(input,select){opacity:1;color:#334155;background:#f6f8fc;cursor:default}</style></head><body class="admin-page"><div class="app-shell"><jsp:include page="/WEB-INF/view/admin/layout/sidebar.jsp"/><div class="main-area">
 <%@ include file="/WEB-INF/view/admin/layout/promotion-header.jsp" %><main class="content-layout">
 <section class="panel"><div class="panel-header"><h2>Thông tin đợt giảm giá <span class="muted"><c:out value="${maUuDai}"/></span></h2><a class="button secondary" href="/quan-ly/dot-giam-gia">Về danh sách</a></div><div class="panel-body"><c:if test="${not empty error}"><div class="alert error" role="alert" data-vs-flash="error"><c:out value="${error}"/></div></c:if>
 <c:if test="${not empty success}"><div class="alert success" role="status" data-vs-flash="success"><c:out value="${success}"/></div></c:if>
-<form method="post" action="${duongDanLuu}" class="product-admin-form">
+<c:if test="${chiXem}"><p class="muted">Chỉ xem thông tin</p></c:if><form method="post" action="${duongDanLuu}" class="product-admin-form"><fieldset class="promotion-fields" ${chiXem ? 'disabled' : ''}>
 <c:if test="${uuDai.het_han}"><div class="product-admin-wide"><span class="product-admin-tag expired">Hết hạn</span> Đợt đã qua ngày kết thúc. Muốn áp dụng lại, hãy cập nhật thời gian và cho phép áp dụng.</div></c:if>
 <c:if test="${uuDai.sap_mo}"><div class="product-admin-wide"><span class="product-admin-tag upcoming">Sắp mở</span> Đợt giảm giá sẽ áp dụng từ ngày <c:out value="${uuDai.ngay_bat_dau}"/>.</div></c:if>
 <div class="field"><label for="ten_dot_giam_gia">Tên đợt giảm giá *</label><input class="input" id="ten_dot_giam_gia" name="ten_dot_giam_gia" type="text" value='<c:out value="${uuDai.ten_dot_giam_gia}"/>' required  maxlength="255"></div>
@@ -22,18 +22,18 @@
 <div class="product-admin-wide muted">Giảm theo phần trăm tối đa 100%. Ưu đãi được áp dụng từ ngày bắt đầu đến hết ngày kết thúc. Mỗi mẫu tự nhận đợt có số tiền thực giảm cao nhất; bằng nhau thì chọn đợt tạo mới nhất. Không cộng dồn các đợt giảm giá.</div>
 <c:if test="${empty idUuDai}"><div class="product-admin-wide muted">Tạo đợt mới ở trạng thái “Cho phép áp dụng” sẽ gửi email thông báo đến các khách hàng có tài khoản đang hoạt động. Email được gửi riêng cho từng khách.</div></c:if>
 <c:if test="${not empty idUuDai}"><div class="product-admin-wide muted">Bật lại đợt đã ngừng trong thời gian áp dụng sẽ gửi email thông báo đến khách hàng. Lưu khi đợt đang bật không gửi lại email.</div></c:if>
-<div class="product-admin-actions product-admin-wide"><button class="button">Lưu đợt giảm giá</button></div></form></div></section>
+<c:if test="${not chiXem}"><div class="product-admin-actions product-admin-wide"><button class="button">Lưu đợt giảm giá</button></div></c:if></fieldset></form></div></section>
 <c:if test="${not empty idUuDai}"><section class="panel" id="mau-giam-gia"><div class="panel-header"><h2>Mẫu giày áp dụng</h2></div><div class="panel-body">
-<form method="post" action="/quan-ly/dot-giam-gia/${idUuDai}/mau/luu" class="product-admin-form">
+<c:if test="${not chiXem}"><form method="post" action="/quan-ly/dot-giam-gia/${idUuDai}/mau/luu" class="product-admin-form">
 <div class="field product-admin-wide"><label for="id_chi_tiet_san_pham">Mẫu giày *</label><select class="select" name="id_chi_tiet_san_pham" id="id_chi_tiet_san_pham" required><option value="">Chọn mẫu giày</option>
 <c:forEach items="${cacMau}" var="m"><option value="${m.id}" ${mauForm.id_chi_tiet_san_pham == m.id ? 'selected' : ''}><c:out value="${m.ma_chi_tiet_san_pham}"/> - <c:out value="${m.ten_san_pham}"/> - Size <c:out value="${m.ten_kich_thuoc}"/> · <c:out value="${m.ten_gioi_tinh}"/> - <c:out value="${m.ten_mau_sac}"/> - <c:out value="${m.ten_form_chan}"/></option></c:forEach></select></div>
 <div class="field"><label for="ghi_chu">Ghi chú</label><input class="input" id="ghi_chu" name="ghi_chu" type="text" value='<c:out value="${mauForm.ghi_chu}"/>'   maxlength="255"></div>
 
-<div class="product-admin-wide muted">Các mẫu dùng mức giảm và giới hạn chung của đợt. Chọn lại mẫu đã có để cập nhật ghi chú.</div><div class="product-admin-actions product-admin-wide"><button class="button">Lưu mẫu áp dụng</button></div></form>
-<div class="product-admin-table"><table class="table"><thead><tr><th>Mẫu giày</th><th>Size / Màu / Dáng</th><th>Mức giảm của đợt</th><th>Tối đa được giảm</th><th>Ghi chú</th><th>Thao tác</th></tr></thead><tbody>
+<div class="product-admin-wide muted">Các mẫu dùng mức giảm và giới hạn chung của đợt. Chọn lại mẫu đã có để cập nhật ghi chú.</div><div class="product-admin-actions product-admin-wide"><button class="button">Lưu mẫu áp dụng</button></div></form></c:if>
+<div class="product-admin-table"><table class="table"><thead><tr><th>Mẫu giày</th><th>Size / Màu / Dáng</th><th>Mức giảm của đợt</th><th>Tối đa được giảm</th><th>Ghi chú</th><c:if test="${not chiXem}"><th>Thao tác</th></c:if></tr></thead><tbody>
 <c:forEach items="${mauDaChon}" var="m"><tr><td><c:out value="${m.ten_san_pham}"/><div class="muted"><c:out value="${m.ma_chi_tiet_san_pham}"/></div></td><td>Size <c:out value="${m.ten_kich_thuoc}"/> · <c:out value="${m.ten_gioi_tinh}"/> · <c:out value="${m.ten_mau_sac}"/> · <c:out value="${m.ten_form_chan}"/></td>
 <td><fmt:formatNumber value="${uuDai.gia_tri_giam_gia}" maxFractionDigits="2"/> ${uuDai.loai_giam_gia ? 'đ' : '%'}</td>
 <td><c:choose><c:when test="${empty uuDai.so_tien_giam_toi_da or uuDai.so_tien_giam_toi_da == 0}">Không giới hạn</c:when><c:otherwise><fmt:formatNumber value="${uuDai.so_tien_giam_toi_da}" maxFractionDigits="2"/> đ</c:otherwise></c:choose></td><td><c:out value="${m.ghi_chu}"/></td>
-<td><form method="post" action="/quan-ly/dot-giam-gia/${idUuDai}/mau/${m.id}/bo" data-vs-confirm="Mẫu giày này sẽ không còn được áp dụng ưu đãi của đợt giảm giá này." data-vs-title="Bỏ áp dụng giảm giá" data-vs-button="Bỏ áp dụng" data-vs-tone="danger"><button class="button danger">Bỏ áp dụng</button></form></td></tr></c:forEach>
+<c:if test="${not chiXem}"><td><form method="post" action="/quan-ly/dot-giam-gia/${idUuDai}/mau/${m.id}/bo" data-vs-confirm="Mẫu giày này sẽ không còn được áp dụng ưu đãi của đợt giảm giá này." data-vs-title="Bỏ áp dụng giảm giá" data-vs-button="Bỏ áp dụng" data-vs-tone="danger"><button class="button danger">Bỏ áp dụng</button></form></td></c:if></tr></c:forEach>
 <c:if test="${empty mauDaChon}"><tr><td colspan="6">Chưa có mẫu giày áp dụng.</td></tr></c:if></tbody></table></div></div></section></c:if>
 </main></div></div></body></html>

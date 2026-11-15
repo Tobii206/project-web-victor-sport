@@ -104,7 +104,7 @@ class GiaoHangTuDongTests {
         when(jdbc.update(contains("SET trang_thai_hien_tai=5"),eq(2),eq(10))).thenReturn(1,0);
         service.xacNhanGiaoKhachVangLai(10,2);
         verify(jdbc).update(argThat(sql -> sql.contains("id_khach_hang IS NULL") && sql.contains("trang_thai_hien_tai=4") && sql.contains("loai_don IN (1,2)")),eq(2),eq(10));
-        verify(jdbc).update(contains("INSERT INTO lich_su_hoa_don"),eq(10),eq(5),contains("Quản trị viên"),eq(2),eq(2));
+        verify(jdbc).update(contains("INSERT INTO lich_su_hoa_don"),eq(10),eq(5),eq("Cửa hàng xác nhận khách đã nhận hàng."),eq(2),eq(2));
         assertThrows(IllegalArgumentException.class,()->service.xacNhanGiaoKhachVangLai(10,2));
         verify(jdbc,never()).update(contains("giao_dich_thanh_toan"),any(Object[].class));
     }
